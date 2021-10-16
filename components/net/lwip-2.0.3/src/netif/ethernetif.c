@@ -6,9 +6,10 @@
 #include "netif/ethernetif.h"
 #include "netif/etharp.h"
 #include "dhcpd_api.h"
-#include "wifi/wifi.h"
+#include "wifi.h"
 #include "utils/debug/log.h"
 #include "ln_compiler.h"
+#include "ln_utils.h"
 
 #define TCPIP_PKT_SIZE_MAX              (NETIF_MTU + PBUF_LINK_HLEN)//max in/output pocket size = MTU + LINK_HEAD_LEN
 
@@ -62,21 +63,25 @@ static err_t low_level_output(struct netif *netif, struct pbuf *pkt)
     struct pbuf *q = NULL;
     uint8_t * frame_buf  = NULL;
     uint16_t payload_offset = 0;
-    
+
     if(!netif_is_link_up(netif)) {
         LOG(LOG_LVL_INFO, "[%s, %d] netif is not link up.\r\n", __func__, __LINE__);
         ret = ERR_IF;
         return ret;
     }
-    
+
     frame_buf = OS_Malloc(pkt->tot_len);
-    
+    if (frame_buf == NULL)
+    {
+        return ERR_MEM;
+    }
+
     for(q = pkt; q != NULL; q = q->next) {
         memcpy(frame_buf + payload_offset, (u8_t*)q->payload, q->len );
         payload_offset += q->len;
     }
     wifi_send_ethernet_pkt(frame_buf, pkt->tot_len, 20, 5);
-    
+
     OS_Free(frame_buf);
     return ret;
 }
@@ -85,7 +90,7 @@ __STATIC_INLINE__ void low_level_input(netif_idx_t nif_idx, uint8_t *data, uint1
 {
     struct pbuf *pkt = NULL, *q = NULL;
     struct netif * nif = NULL;
-    
+
     if(NULL == (pkt =pbuf_alloc(PBUF_RAW, len, PBUF_POOL))) {
         LOG(LOG_LVL_DEBUG, "[%s, %d] Can not malloc pbuff(request len=%d).\r\n", __func__, __LINE__, len);
         return;
@@ -130,7 +135,7 @@ static err_t ethernetif_init(struct netif *netif, netif_idx_t nif_idx)
         LOG(LOG_LVL_ERROR, "netif idx error\r\n");
         return ERR_ARG;
     }
-    
+
     netif->output = etharp_output;
     netif->linkoutput = low_level_output;
     netif->hwaddr_len = NETIF_MAX_HWADDR_LEN;
@@ -149,34 +154,29 @@ static err_t ethernetif_softap_init(struct netif *nif) {
 
 static void tcpip_init_done(void *arg)
 {
-    ethernetif_t *eth_if = ethernetif_get_handle();
-//    netdev_t *ndev = NULL;
+    LN_UNUSED(arg);
+
     struct netif *nif = NULL;
     netif_idx_t nif_idx;
 
-    //memset(eth_if, 0, sizeof(ethernetif_t));
-
     //for STA
     nif_idx = NETIF_IDX_STA;
-//    ndev = ethernetif_get_netdev(nif_idx);
     nif = netdev_get_netif(nif_idx);
     netif_add(nif, NULL, NULL, NULL, NULL, ethernetif_sta_init, tcpip_input);
     netif_set_default(nif);
 
     //for AP
     nif_idx = NETIF_IDX_AP;
-//    ndev = ethernetif_get_netdev(nif_idx);
     nif = netdev_get_netif(nif_idx);
     netif_add(nif, NULL, NULL, NULL, NULL, ethernetif_softap_init, tcpip_input);
-//    netif_set_default(nif);
-    
+
     wifi_if_reg_recv_ethernet_pkt_callback(&netif_low_level_input_callback);
-    
+
     LOG(LOG_LVL_INFO, "TCP/IP initialized.\r\n");
 }
 
 
-static void post_ip_info(struct netif *nif)
+static void print_netdev_info(struct netif *nif)
 {
     uint8_t * mac = nif->hwaddr;
 
@@ -190,21 +190,21 @@ static void post_ip_info(struct netif *nif)
 }
 
 static void sta_netif_link_changed_cb(struct netif *nif) {
-    
+    LN_UNUSED(nif);
 }
 
 static void sta_netif_status_changed_cb(struct netif *nif)
 {
-    if (!ip4_addr_cmp(ip_2_ip4(&nif->ip_addr), IP4_ADDR_ANY4)) 
+    if (!ip4_addr_cmp(ip_2_ip4(&nif->ip_addr), IP4_ADDR_ANY4))
     {
         if (dhcp_supplied_address(nif)) {
-            post_ip_info(nif);
+            print_netdev_info(nif);
         }
     }
 }
 
 ////////////////////////////lwip netdev api/////////////////////////////////////////
-int lwip_tcpip_init(void) 
+int lwip_tcpip_init(void)
 {
     tcpip_init(tcpip_init_done, NULL);
     return 0;
@@ -231,18 +231,18 @@ int netdev_set_state(netif_idx_t nif_idx, netdev_state_t state)
 
             netif_set_status_callback(nif, sta_netif_status_changed_cb);
             netif_set_link_callback(nif, sta_netif_link_changed_cb);
-            
+
             netifapi_dhcp_release(nif);
             netifapi_dhcp_stop(nif);
             netifapi_dhcp_start(nif);
         }
-        else 
+        else
         {
             netifapi_netif_set_down(nif);
             netifapi_netif_set_link_down(nif);
 
             netifapi_dhcp_release(nif);
-            netifapi_dhcp_stop(nif); 
+            netifapi_dhcp_stop(nif);
             netif_set_status_callback(nif, NULL);
             netif_set_link_callback(nif, NULL);
         }
@@ -256,7 +256,7 @@ int netdev_set_state(netif_idx_t nif_idx, netdev_state_t state)
             dhcpd_stop();
             dhcpd_start();
         }
-        else 
+        else
         {
             dhcpd_stop();
             netifapi_netif_set_link_down(nif);
@@ -266,19 +266,19 @@ int netdev_set_state(netif_idx_t nif_idx, netdev_state_t state)
     return 0;
 }
 
-void netdev_set_active(netif_idx_t nif_idx) 
+void netdev_set_active(netif_idx_t nif_idx)
 {
     ethernetif_t *eth_if = ethernetif_get_handle();
     eth_if->active = nif_idx;
 }
 
-netif_idx_t netdev_get_active(void) 
+netif_idx_t netdev_get_active(void)
 {
     ethernetif_t *eth_if = ethernetif_get_handle();
     return eth_if->active;
 }
 
-netdev_link_state_t netdev_get_link_state(netif_idx_t nif_idx) 
+netdev_link_state_t netdev_get_link_state(netif_idx_t nif_idx)
 {
     netdev_t *ndev = ethernetif_get_netdev(nif_idx);
 

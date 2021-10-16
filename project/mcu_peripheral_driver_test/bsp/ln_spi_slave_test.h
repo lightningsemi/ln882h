@@ -8,9 +8,10 @@
  * @copyright Copyright (c) 2021 Shanghai Lightning Semiconductor Technology Co. Ltd
  * 
  */
- 
+#ifndef LN_SPI_SLAVE_TEST
+#define LN_SPI_SLAVE_TEST
  
 void ln_spi_slave_test(void);
 
 
-
+#endif

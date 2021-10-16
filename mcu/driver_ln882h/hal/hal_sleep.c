@@ -404,9 +404,9 @@ int hal_post_sleep_processing(uint32_t *xExpectedIdleTime)
     * If flash is turned off in retention and frozen, It must be re-enabled after waking up.
     */
     if(sleep_mode >= RETENTION_SLEEP){
-        FLASH_Init();
+        hal_flash_init();
         //Enable QSPI 4bit mode
-        FLASH_QuadModeEnable(1);
+        hal_flash_quad_mode_enable(1);
         //Init Flash cache
         flash_cache_init(0);
         log_init();

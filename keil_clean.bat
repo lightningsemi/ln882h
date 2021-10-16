@@ -22,6 +22,12 @@ del *.tra /s
 del *.dep /s
 del JLinkLog.txt /s
 
+del boot_*.asm /s
+del firmware*.asm /s
+del firmware*.bin /s
+del flashimage*.bin /s
+del *.uvguix.* /s
+
 del *.iex /s
 del *.htm /s
 del *.orig /s

@@ -55,7 +55,7 @@
 #include "hal/hal_gpio.h"
 #include "hal/hal_dma.h"
 #include "hal/hal_misc.h"
-#include "log.h"
+#include "utils/debug/log.h"
 
 /* 配置SPI CS引脚 */
 #define LN_SPI_TEST_CS_PORT_BASE    GPIOA_BASE

@@ -12,7 +12,7 @@
 #include "ln_test_common.h"
 #include "hal_common.h"
 #include "hal_trng.h"
-#include "log.h"
+#include "utils/debug/log.h"
 
 volatile unsigned int random_num[4]; 
 void ln_trng_test(void)

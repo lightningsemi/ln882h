@@ -257,7 +257,6 @@ void dhcpd_handle_msg(struct raw_msg *msg)
     struct sockaddr_in sockaddr_to = {0};
     int send_len = 0;
     uint16_t send_pkt_len = 0;
-    dhcpd_ctrl_t *dhcpd = dhcpd_get_handle();
 
     struct dhcp_packet *request  = (struct dhcp_packet *)msg->recv_buff;
     struct dhcp_packet *response = (struct dhcp_packet *)msg->recv_buff;
@@ -729,11 +728,19 @@ int do_inform(struct raw_msg *msg, uint16_t *send_pkt_len, uint16_t max_mtu)
 }
 
 int do_release(struct raw_msg *msg, uint16_t *send_pkt_len, uint16_t max_mtu) {
+    LN_UNUSED(msg);
+    LN_UNUSED(send_pkt_len);
+    LN_UNUSED(max_mtu);
+
     DHCPD_PRINTF("Support [RELEASE msg] in the future!\r\n");
     return LN_FALSE;//Don't reply.
 }
 
 int do_decline(struct raw_msg *msg, uint16_t *send_pkt_len, uint16_t max_mtu) {
+    LN_UNUSED(msg);
+    LN_UNUSED(send_pkt_len);
+    LN_UNUSED(max_mtu);
+
     DHCPD_PRINTF("Support [DECLINE msg] in the future!\r\n");
     return LN_FALSE;//Don't reply.
 }

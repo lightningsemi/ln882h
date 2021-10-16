@@ -8,7 +8,9 @@
  * @copyright Copyright (c) 2021 Shanghai Lightning Semiconductor Technology Co. Ltd
  * 
  */
- 
- 
+#ifndef LN_WDT_TEST_H
+#define LN_WDT_TEST_H 
+
  void ln_wdt_test(void);
 
+#endif

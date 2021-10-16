@@ -51,7 +51,7 @@ void hal_gpio_pin_pull_set(uint32_t gpio_base, gpio_pin_t pin, gpio_pull_t pull)
     }
     gpio_pu_setf(gpio_base, pu_tmp);
     gpio_pd_setf(gpio_base, pd_tmp);
-};
+}
 
 void hal_gpio_pin_speed_set(uint32_t gpio_base, gpio_pin_t pin, gpio_speed_t speed)
 {
@@ -132,6 +132,21 @@ hal_flag_t hal_gpio_pin_output_read(uint32_t gpio_base, gpio_pin_t pin)
 {
     uint16_t port_output = gpio_odr_getf(gpio_base);
     return (port_output & pin) ? HAL_SET : HAL_RESET;
+}
+
+hal_flag_t hal_gpio_pin_read(uint32_t gpio_base, gpio_pin_t pin)
+{
+    uint16_t port_dir = gpio_ddr_getf(gpio_base);
+    uint16_t port_value = 0;
+    if((port_dir & pin) == pin)
+    {
+        port_value = gpio_odr_getf(gpio_base);
+    }
+    else
+    {
+        port_value = gpio_idr_getf(gpio_base);
+    }
+    return (port_value & pin) ? HAL_SET : HAL_RESET;
 }
 
 void hal_gpio_port_output_write(uint32_t gpio_base, uint16_t port_val)

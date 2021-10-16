@@ -4,8 +4,7 @@
  * Copyright (C) 2018 LightningSemi Technology Co., Ltd. All rights reserved.
  */
 #include "proj_config.h"
-#include "./FreeRTOS_Adapter/freertos_common.h"
-#include "ln882h.h"
+#include "freertos_common.h"
 
 #ifdef __CC_ARM
     extern unsigned int Image$$HEAP_SPACE0$$ZI$$Base;
@@ -13,8 +12,6 @@
     #define HEAP0_START                      (&Image$$HEAP_SPACE0$$ZI$$Base)
     #define HEAP0_END                        (&Image$$HEAP_SPACE0$$ZI$$Limit)
 	#define HEAP0_LEN                        ((uint8_t *)HEAP0_END - (uint8_t *)HEAP0_START)
-#elif __ICCARM__
-    #error "TODO: support iar compiler!!!"
 #elif __GNUC__
     extern void *heap0_start;
     extern void *heap0_end;
@@ -26,6 +23,8 @@
     #error "Unknown compiler!!!"
 #endif
 
+/* declarations */
+static void OS_HeapSizeConfig(void);
 
 static HeapRegion_t xHeapRegions[] = {
     {NULL, 0},

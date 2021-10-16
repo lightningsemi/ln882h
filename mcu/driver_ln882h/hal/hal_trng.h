@@ -77,7 +77,7 @@ uint32_t    hal_trng_get_data_32_63(uint32_t trng);
 uint32_t    hal_trng_get_data_64_95(uint32_t trng);
 uint32_t    hal_trng_get_data_96_127(uint32_t trng);
 
-            //cbutton it config
+            //trng it config
 void        hal_trng_it_cfg(uint32_t trng,trng_it_flag_t trng_it_flag ,hal_en_t en);
 uint8_t     hal_trng_get_it_flag(uint32_t trng,trng_it_flag_t trng_it_flag);
 void        hal_trng_clr_it_flag(uint32_t trng,trng_it_flag_t trng_it_flag);

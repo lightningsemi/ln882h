@@ -21,7 +21,7 @@
 #include "ln_wdt_test.h"
 #include "hal/hal_wdt.h"
 #include "hal/hal_gpio.h"
-#include "log.h"
+#include "utils/debug/log.h"
 
 void ln_wdt_test(void)
 {

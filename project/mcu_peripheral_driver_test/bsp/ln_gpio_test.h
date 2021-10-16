@@ -9,6 +9,10 @@
  * 
  */
 
-
+#ifndef LN_GPIO_TEST_H
+#define LN_GPIO_TEST_H
 
 void ln_gpio_test(void);
+
+
+#endif

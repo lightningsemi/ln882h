@@ -9,5 +9,10 @@
  * 
  */
 
+#ifndef LN_DMA_TEST_H
+#define LN_DMA_TEST_H
+
 void ln_dma_test(void);
 
+
+#endif 

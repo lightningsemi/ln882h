@@ -7,7 +7,7 @@ extern "C" {
 
 #include "ln_types.h"
 #include "utils/ln_list.h"
-#include "wifi/wifi.h"
+#include "wifi.h"
 
 #define AP_INFO_LIFETIME    (8)//uints:second
 #define AP_LIST_NODE_MAX    (40)

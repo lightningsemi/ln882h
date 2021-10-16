@@ -1,7 +1,7 @@
 #ifndef __SYSTEM_PARAMETER_H__
 #define __SYSTEM_PARAMETER_H__
 
-#include "wifi/wifi.h"
+#include "wifi.h"
 #include "dhcpd_api.h"
 #include "netif/ethernetif.h"
 

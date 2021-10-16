@@ -7,7 +7,7 @@
  * @brief initialize runtime measure feature.
  * initialize runtime measure feature.
  *
- * @attention 1. just called once. 
+ * @attention 1. just called once.
  *            2. call it in the first phase of the main function, after system clock init.
  *
  * @return  none
@@ -32,7 +32,7 @@ uint32_t  ln_runtime_get_curr_cycles(void);
  *
  * @param[in]    last    last running cycles.
  * @param[in]    curr    current running cycles.
- * 
+ *
  * @return  cycles   delta running cycles.
  */
 uint32_t  ln_runtime_get_delta_cycles(uint32_t last, uint32_t curr);
@@ -45,7 +45,7 @@ uint32_t  ln_runtime_get_delta_cycles(uint32_t last, uint32_t curr);
  *
  * @param[in]    last    last running cycles.
  * @param[in]    curr    current running cycles.
- * 
+ *
  * @return  cycles   delta running ticks.
  */
 uint32_t  ln_runtime_get_delta_ticks(uint32_t last, uint32_t curr);
@@ -57,7 +57,7 @@ uint32_t  ln_runtime_get_delta_ticks(uint32_t last, uint32_t curr);
  * @attention CPU will be blocked.
  *
  * @param[in]    us   how long is the delay time.
- * 
+ *
  * @return  none.
  */
 void  ln_block_delayus(uint32_t us);
@@ -69,7 +69,7 @@ void  ln_block_delayus(uint32_t us);
  * @attention CPU will be blocked.
  *
  * @param[in]    ms   how long is the delay time.
- * 
+ *
  * @return  none.
  */
 void  ln_block_delayms(uint32_t ms);
@@ -91,12 +91,17 @@ uint32_t  ln_os_tick_comp_pre_get_cycles(void);
  * @attention Call it in the critical section.
  *
  * @param[in]    last   last running cycles.
- * 
+ *
  * @return  none.
  */
 void  ln_os_tick_comp_val_inc(uint32_t last);
 
-
+/**
+ * @brief
+ *
+ * @param comp_val
+ */
+void ln_get_os_tick_comp_val(uint16_t ** comp_val);
 
 #endif /* __LN_RUNTIME_H__ */
 

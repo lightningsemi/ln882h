@@ -213,26 +213,32 @@ typedef enum
 
 typedef enum
 {
-    ADC_VREF_0_8_V   = 0,       //0.8V
-    ADC_VREF_0_8_5_V = 1,       //0.85V
-    ADC_VREF_0_9_5_V = 2,       //0.95V
-    ADC_VREF_1_0_5_V = 3,       //1.05V
+    ADC_VREF_0_8_V   = 0,       
+    ADC_VREF_0_8_5_V = 1,       
+    ADC_VREF_0_9_5_V = 2,       
+    ADC_VREF_1_0_5_V = 3,       
 }adc_vref_set_t;
 
 #define IS_ADC_VREF_VALUE(VALUE)     ((VALUE) == ADC_VREF_0_8_V   || ADC_VREF_0_8_5_V   ||  \
                                       (VALUE) == ADC_VREF_0_9_5_V || ADC_VREF_1_0_5_V   )  
 
 
-typedef enum
-{
-    ADC_ISOLATE_SIGNAL               = 0,
-    ADC_BYPASS_THE_INPUT_DRIVER      = 1,
-    ADC_SIGNAL_DIV_4                 = 2,
-    ADC_SIGNAL_DIV_2                 = 3,
-}adc_ch_ingain_t;
-
 #define IS_ADC_CH_INGAIN_VALUE(VALUE)   ((VALUE) == ADC_ISOLATE_SIGNAL   || ADC_BYPASS_THE_INPUT_DRIVER   ||  \
                                          (VALUE) == ADC_SIGNAL_DIV_4     || ADC_SIGNAL_DIV_2                     )
+
+typedef enum
+{
+    ADC_EOC_FLAG_7       = 3,     // [7] End of conversion flag. 
+    ADC_EOC_FLAG_6       = 4,     // [6] End of conversion flag. 
+    ADC_EOC_FLAG_5       = 5,     // [5] End of conversion flag. 
+    ADC_EOC_FLAG_4       = 6,     // [4] End of conversion flag. 
+    ADC_EOC_FLAG_3       = 7,     // [3] End of conversion flag. 
+    ADC_EOC_FLAG_2       = 8,     // [2] End of conversion flag. 
+    ADC_EOC_FLAG_1       = 9,     // [1] End of conversion flag. 
+    ADC_EOC_FLAG_0       = 10,    // [0] End of conversion flag. 
+}adc_eoc_flag_t;
+
+#define IS_ADC_EOC_FLAG_VALUE(VALUE)  (((VALUE) <= ADC_EOC_FLAG_0)) 
 
 
 typedef enum
@@ -315,10 +321,7 @@ typedef struct
 
     adc_vref_set_t                  adc_vref_set;                   /*!< Specifies the adc  Vref.
                                                                     The range of parameters can be referred to @IS_ADC_VREF_VALUE */ 
-
-    adc_ch_ingain_t                 adc_ch_ingain;                  /*!< Specifies the adc  ingain.
-                                                                    The range of parameters can be referred to @IS_ADC_CH_INGAIN_VALUE */ 
-
+   
 }adc_init_t_def;
 
 
@@ -330,6 +333,7 @@ void        hal_adc_en(uint32_t adc_base,hal_en_t en);
 
 void        hal_adc_start_conv(uint32_t adc_base);
 void        hal_adc_stop_conv(uint32_t adc_base);
+uint8_t     hal_adc_get_eoc_flag(uint32_t adc_base,adc_eoc_flag_t adc_eoc_flag);
 void        hal_adc_spe_sw_start(uint32_t adc_base);
 uint16_t    hal_adc_get_data(uint32_t adc_base,adc_ch_t ch);
 

@@ -17,7 +17,7 @@
 #define FALSH_SIZE_4K           (4 *1024)
 #define FALSH_SIZE_BLOCK_32K    (32*1024)
 #define FALSH_SIZE_BLOCK_64K    (64*1024)
-#define FALSH_SIZE_MAX		    (2 *1024*1024)
+#define FALSH_SIZE_MAX		    (4 *1024*1024)
 
 
 typedef enum
@@ -53,13 +53,13 @@ typedef enum
 
     FLASH_POWER_DOWN          = 0xB9,
     FLASH_POWER_ON            = 0xAB,
-} Flash_Cmd_t;
+} flash_cmd_t;
 
 typedef enum
 {
     NORMAL_AREA = 0,
     SECURITY_AREA,   
-} Flash_AreaType;
+} flash_area_t;
 
 
 typedef union
@@ -72,7 +72,7 @@ typedef union
       uint8_t SRP   : 1;//Status Register Protect        
   }bits;
   uint8_t reg1_data;
-} FlashStatusReg1_t;
+} flash_status_reg1_t;
 
 typedef union
 {
@@ -86,7 +86,7 @@ typedef union
       uint8_t Res3  : 1;
   }bits;
   uint8_t reg2_data;
-} FlashStatusReg2_t;
+} flash_status_reg2_t;
 
 
 typedef enum
@@ -95,35 +95,35 @@ typedef enum
     ERASE_BLOCK_32KB,
     ERASE_BLOCK_64KB,
     ERASE_CHIP,
-}Flash_EraseType_t;
+}flash_erase_type_t;
 
 
 /****************************  FLASH API  **************************/
-void     FLASH_Init(void);
-void     FLASH_Deinit(void);
-uint8_t  FLASH_ReadByCache(uint32_t offset, uint32_t length, uint8_t *buffer);
-uint8_t  FLASH_Read(uint32_t offset, uint32_t length, uint8_t *buffer);
-uint8_t  FLASH_Program(uint32_t offset, uint32_t length, uint8_t *buffer);
-void     FLASH_Erase(uint32_t offset, uint32_t length);//@param: offset,length(Note:4K Aligned)
-void     FLASH_ChipErase(void);
-uint8_t  FLASH_QuadProgram(uint32_t offset, uint32_t length, uint8_t *buffer);
-uint32_t FLASH_ReadID(void);
-uint16_t FLASH_ReadDeviceID(void);
-uint8_t  FLASH_ReadSR1(void);
-uint8_t  FLASH_ReadSR2(void);
-uint16_t FLASH_ReadStatus(void);
-void     FLASH_ProgramEraseSuspend(void);
-void     FLASH_ProgramEraseResume(void);
-void     FLASH_WriteEnable(void);
-void     FLASH_WriteDisable(void);
-void     FLASH_LockOTP(void);
-uint8_t  FLASH_GetOTPState(void);
-void     FLASH_QuadModeEnable(uint8_t enable);
-void     FLASH_OperationWait(void);
+void     hal_flash_init(void);
+void     hal_flash_deinit(void);
+uint8_t  hal_flash_read_by_cache(uint32_t offset, uint32_t length, uint8_t *buffer);
+uint8_t  hal_flash_read(uint32_t offset, uint32_t length, uint8_t *buffer);
+uint8_t  hal_flash_program(uint32_t offset, uint32_t length, uint8_t *buffer);
+void     hal_flash_erase(uint32_t offset, uint32_t length);//@param: offset,length(Note:4K Aligned)
+void     hal_flash_chip_erase(void);
+uint32_t hal_flash_read_id(void);
+uint16_t hal_flash_read_device_id(void);
+uint8_t  hal_flash_read_sr1(void);
+uint8_t  hal_flash_read_sr2(void);
+uint16_t hal_flash_read_status(void);
+void     hal_flash_program_erase_suspend(void);
+void     hal_flash_program_erase_resume(void);
+void     hal_flash_write_enable(void);
+void     hal_flash_write_disable(void);
+void     hal_flash_lock_otp(void);
+uint8_t  hal_flash_get_otp_state(void);
+void     hal_flash_quad_mode_enable(uint8_t enable);
+void     hal_flash_operation_wait(void);
 
-void     FLASH_SecurityAreaErase(uint32_t offset);
-uint8_t  FLASH_SecurityAreaProgram(uint32_t offset, uint32_t len, uint8_t * buf);
-void     FLASH_SecurityAreaRead(uint32_t offset, uint32_t len, uint8_t * buf);
+void     hal_flash_security_area_erase(uint32_t offset);
+uint8_t  hal_flash_security_area_program(uint32_t offset, uint32_t len, uint8_t * buf);
+void     hal_flash_security_area_read(uint32_t offset, uint32_t len, uint8_t * buf);
+
 
 
 #ifdef __cplusplus

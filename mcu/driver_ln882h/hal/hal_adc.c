@@ -37,7 +37,7 @@ void hal_adc_init(uint32_t adc_base,adc_init_t_def* adc_init_struct)
     hal_assert(IS_ADC_CH(adc_init_struct->adc_ch));
     hal_assert(IS_ADC_PRESCALE_VALUE(adc_init_struct->adc_presc));
     hal_assert(IS_ADC_VREF_VALUE(adc_init_struct->adc_vref_set));
-    hal_assert(IS_ADC_CH_INGAIN_VALUE(adc_init_struct->adc_ch_ingain));
+
 
 
     if (adc_init_struct->adc_awd_sgl == ADC_AWD_ALL_CH) {
@@ -374,6 +374,15 @@ uint16_t hal_adc_get_data(uint32_t adc_base,adc_ch_t ch)
             break;
     }
     return data;
+}
+
+//Check that the conversion is complete
+uint8_t hal_adc_get_eoc_flag(uint32_t adc_base,adc_eoc_flag_t adc_eoc_flag)
+{
+    /* check the parameters */
+    hal_assert(IS_ADC_ALL_PERIPH(adc_base));
+    hal_assert(IS_ADC_EOC_FLAG_VALUE(adc_eoc_flag));
+    return hal_adc_get_it_flag(adc_base,(adc_it_flag_t)adc_eoc_flag);
 }
 
 void hal_adc_it_cfg(uint32_t adc_base,adc_it_flag_t adc_it_flag ,hal_en_t en)

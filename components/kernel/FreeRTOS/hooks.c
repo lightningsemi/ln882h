@@ -1,7 +1,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "utils/debug/log.h"
-#include "utils/debug/art_assert.h"
+#include "utils/debug/ln_assert.h"
 
 #if( configUSE_MALLOC_FAILED_HOOK == 1 )
 extern void vApplicationMallocFailedHook(void);
@@ -9,7 +9,7 @@ void vApplicationMallocFailedHook(void)
 {
 	/* vApplicationMallocFailedHook() will only be called if malloc failed */
     LOG(LOG_LVL_EMERG,"Malloc Failed\r\n");
-    ART_ASSERT(0);
+    LN_ASSERT(0);
 }
 #endif
 
@@ -22,7 +22,7 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 
     /* vApplicationStackOverflowHook will only be called if stackoverflow */
     LOG(LOG_LVL_EMERG,"(%s)StackOverFlow\r\n", pcTaskName);
-    ART_ASSERT(0);
+    LN_ASSERT(0);
 }
 #endif
 

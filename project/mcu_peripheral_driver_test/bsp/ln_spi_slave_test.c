@@ -45,7 +45,7 @@
 #include "hal/hal_spi.h"
 #include "hal/hal_gpio.h"
 #include "hal/hal_dma.h"
-#include "log.h"
+#include "utils/debug/log.h"
 
 
 #define LN_SPI_TEST_CS_PORT_BASE GPIOB_BASE

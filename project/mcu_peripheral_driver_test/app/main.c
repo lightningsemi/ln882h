@@ -13,7 +13,7 @@
 #include "hal/hal_gpio.h"
 #include "ln_test_common.h"
 #include "ln_show_reg.h"
-#include "log.h"
+#include "utils/debug/log.h"
 
 
 #include "hal_adc.h"
@@ -21,13 +21,13 @@
 #include "hal_clock.h"
 #include "hal_adv_timer.h"
 
-static unsigned char tx_data[100];              //²âÊÔBUFFER
+static unsigned char tx_data[100];              //æµ‹è¯•BUFFER
 static unsigned char rx_data[100];
 static unsigned char sensor_data[6];
 static unsigned int  err_cnt = 0;
 
-static volatile double        tem_data = 0;     //ÎÂ¶ÈÊı¾İ
-static volatile double        hum_data = 0;     //Êª¶ÈÊı¾İ
+static volatile double        tem_data = 0;     //æ¸©åº¦æ•°æ®
+static volatile double        hum_data = 0;     //æ¹¿åº¦æ•°æ®
 
 
 static unsigned int address[10];
@@ -40,16 +40,16 @@ static unsigned char status[2];
 
 int main (int argc, char* argv[])
 {  
-    /* 1. ÏµÍ³³õÊ¼»¯ */
+    /* 1. ç³»ç»Ÿåˆå§‹åŒ– */
     SetSysClock();
     
     log_init();
     
-    /* 2. I2C²âÊÔ */
+    /* 2. I2Cæµ‹è¯• */
     
     ln_i2c_init();              
     
-    /* 2.1 ¿ªÊ¼É¨ÃèI2CµØÖ· */
+    /* 2.1 å¼€å§‹æ‰«æI2Cåœ°å€ */
     LOG(LOG_LVL_INFO,"ln8620 i2c scan start! \n");
     
     hal_i2c_address_scan(I2C_BASE);
@@ -72,7 +72,7 @@ int main (int argc, char* argv[])
         tx_data[i] = i;
     }
     
-    /* 2.2 ¿ªÊ¼¶ÁĞ´AT24C04 */
+    /* 2.2 å¼€å§‹è¯»å†™AT24C04 */
     LOG(LOG_LVL_INFO,"ln8620 i2c + 24c04 test start! \n");
     
     hal_24c04_write(256,tx_data,100);
@@ -92,53 +92,53 @@ int main (int argc, char* argv[])
     
     LOG(LOG_LVL_INFO,"ln8620 i2c + oled test start! \n");
     
-    /* 2.3 ³õÊ¼»¯OLEDÏÔÊ¾ÆÁ */
+    /* 2.3 åˆå§‹åŒ–OLEDæ˜¾ç¤ºå± */
     gpio_init_t gpio_init;
-    memset(&gpio_init,0,sizeof(gpio_init));        //ÇåÁã½á¹¹Ìå
-    gpio_init.dir = GPIO_OUTPUT;                   //ÅäÖÃGPIO·½Ïò£¬ÊäÈë»òÕßÊä³ö
-    gpio_init.pin = GPIO_PIN_4;                    //ÅäÖÃGPIOÒı½ÅºÅ
-    gpio_init.speed = GPIO_HIGH_SPEED;             //ÉèÖÃGPIOËÙ¶È
-    hal_gpio_init(GPIOB_BASE,&gpio_init);          //³õÊ¼»¯GPIO
-    hal_gpio_pin_reset(GPIOB_BASE,GPIO_PIN_4);     //RESET OLEDÆÁÄ»
+    memset(&gpio_init,0,sizeof(gpio_init));        //æ¸…é›¶ç»“æ„ä½“
+    gpio_init.dir = GPIO_OUTPUT;                   //é…ç½®GPIOæ–¹å‘ï¼Œè¾“å…¥æˆ–è€…è¾“å‡º
+    gpio_init.pin = GPIO_PIN_4;                    //é…ç½®GPIOå¼•è„šå·
+    gpio_init.speed = GPIO_HIGH_SPEED;             //è®¾ç½®GPIOé€Ÿåº¦
+    hal_gpio_init(GPIOB_BASE,&gpio_init);          //åˆå§‹åŒ–GPIO
+    hal_gpio_pin_reset(GPIOB_BASE,GPIO_PIN_4);     //RESET OLEDå±å¹•
     ln_delay_ms(100);
     hal_gpio_pin_set(GPIOB_BASE,GPIO_PIN_4);
     
     ln_oled_init(I2C_BASE);
     ln_oled_display_on();
 
-    ln_oled_show_string(0,40,(unsigned char *)"Test success!",12);      //ÏÔÊ¾²âÊÔ³É¹¦µÄÓ¢ÎÄ
+    ln_oled_show_string(0,40,(unsigned char *)"Test success!",12);      //æ˜¾ç¤ºæµ‹è¯•æˆåŠŸçš„è‹±æ–‡
     LOG(LOG_LVL_INFO,"ln8620 i2c + oled test success! \n");
     
-    ln_oled_refresh();                                                  //Ë¢ĞÂÏÔÊ¾
+    ln_oled_refresh();                                                  //åˆ·æ–°æ˜¾ç¤º
     ln_delay_ms(1000);
     ln_oled_clear();
     
-    /* 2.4 ³õÊ¼»¯ÎÂÊª¶È´«¸ĞÆ÷ */
+    /* 2.4 åˆå§‹åŒ–æ¸©æ¹¿åº¦ä¼ æ„Ÿå™¨ */
     LOG(LOG_LVL_INFO,"ln8620 i2c + sht30 test start! \n");
     ln_tem_hum_init();
     
-    /* 3. ADC²âÊÔ £¨²É¼¯¹âÃôµç×èÖµ£©*/
+    /* 3. ADCæµ‹è¯• ï¼ˆé‡‡é›†å…‰æ•ç”µé˜»å€¼ï¼‰*/
     
     adc_init_t_def adc_init;
     
     memset(&adc_init,0,sizeof(adc_init));
     
-    adc_init.adc_ch = ADC_CH5;                              //ÅäÖÃÍ¨µÀ
-    adc_init.adc_conv_mode = ADC_CONV_MODE_CONTINUE;        //ÅäÖÃADCÎªÁ¬Ğø×ª»»Ä£Ê½
+    adc_init.adc_ch = ADC_CH5;                              //é…ç½®é€šé“
+    adc_init.adc_conv_mode = ADC_CONV_MODE_CONTINUE;        //é…ç½®ADCä¸ºè¿ç»­è½¬æ¢æ¨¡å¼
     adc_init.adc_presc = 40;                             
-    hal_adc_init(ADC_BASE,&adc_init);                       //³õÊ¼»¯ADC
+    hal_adc_init(ADC_BASE,&adc_init);                       //åˆå§‹åŒ–ADC
     
-    hal_gpio_pin_mode_set(GPIOB_BASE,GPIO_PIN_3,GPIO_MODE_ANALOG);      //ÅäÖÃPB3ÎªÄ£ÄâÒı½Å
+    hal_gpio_pin_mode_set(GPIOB_BASE,GPIO_PIN_3,GPIO_MODE_ANALOG);      //é…ç½®PB3ä¸ºæ¨¡æ‹Ÿå¼•è„š
     hal_adc_it_cfg(ADC_BASE,ADC_IT_FLAG_EOC_5,HAL_ENABLE);            
     
     hal_adc_en(ADC_BASE,HAL_ENABLE);
     hal_adc_start_conv(ADC_BASE);
     
 
-    /* 4. SPI Flash²âÊÔ */
+    /* 4. SPI Flashæµ‹è¯• */
     ln_spi_master_init();
     
-    //³õÊ¼»¯Êı¾İbuffer
+    //åˆå§‹åŒ–æ•°æ®buffer
     for(int i = 0; i < 100 ; i++)
     {
         tx_data[i] = i + 2;
@@ -146,25 +146,25 @@ int main (int argc, char* argv[])
 
     LOG(LOG_LVL_INFO,"ln8620 SPI + 25WQ16 test start! \n");
 
-    /********************************SPIÖ±½Ó¶ÁĞ´FlashĞ¾Æ¬****************************************************************/
+    /********************************SPIç›´æ¥è¯»å†™FlashèŠ¯ç‰‡****************************************************************/
 
-    //¶ÁÈ¡ID
+    //è¯»å–ID
     hal_25wq16_read_id(SPI0_BASE,rx_data);
     LOG(LOG_LVL_INFO,"ln8620 25WQ16 ID: %x %x %x \n",rx_data[0],rx_data[1],rx_data[2]);
     
-    //¶ÁÈ¡×´Ì¬
+    //è¯»å–çŠ¶æ€
     hal_25wq16_read_status(SPI0_BASE,rx_data);
 
-    //Ğ´Ê¹ÄÜ
+    //å†™ä½¿èƒ½
     hal_25wq16_write_enable(SPI0_BASE);
 
-    //¶ÁÈ¡×´Ì¬
+    //è¯»å–çŠ¶æ€
     hal_25wq16_read_status(SPI0_BASE,rx_data);
 
-    //²Á³ıĞ¾Æ¬
+    //æ“¦é™¤èŠ¯ç‰‡
     hal_25wq16_erase_flash(SPI0_BASE,0x200);
 
-    //µÈ´ı²Á³ıÍê³É
+    //ç­‰å¾…æ“¦é™¤å®Œæˆ
     while(1)
     {
         hal_25wq16_read_status(SPI0_BASE,status);
@@ -172,10 +172,10 @@ int main (int argc, char* argv[])
             break;
     }
 
-    //ÏòFlashĞ¾Æ¬ÖĞĞ´ÈëÊı¾İ
+    //å‘FlashèŠ¯ç‰‡ä¸­å†™å…¥æ•°æ®
     hal_25wq16_write_flash(SPI0_BASE,0x200,tx_data,100);
 
-    //µÈ´ıĞ´ÈëÍê³É
+    //ç­‰å¾…å†™å…¥å®Œæˆ
     while(1)
     {
         hal_25wq16_read_status(SPI0_BASE,status);
@@ -183,10 +183,10 @@ int main (int argc, char* argv[])
             break;
     }
 
-    //´ÓFlashĞ¾Æ¬ÖĞ¶Á³öÊı¾İ
+    //ä»FlashèŠ¯ç‰‡ä¸­è¯»å‡ºæ•°æ®
     hal_25wq16_read_flash(SPI0_BASE,0x200,rx_data,100);
     
-    //ÅĞ¶ÏĞ´ÈëµÄÊı¾İÊÇ·ñÕıÈ·
+    //åˆ¤æ–­å†™å…¥çš„æ•°æ®æ˜¯å¦æ­£ç¡®
     err_cnt = 0;
     for(int i = 0 ; i < 100; i++)
     {
@@ -196,7 +196,7 @@ int main (int argc, char* argv[])
         }
     }
 
-    //´òÓ¡LOG
+    //æ‰“å°LOG
     if(err_cnt != 0)
     {
         LOG(LOG_LVL_INFO,"ln8620 SPI + 25WQ16 test fail! \n");
@@ -206,56 +206,56 @@ int main (int argc, char* argv[])
         LOG(LOG_LVL_INFO,"ln8620 SPI + 25WQ16 test success! \n");
     }
     
-    /* 5. PWM²âÊÔ */
+    /* 5. PWMæµ‹è¯• */
     __NVIC_SetPriorityGrouping(4);
     __enable_irq();
 
-    /* pwm Òı½Å³õÊ¼»¯ */
+    /* pwm å¼•è„šåˆå§‹åŒ– */
     hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_8,ADV_TIMER_PWM0);
     hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_9,ADV_TIMER_PWM1);
     hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_8,HAL_ENABLE);
     hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_9,HAL_ENABLE);  
 
-    /* PWM²ÎÊı³õÊ¼»¯ */
+    /* PWMå‚æ•°åˆå§‹åŒ– */
     adv_tim_init_t_def adv_tim_init;
     memset(&adv_tim_init,0,sizeof(adv_tim_init));
-    adv_tim_init.adv_tim_clk_div = 0;                               //ÉèÖÃÊ±ÖÓ·ÖÆµ£¬0Îª²»·ÖÆµ
-    adv_tim_init.adv_tim_load_value =  40000 - 1;                   //ÉèÖÃPWMÆµÂÊ£¬40000 * 1 / PCLK(80M) / DIV(0) = 2k
-    adv_tim_init.adv_tim_cmp_a_value = 40000 ;                      //ÉèÖÃÍ¨µÀa±È½ÏÖµ£¬Õ¼¿Õ±ÈÎª 50%
-    adv_tim_init.adv_tim_cmp_b_value = 40000 ;                      //ÉèÖÃÍ¨µÀb±È½ÏÖµ£¬Õ¼¿Õ±ÈÎª 50%
-    adv_tim_init.adv_tim_dead_gap_value = 1000;                     //ÉèÖÃËÀÇøÊ±¼ä
-    adv_tim_init.adv_tim_dead_en = ADV_TIMER_DEAD_DIS;              //²»¿ªÆôËÀÇø
-    adv_tim_init.adv_tim_cnt_mode = ADV_TIMER_CNT_MODE_INC;         //ÏòÉÏ¼ÆÊıÄ£Ê½
-    adv_tim_init.adv_tim_cha_en = ADV_TIMER_CHA_EN;                 //Ê¹ÄÜÍ¨µÀa
-    adv_tim_init.adv_tim_chb_en = ADV_TIMER_CHB_EN;                 //Ê¹ÄÜÍ¨µÀb
-    adv_tim_init.adv_tim_cha_it_mode = ADV_TIMER_CHA_IT_MODE_INC;   //Ê¹ÄÜÍ¨µÀaÏòÉÏ¼ÆÊıÖĞ¶Ï
-    adv_tim_init.adv_tim_chb_it_mode = ADV_TIMER_CHB_IT_MODE_INC;   //Ê¹ÄÜÍ¨µÀbÏòÉÏ¼ÆÊıÖĞ¶Ï
-    hal_adv_tim_init(ADV_TIMER_0_BASE,&adv_tim_init);               //³õÊ¼»¯ADV_TIMER0
+    adv_tim_init.adv_tim_clk_div = 0;                               //è®¾ç½®æ—¶é’Ÿåˆ†é¢‘ï¼Œ0ä¸ºä¸åˆ†é¢‘
+    adv_tim_init.adv_tim_load_value =  40000 - 1;                   //è®¾ç½®PWMé¢‘ç‡ï¼Œ40000 * 1 / PCLK(80M) / DIV(0) = 2k
+    adv_tim_init.adv_tim_cmp_a_value = 40000 ;                      //è®¾ç½®é€šé“aæ¯”è¾ƒå€¼ï¼Œå ç©ºæ¯”ä¸º 50%
+    adv_tim_init.adv_tim_cmp_b_value = 40000 ;                      //è®¾ç½®é€šé“bæ¯”è¾ƒå€¼ï¼Œå ç©ºæ¯”ä¸º 50%
+    adv_tim_init.adv_tim_dead_gap_value = 1000;                     //è®¾ç½®æ­»åŒºæ—¶é—´
+    adv_tim_init.adv_tim_dead_en = ADV_TIMER_DEAD_DIS;              //ä¸å¼€å¯æ­»åŒº
+    adv_tim_init.adv_tim_cnt_mode = ADV_TIMER_CNT_MODE_INC;         //å‘ä¸Šè®¡æ•°æ¨¡å¼
+    adv_tim_init.adv_tim_cha_en = ADV_TIMER_CHA_EN;                 //ä½¿èƒ½é€šé“a
+    adv_tim_init.adv_tim_chb_en = ADV_TIMER_CHB_EN;                 //ä½¿èƒ½é€šé“b
+    adv_tim_init.adv_tim_cha_it_mode = ADV_TIMER_CHA_IT_MODE_INC;   //ä½¿èƒ½é€šé“aå‘ä¸Šè®¡æ•°ä¸­æ–­
+    adv_tim_init.adv_tim_chb_it_mode = ADV_TIMER_CHB_IT_MODE_INC;   //ä½¿èƒ½é€šé“bå‘ä¸Šè®¡æ•°ä¸­æ–­
+    hal_adv_tim_init(ADV_TIMER_0_BASE,&adv_tim_init);               //åˆå§‹åŒ–ADV_TIMER0
 
-    uint32_t cmp_a_value = 0;       //Í¨µÀaµÄ±È½ÏÖµ
-    float    duty_value  = 0;       //Õ¼¿Õ±È
-    uint8_t  inc_dir     = 0;       //Õ¼¿Õ±ÈµİÔö/¼õ·½Ïò
-    uint32_t pulse_cnt   = 0;       //Âö³å¼ÆÊı
+    uint32_t cmp_a_value = 0;       //é€šé“açš„æ¯”è¾ƒå€¼
+    float    duty_value  = 0;       //å ç©ºæ¯”
+    uint8_t  inc_dir     = 0;       //å ç©ºæ¯”é€’å¢/å‡æ–¹å‘
+    uint32_t pulse_cnt   = 0;       //è„‰å†²è®¡æ•°
     
     while(1)
     {   
         unsigned char display_buffer[16];
         
-        if(tem_hum_read_sensor_data(sensor_data) == 0)                     //»ñµÃÎÂÊª¶ÈĞÅÏ¢
+        if(tem_hum_read_sensor_data(sensor_data) == 0)                     //è·å¾—æ¸©æ¹¿åº¦ä¿¡æ¯
         {
             
             memset(display_buffer,' ',16);
-            tem_data = -45 + (175 * (sensor_data[0] * 256 + sensor_data[1]) * 1.0 / (65535 - 1)) ;      //×ª»»ÎªÉãÊÏ¶È
-            hum_data = 100 * ((sensor_data[3] * 256 + sensor_data[4]) * 1.0 / (65535 - 1)) ;            //×ª»»Îª%
+            tem_data = -45 + (175 * (sensor_data[0] * 256 + sensor_data[1]) * 1.0 / (65535 - 1)) ;      //è½¬æ¢ä¸ºæ‘„æ°åº¦
+            hum_data = 100 * ((sensor_data[3] * 256 + sensor_data[4]) * 1.0 / (65535 - 1)) ;            //è½¬æ¢ä¸º%
 
-            sprintf((char *)display_buffer,"TEM : %0.2f",tem_data);        //oledÏÔÊ¾ºÍ´®¿Ú´òÓ¡Êı¾İ
+            sprintf((char *)display_buffer,"TEM : %0.2f",tem_data);        //oledæ˜¾ç¤ºå’Œä¸²å£æ‰“å°æ•°æ®
             ln_oled_show_string_with_len(0,32,display_buffer,16,15);      
             memset(display_buffer,' ',16);
             sprintf((char *)display_buffer,"HUM : %0.2f",hum_data);
             ln_oled_show_string_with_len(0,48,display_buffer,16,15);      
         }
 
-        //ÏÔÊ¾ºÍ´òÓ¡LOG¡£
+        //æ˜¾ç¤ºå’Œæ‰“å°LOGã€‚
         LOG(LOG_LVL_INFO,"Tem = %0.2f  ",tem_data);
         LOG(LOG_LVL_INFO,"Hum = %0.2f%\n",hum_data);
         
@@ -273,8 +273,8 @@ int main (int argc, char* argv[])
             LOG(LOG_LVL_INFO,"LIGHT : %d \r\n\r\n",light_value);
         }
         
-        //´Ë´¦´úÂëÊÇ¹âÃôµç×èºÍLEDµÆÁª¶¯£¬¹âÕÕ¶ÈÔ½µÍ£¬µÆµÄÁÁ¶ÈÔ½¸ß¡£
-        //200ÊÇ¹âÕÕ×îÇ¿Ê±ºò²É¼¯µÄADÖµ£¬2000ÊÇÍêÈ«ÕÚµ²¹âÃôµç×è²É¼¯µÄÖµ
+        //æ­¤å¤„ä»£ç æ˜¯å…‰æ•ç”µé˜»å’ŒLEDç¯è”åŠ¨ï¼Œå…‰ç…§åº¦è¶Šä½ï¼Œç¯çš„äº®åº¦è¶Šé«˜ã€‚
+        //200æ˜¯å…‰ç…§æœ€å¼ºæ—¶å€™é‡‡é›†çš„ADå€¼ï¼Œ2000æ˜¯å®Œå…¨é®æŒ¡å…‰æ•ç”µé˜»é‡‡é›†çš„å€¼
         if(light_value <= 300)
             duty_value = 0.01;
         else if(light_value >= 2000)
@@ -292,7 +292,7 @@ int main (int argc, char* argv[])
         
         
         
-        ln_oled_refresh();                                                  //Ë¢ĞÂOLEDÏÔÊ¾
+        ln_oled_refresh();                                                  //åˆ·æ–°OLEDæ˜¾ç¤º
         
         ln_delay_ms(30);
     }

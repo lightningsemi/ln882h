@@ -32,7 +32,7 @@ int log_stdio_write(char *buf, size_t size)
 */
 static void dump_hex(uint8_t level, const uint8_t *buf, uint32_t size, uint32_t number)
 {
-    int i, j;
+    uint32_t i, j;
 
     for (i = 0; i < size; i += number)
     {

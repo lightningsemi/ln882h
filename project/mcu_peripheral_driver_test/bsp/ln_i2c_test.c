@@ -55,7 +55,7 @@
 #include "hal/hal_i2c.h"
 #include "hal/hal_gpio.h"
 #include "reg_i2c.h"
-#include "log.h"
+#include "utils/debug/log.h"
 #include "ln_i2c_test.h"
 #include "ln_oled_test.h"
 #include "ln_mpu9250_test.h"

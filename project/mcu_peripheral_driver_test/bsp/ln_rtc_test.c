@@ -38,7 +38,7 @@
 #include "hal_rtc.h"
 #include "hal/hal_gpio.h"
 #include "hal/hal_misc.h"
-#include "log.h"
+#include "utils/debug/log.h"
 
 void ln_rtc_test(void)
 {

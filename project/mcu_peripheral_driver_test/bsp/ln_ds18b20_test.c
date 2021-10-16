@@ -26,7 +26,7 @@
 #include "ln_ds18b20_test.h"
 #include "string.h"
 #include "stdbool.h"
-#include "log.h"
+#include "utils/debug/log.h"
 
 ds18b20_data_str    ds18b20_data[1];
 

@@ -41,7 +41,7 @@
 #include "hal/hal_adv_timer.h"
 #include "hal/hal_gpio.h"
 #include "hal/hal_clock.h"
-#include "log.h"
+#include "utils/debug/log.h"
 #include "reg_adv_timer.h"
 
 void ln_adv_timer_test(void)

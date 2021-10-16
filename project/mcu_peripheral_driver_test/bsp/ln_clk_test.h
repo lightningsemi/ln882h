@@ -10,6 +10,13 @@
  */
  
  
+#ifndef LN_CLK_TEST_H
+#define LN_CLK_TEST_H
+
+void ln_clk_test();
+
+#endif
+
 
 
 

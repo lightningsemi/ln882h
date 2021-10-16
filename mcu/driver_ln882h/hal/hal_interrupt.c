@@ -1,58 +1,73 @@
 #include "ln882h.h"
 
+// TODO: cmbacktrace 支持 ARMCC 和 GCC
+#if defined ( __GNUC__ ) && !defined(__ARMCC_VERSION)
+#define CFG_USING_CM_BACKTRACE
+#endif
+
 #ifdef CFG_USING_CM_BACKTRACE
-#include "utils/debug/CmBacktrace/cm_backtrace.h"
+#include "cm_backtrace.h"
 #endif /* CFG_USING_CM_BACKTRACE */
 
 #include <stdbool.h>
 #include "hal/hal_common.h"
+#include "hal/hal_interrupt.h"
 
 void set_interrupt_priority(void)
 {
     NVIC_SetPriorityGrouping(4);
 
     NVIC_SetPriority(SysTick_IRQn,   (1<<__NVIC_PRIO_BITS) - 1);
-    NVIC_SetPriority(MAC_IRQn,       2);
-    NVIC_SetPriority(PAOTD_IRQn,     2);
+    NVIC_SetPriority(PendSV_IRQn,    (1<<__NVIC_PRIO_BITS) - 1);
+
     NVIC_SetPriority(WDT_IRQn,       4);
-//    NVIC_SetPriority(EXTERNAL_IRQn,  4);
-//    NVIC_SetPriority(RTC_IRQn,       4);
-//    NVIC_SetPriority(SLEEP_IRQn,     4);
-//    NVIC_SetPriority(DMA_IRQn,       4);
-//    NVIC_SetPriority(QSPI_IRQn,      4);
-//    NVIC_SetPriority(SDIO_FUN1_IRQn, 4);
-//    NVIC_SetPriority(SDIO_FUN2_IRQn, 4);
-//    NVIC_SetPriority(SDIO_FUN3_IRQn, 4);
-//    NVIC_SetPriority(SDIO_FUN4_IRQn, 4);
-//    NVIC_SetPriority(SDIO_FUN5_IRQn, 4);
-//    NVIC_SetPriority(SDIO_FUN6_IRQn, 4);
-//    NVIC_SetPriority(SDIO_FUN7_IRQn, 4);
-//    NVIC_SetPriority(SDIO_ASYNC_HOST_IRQn, 4);
-//    NVIC_SetPriority(SDIO_M2S_IRQn,  4);
-//    NVIC_SetPriority(CM4_INTR0_IRQn, 4);
-//    NVIC_SetPriority(CM4_INTR1_IRQn, 4);
-//    NVIC_SetPriority(CM4_INTR2_IRQn, 4);
-//    NVIC_SetPriority(CM4_INTR3_IRQn, 4);
-//    NVIC_SetPriority(CM4_INTR4_IRQn, 4);
-//    NVIC_SetPriority(CM4_INTR5_IRQn, 4);
-    NVIC_SetPriority(ADC_IRQn,       4);
-//    NVIC_SetPriority(TIMER_IRQn,     4);
-//    NVIC_SetPriority(I2C0_IRQn,      4);
-//    NVIC_SetPriority(I2C1_IRQn,      4);
-//    NVIC_SetPriority(SPI0_IRQn,      4);
-//    NVIC_SetPriority(SPI2_IRQn,      4);
+    NVIC_SetPriority(EXT_IRQn,       4);
+    NVIC_SetPriority(RTC_IRQn,       4);
+    NVIC_SetPriority(RFSLP_IRQn,     4);
+    NVIC_SetPriority(MAC_IRQn,       2);
+
+    NVIC_SetPriority(BLE_WAKE_IRQn,  4);
+    NVIC_SetPriority(BLE_ERR_IRQn,   4);
+    NVIC_SetPriority(BLE_MAC_IRQn,   3);
+    NVIC_SetPriority(DMA_IRQn,       4);
+    NVIC_SetPriority(QSPI_IRQn,      4);
+
+    NVIC_SetPriority(SDIO_1_IRQn,    4);
+    NVIC_SetPriority(SDIO_2_IRQn,    4);
+    NVIC_SetPriority(SDIO_3_IRQn,    4);
+
+    NVIC_SetPriority(FPIXC_IRQn,     4);
+    NVIC_SetPriority(FPOFC_IRQn,     4);
+    NVIC_SetPriority(FPUFC_IRQn,     4);
+    NVIC_SetPriority(FPIOC_IRQn,     4);
+    NVIC_SetPriority(FPDZC_IRQn,     4);
+    NVIC_SetPriority(FPIDC_IRQn,     4);
+
+    NVIC_SetPriority(I2C_IRQn,       4);
+    NVIC_SetPriority(SPI0_IRQn,      4);
+    NVIC_SetPriority(SPI1_IRQn,      4);
+
     NVIC_SetPriority(UART0_IRQn,     4);
     NVIC_SetPriority(UART1_IRQn,     2);
-    NVIC_SetPriority(SPI1_IRQn,      4);
-//#if BLE_SUPPORT==ENABLE    
-//    NVIC_SetPriority(GPIO_IRQn, 3);//BLE use the gpio for IRQ, need higher priority
-//#else 
-//    NVIC_SetPriority(GPIO_IRQn, 4);
-//#endif
-    NVIC_SetPriority(I2S_IRQn, 4);
-		NVIC_SetPriority(BLE_MAC_IRQn, 2);//BLE use the gpio for IRQ, need higher priority
-}
+    NVIC_SetPriority(UART2_IRQn,     2);
 
+    NVIC_SetPriority(ADC_IRQn,       4);
+    NVIC_SetPriority(WS2811_IRQn,    4);
+    NVIC_SetPriority(I2S_IRQn,       4);
+
+    NVIC_SetPriority(GPIOA_IRQn,     4);
+    NVIC_SetPriority(GPIOB_IRQn,     4);
+
+    NVIC_SetPriority(TIMER0_IRQn,    4);
+    NVIC_SetPriority(TIMER1_IRQn,    4);
+    NVIC_SetPriority(TIMER2_IRQn,    4);
+    NVIC_SetPriority(TIMER3_IRQn,    4);
+    NVIC_SetPriority(ADV_TIMER_IRQn, 4);
+
+    NVIC_SetPriority(AES_IRQn,       4);
+    NVIC_SetPriority(TRNG_IRQn,      4);
+    NVIC_SetPriority(PAOTD_IRQn,     2);
+}
 
 void switch_global_interrupt(hal_en_t enable)
 {
@@ -65,7 +80,7 @@ void switch_global_interrupt(hal_en_t enable)
 
 #if defined (__ARMCC_VERSION)
     __asm void NMI_Handler (void)
-    {   
+    {
         MOV    R0, LR
         MOV    R1, SP
 #ifdef CFG_USING_CM_BACKTRACE
@@ -74,9 +89,9 @@ void switch_global_interrupt(hal_en_t enable)
 NMI_Fault_Loop
         B      NMI_Fault_Loop
     }
-    
+
     __asm void HardFault_Handler (void)
-    {   
+    {
         MOV    R0, LR
         MOV    R1, SP
 #ifdef CFG_USING_CM_BACKTRACE
@@ -85,9 +100,9 @@ NMI_Fault_Loop
 Hard_Fault_Loop
         B      Hard_Fault_Loop
     }
-    
+
     __asm void MemManage_Handler (void)
-    {   
+    {
         MOV    R0, LR
         MOV    R1, SP
 #ifdef CFG_USING_CM_BACKTRACE
@@ -96,9 +111,9 @@ Hard_Fault_Loop
 MM_Fault_Loop
         B      MM_Fault_Loop
     }
-    
+
     __asm void BusFault_Handler (void)
-    {   
+    {
         MOV    R0, LR
         MOV    R1, SP
 #ifdef CFG_USING_CM_BACKTRACE
@@ -107,9 +122,9 @@ MM_Fault_Loop
 Bus_Fault_Loop
         B      Bus_Fault_Loop
     }
-    
+
     __asm void UsageFault_Handler (void)
-    {   
+    {
         MOV    R0, LR
         MOV    R1, SP
 #ifdef CFG_USING_CM_BACKTRACE
@@ -120,7 +135,7 @@ Usage_Fault_Loop
     }
 
     __asm void DebugMon_Handler (void)
-    {   
+    {
         MOV    R0, LR
         MOV    R1, SP
 #ifdef CFG_USING_CM_BACKTRACE
@@ -129,7 +144,7 @@ Usage_Fault_Loop
 DBG_Fault_Loop
         B      DBG_Fault_Loop
     }
- 
+
 #elif defined ( __GNUC__ )
 
      void NMI_Handler (void)

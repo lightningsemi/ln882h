@@ -1,5 +1,5 @@
-#ifndef _MPU9250_H
-#define _MPU9250_H
+#ifndef LN_MPU9250_TEST_H
+#define LN_MPU9250_TEST_H
 
 #include "stdint.h"
 //如果AD0脚(9脚)接地,IIC地址为0X68(不包含最低位).
@@ -103,7 +103,7 @@ uint8_t ln_mpu_set_accel_fsr(uint8_t fsr);
 uint8_t ln_mpu_set_rate(uint16_t rate);
 uint8_t ln_mpu_write_len(uint8_t addr,uint8_t reg,uint8_t len,uint8_t *buf);
 uint8_t ln_mpu_read_len(uint8_t addr,uint8_t reg,uint8_t len,uint8_t *buf);
-short ln_mpu_get_temperature(void);
+int16_t ln_mpu_get_temperature(void);
 uint8_t ln_mpu_get_gyroscope(short *gx,short *gy,short *gz);
 uint8_t ln_mpu_get_accelerometer(short *ax,short *ay,short *az);
 uint8_t ln_mpu_get_magnetometer(short *mx,short *my,short *mz);

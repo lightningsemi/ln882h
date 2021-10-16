@@ -18,6 +18,8 @@ class BootHeader:
 
     CRP_VALID_FLAG = 0x46505243
 
+    BOOT_SIZE_LIMIT  = (1024 * 36)
+
     def __init__(self, other_buf) -> None:
         self.__bootram_target_addr  = 0
         self.__bootram_bin_length   = 0 # 2bytes
@@ -61,6 +63,13 @@ class BootHeader:
     def bootram_bin_length(self):
         return self.__bootram_bin_length
 
+    @bootram_bin_length.setter
+    def bootram_bin_length(self, length):
+        if isinstance(length, int):
+            self.__bootram_bin_length = length
+        else:
+            raise TypeError("length MUST be int type!!!")
+
     @property
     def bootram_crc_offset(self):
         return self.__bootram_crc_offset
@@ -68,6 +77,13 @@ class BootHeader:
     @property
     def bootram_crc_value(self):
         return self.__bootram_crc_value
+
+    @bootram_crc_value.setter
+    def bootram_crc_value(self, val):
+        if isinstance(val, int):
+            self.__bootram_crc_value = val
+        else:
+            raise TypeError("crc MUST be int type!!!")
 
     @property
     def bootram_vector_addr(self):
@@ -89,4 +105,5 @@ class BootHeader:
 
     @property
     def boot_header_crc(self):
+        self.__boot_header_crc = zlib.crc32(self.__buffer[0:(BootHeader.BOOT_HEADER_SIZE-4)])
         return self.__boot_header_crc

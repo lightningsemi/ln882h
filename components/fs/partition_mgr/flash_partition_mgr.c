@@ -9,7 +9,7 @@ int ln_verify_partition_table(void)
 
     for (uint32_t i = 0; i < PARTITION_TAB_SIZE; i += sizeof(partition_info_t))
     {
-        FLASH_Read((PARTITION_TAB_BASE + i), sizeof(partition_info_t), (uint8_t *)&rd_info);
+        hal_flash_read((PARTITION_TAB_BASE + i), sizeof(partition_info_t), (uint8_t *)&rd_info);
 
         if ((rd_info.type       == 0) && \
             (rd_info.start_addr == 0) && \
@@ -36,7 +36,7 @@ int ln_fetch_partition_info(partition_type_t type, partition_info_t *info)
 
     for (uint32_t i = 0; i < PARTITION_TAB_SIZE; i += sizeof(partition_info_t))
     {
-        FLASH_Read((PARTITION_TAB_BASE + i), sizeof(partition_info_t), (uint8_t *)info);
+        hal_flash_read((PARTITION_TAB_BASE + i), sizeof(partition_info_t), (uint8_t *)info);
 
         if (info->type == type)
         {

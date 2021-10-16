@@ -9,6 +9,10 @@
  * 
  */
  
+
+#ifndef LN_EXT_TEST
+#define LN_EXT_TEST
+
 void ln_ext_test(void);
 
-
+#endif

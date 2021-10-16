@@ -46,7 +46,7 @@ typedef enum
 typedef enum
 {
     WDT_RMOD_0     = 0,     
-    WDT_RMOD_1       = 1,        
+    WDT_RMOD_1     = 1,        
 }wdt_rmod_t;
 
 #define IS_WDT_RMOD(MODE)  (((MODE) == WDT_RMOD_0)  || ((MODE) == WDT_RMOD_1)) 
@@ -60,17 +60,25 @@ typedef enum
 }wdt_it_flag_t;
 typedef enum
 {
-    WDT_TOP_VALUE_0           = 0x00,       //wdt cnt value = 0xFF
-    WDT_TOP_VALUE_1           = 0x01,       //wdt cnt value = 0x1FF
-    WDT_TOP_VALUE_2           = 0x02,       //wdt cnt value = 0x3FF
-    WDT_TOP_VALUE_3           = 0x03,       //wdt cnt value = 0x7FF
-    WDT_TOP_VALUE_4           = 0x04,       //wdt cnt value = 0xFFF
-    WDT_TOP_VALUE_5           = 0x05,       //wdt cnt value = 0x1FFF
-    WDT_TOP_VALUE_6           = 0x06,       //wdt cnt value = 0x3FFF
-    WDT_TOP_VALUE_7           = 0x07,       //wdt cnt value = 0x7FFF
-    WDT_TOP_VALUE_8           = 0x08,       //wdt cnt value = 0xFFFF
+    WDT_TOP_VALUE_0           = 0x00,       //wdt cnt value = 0xFF      Time = 0.007 s
+    WDT_TOP_VALUE_1           = 0x01,       //wdt cnt value = 0x1FF     Time = 0.015 s
+    WDT_TOP_VALUE_2           = 0x02,       //wdt cnt value = 0x3FF     Time = 0.031 s
+    WDT_TOP_VALUE_3           = 0x03,       //wdt cnt value = 0x7FF     Time = 0.063 s
+    WDT_TOP_VALUE_4           = 0x04,       //wdt cnt value = 0xFFF     Time = 0.127 s
+    WDT_TOP_VALUE_5           = 0x05,       //wdt cnt value = 0x1FFF    Time = 0.255 s
+    WDT_TOP_VALUE_6           = 0x06,       //wdt cnt value = 0x3FFF    Time = 0.511 s
+    WDT_TOP_VALUE_7           = 0x07,       //wdt cnt value = 0x7FFF    Time = 1.023 s
+    
+    WDT_TOP_VALUE_8           = 0x08,       //wdt cnt value = 0xFFFF    Time = 2.047 s
+    WDT_TOP_VALUE_9           = 0x09,       //wdt cnt value = 0x1FFFF   Time = 4.095 s
+    WDT_TOP_VALUE_10          = 0x0A,       //wdt cnt value = 0x3FFFF   Time = 8.191 s
+    WDT_TOP_VALUE_11          = 0x0B,       //wdt cnt value = 0x7FFFF   Time = 16.38 s
+    WDT_TOP_VALUE_12          = 0x0C,       //wdt cnt value = 0xFFFFF   Time = 32.76 s
+    WDT_TOP_VALUE_13          = 0x0D,       //wdt cnt value = 0x1FFFFF  Time = 65.53 s
+    WDT_TOP_VALUE_14          = 0x0E,       //wdt cnt value = 0x3FFFFF  Time = 131.0 s
+    WDT_TOP_VALUE_15          = 0x0F,       //wdt cnt value = 0x7FFFFF  Time = 262.1 s
 }wdt_top_value_t;
-#define IS_WDT_TOP_VALUE(VALUE)       ( ((VALUE) <= 0x08)) 
+#define IS_WDT_TOP_VALUE(VALUE)       ( ((VALUE) <= 0x0F)) 
 
 #define WDT_IT_FLAG_BIT_NUM         1
 #define IS_WDT_IT_FLAG(FLAG)        (((((uint32_t)FLAG) & 0x01) != 0x00U) && ((((uint32_t)FLAG) & ~0x01) == 0x00U))

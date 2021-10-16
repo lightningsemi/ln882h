@@ -9,6 +9,9 @@
  * 
  */
 
+#ifndef LN_FLASH_TEST
+#define LN_FLASH_TEST
 
 void ln_flash_test(void);
 
+#endif

@@ -8,17 +8,17 @@ static ota_port_ctx_t ota_port;
 
 static int flash_read(uint32_t offset, void *buf, uint32_t len)
 {
-    return FLASH_Read(offset, len, buf);
+    return hal_flash_read(offset, len, buf);
 }
 
 static int flash_write(uint32_t offset, const void *buf, uint32_t len)
 {
-    return FLASH_Program(offset, len, (uint8_t*)buf);
+    return hal_flash_program(offset, len, (uint8_t*)buf);
 }
 
 static int flash_erase(uint32_t offset, uint32_t len)
 {
-    FLASH_Erase(offset, len);
+    hal_flash_erase(offset, len);
     return 0;
 } 
 

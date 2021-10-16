@@ -27,7 +27,7 @@ static void jump_to_application(uint32_t app_offset)
     uint32_t *vec_int_base;
 
     //Enable QSPI 4bit mode
-    FLASH_QuadModeEnable(1);
+    hal_flash_quad_mode_enable(1);
 
     //Init Flash cache
     flash_cache_init(0);
@@ -62,10 +62,10 @@ static void rf_test_bin_run(uint32_t start_addr)
     uint32_t flag2_offset = flag1_offset + sizeof(uint32_t);
     uint32_t flag3_offset = flag2_offset + sizeof(uint32_t);
     
-    FLASH_Read(flag0_offset, sizeof(rf_tset_bin_flag0), (uint8_t *)&rf_tset_bin_flag0);
-    FLASH_Read(flag1_offset, sizeof(rf_tset_bin_flag1), (uint8_t *)&rf_tset_bin_flag1);
-    FLASH_Read(flag2_offset, sizeof(rf_tset_bin_flag2), (uint8_t *)&rf_tset_bin_flag2);
-    FLASH_Read(flag3_offset, sizeof(rf_tset_bin_flag3), (uint8_t *)&rf_tset_bin_flag3);
+    hal_flash_read(flag0_offset, sizeof(rf_tset_bin_flag0), (uint8_t *)&rf_tset_bin_flag0);
+    hal_flash_read(flag1_offset, sizeof(rf_tset_bin_flag1), (uint8_t *)&rf_tset_bin_flag1);
+    hal_flash_read(flag2_offset, sizeof(rf_tset_bin_flag2), (uint8_t *)&rf_tset_bin_flag2);
+    hal_flash_read(flag3_offset, sizeof(rf_tset_bin_flag3), (uint8_t *)&rf_tset_bin_flag3);
     
     if ((rf_tset_bin_flag0 == RF_TEST_BIN_FLAG0) && \
         (rf_tset_bin_flag1 == RF_TEST_BIN_FLAG1) && \
@@ -87,9 +87,9 @@ int main (int argc, char* argv[])
     __enable_irq();
 
     log_init();
-    FLASH_Init();
+    hal_flash_init();
     
-    flash_id = FLASH_ReadID();
+    flash_id = hal_flash_read_id();
     
     flash_cache_disable();
 

@@ -317,9 +317,9 @@ void        hal_adv_tim_set_cap_edge(uint32_t adv_tim_x_base,adv_tim_cap_edg_t a
             //get value
 uint16_t    hal_adv_tim_get_trig_value(uint32_t adv_tim_x_base);
 uint16_t    hal_adv_tim_get_load_value(uint32_t adv_tim_x_base);
-uint16_t    hal_adv_time_get_count(uint32_t adv_tim_x_base);
-uint16_t    hal_adv_time_get_comp_b(uint32_t adv_tim_x_base);
-uint16_t    hal_adv_time_get_comp_a(uint32_t adv_tim_x_base);
+uint16_t    hal_adv_tim_get_count(uint32_t adv_tim_x_base);
+uint16_t    hal_adv_tim_get_comp_b(uint32_t adv_tim_x_base);
+uint16_t    hal_adv_tim_get_comp_a(uint32_t adv_tim_x_base);
 uint8_t     hal_adv_tim_get_cap_dege(uint32_t adv_tim_x_base);
 
             //interrupt

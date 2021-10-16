@@ -9,7 +9,9 @@
  * 
  */
  
- 
+#ifndef LN_UART_TEST_H
+#define LN_UART_TEST_H
  
 void ln_uart_test(void);
 
+#endif

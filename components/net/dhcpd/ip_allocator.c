@@ -92,20 +92,3 @@ int dhcpd_ip_release(char *macaddr)
     set_ip_item_status(ip_item, LN_FALSE);
     return DHCPD_ERR_NONE;
 }
-uint8_t get_allocated_ip_sta_count(void)
-{
-    uint8_t dhcp_client_max = dhcpd_get_client_max();
-    uint8_t i,sta_count=0;
-    uint8_t *mac=0;
-    dhcpd_ip_item_t *ip_item=dhcpd_get_ip_pool();
-    for (i = 0; i < MIN(DHCPD_IP_POOL_SIZE, dhcp_client_max); i++) {
-        if(ip_item[i].allocted){
-            mac=ip_item[i].mac;
-            /*DHCPD_ERR("dhcpd_ip_allocate i=%d macaddr %02x:%02x:%02x:%02x:%02x:%02x  ip_addr->addr = %x ip_item->allocted=%d\r\n",
-            i,mac[0],mac[1],mac[2],mac[3],mac[4],mac[5],ip_item->ip.addr,ip_item->allocted);*/
-            sta_count++;
-        }
-    }
-    return sta_count;
-
-}

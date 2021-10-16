@@ -9,10 +9,10 @@
  * 
  */
 
-
-
+#ifndef LN_WS2811_TEST_H
+#define LN_WS2811_TEST_H
 
 void ln_ws2811_init(void);
 
-
+#endif
 

@@ -10,9 +10,9 @@
  */
  
 /*
-            ADCÊ¹ÓÃËµÃ÷£º
+            ADCä½¿ç”¨è¯´æ˜ï¼š
 
-                1. ±¾²âÊÔÊ¹ÓÃPB3×÷ÎªÁË²âÊÔÒı½Å
+                1. æœ¬æµ‹è¯•ä½¿ç”¨PB3ä½œä¸ºäº†æµ‹è¯•å¼•è„š
 
 */
 
@@ -22,7 +22,7 @@
 #include "hal_adc.h"
 #include "hal_gpio.h"
 #include "hal_dma.h"
-#include "log.h"
+#include "utils/debug/log.h"
 
 #include "ln_adc_test.h"
 #include "ln_test_common.h"
@@ -38,12 +38,12 @@ void ln_adc_test(void)
     
     memset(&adc_init,0,sizeof(adc_init));
     
-    adc_init.adc_ch = ADC_CH5;                              //ÅäÖÃÍ¨µÀ
-    adc_init.adc_conv_mode = ADC_CONV_MODE_CONTINUE;        //ÅäÖÃADCÎªÁ¬Ğø×ª»»Ä£Ê½
-    adc_init.adc_presc = 40;                                //ÉèÖÃ²ÉÑùÖÜÆÚÎª1M
-    hal_adc_init(ADC_BASE,&adc_init);                       //³õÊ¼»¯ADC
+    adc_init.adc_ch = ADC_CH5;                              //é…ç½®é€šé“
+    adc_init.adc_conv_mode = ADC_CONV_MODE_CONTINUE;        //é…ç½®ADCä¸ºè¿ç»­è½¬æ¢æ¨¡å¼
+    adc_init.adc_presc = 40;                                //è®¾ç½®é‡‡æ ·å‘¨æœŸä¸º1M
+    hal_adc_init(ADC_BASE,&adc_init);                       //åˆå§‹åŒ–ADC
     
-    hal_gpio_pin_mode_set(GPIOB_BASE,GPIO_PIN_3,GPIO_MODE_ANALOG);      //ÅäÖÃPB3ÎªÄ£ÄâÒı½Å
+    hal_gpio_pin_mode_set(GPIOB_BASE,GPIO_PIN_3,GPIO_MODE_ANALOG);      //é…ç½®PB3ä¸ºæ¨¡æ‹Ÿå¼•è„š
     hal_adc_it_cfg(ADC_BASE,ADC_IT_FLAG_EOC_5,HAL_ENABLE);            
     
     
@@ -51,14 +51,14 @@ void ln_adc_test(void)
     dma_init_t_def dma_init;
     memset(&dma_init,0,sizeof(dma_init));
     
-    dma_init.dma_mem_addr = (uint32_t)adc_data;        //ÉèÖÃDMAÄÚ´æµØÖ·
-    dma_init.dma_data_num = 4096;                      //ÉèÖÃDMA´«Êä´ÎÊı
-    dma_init.dma_dir = DMA_READ_FORM_P;                //ÉèÖÃDMA·½Ïò
-    dma_init.dma_mem_inc_en = DMA_MEM_INC_EN;          //ÉèÖÃDMAÄÚ´æÊÇ·ñÔö³¤
-    dma_init.dma_p_addr = ADC_DATA_REG_5;              //ÉèÖÃDMAÍâÉèµØÖ·
+    dma_init.dma_mem_addr = (uint32_t)adc_data;        //è®¾ç½®DMAå†…å­˜åœ°å€
+    dma_init.dma_data_num = 4096;                      //è®¾ç½®DMAä¼ è¾“æ¬¡æ•°
+    dma_init.dma_dir = DMA_READ_FORM_P;                //è®¾ç½®DMAæ–¹å‘
+    dma_init.dma_mem_inc_en = DMA_MEM_INC_EN;          //è®¾ç½®DMAå†…å­˜æ˜¯å¦å¢é•¿
+    dma_init.dma_p_addr = ADC_DATA_REG_5;              //è®¾ç½®DMAå¤–è®¾åœ°å€
     dma_init.dma_mem_size = DMA_MEM_SIZE_16_BIT;
     dma_init.dma_p_size = DMA_P_SIZE_16_BIT;
-    hal_dma_init(DMA_CH_7,&dma_init);                  //³õÊ¼»¯DMA
+    hal_dma_init(DMA_CH_7,&dma_init);                  //åˆå§‹åŒ–DMA
    
     hal_adc_dma_en(ADC_BASE,HAL_ENABLE);
     hal_adc_en(ADC_BASE,HAL_ENABLE);

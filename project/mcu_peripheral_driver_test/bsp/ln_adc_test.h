@@ -10,6 +10,10 @@
  */
  
  
+#ifndef  LN_ADC_TEST_H
+#define  LN_ADC_TEST_H
+
 void ln_adc_test(void);
 
 
+#endif //LN_ADC_TEST_H

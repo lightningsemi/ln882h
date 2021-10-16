@@ -4828,7 +4828,7 @@ uint32_t vTaskStackSize()
 {
   #if ( portSTACK_GROWTH > 0 )
     return (pxNewTCB->pxEndOfStack - pxNewTCB->pxStack + 1);
-  #else /* ( portSTACK_GROWTH > 0 )*/    
+  #else /* ( portSTACK_GROWTH > 0 )*/
     return pxCurrentTCB->uxSizeOfStack;
   #endif /* ( portSTACK_GROWTH > 0 )*/
 }

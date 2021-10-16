@@ -27,6 +27,7 @@
  */
 
 #include "utils/debug/CmBacktrace/cm_backtrace.h"
+#include "ln_utils.h"
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
@@ -248,6 +249,8 @@ void cm_backtrace_firmware_info(void) {
  * @param size stack size
  */
 static void get_cur_thread_stack_info(uint32_t sp, uint32_t *start_addr, size_t *size) {
+    LN_UNUSED(sp);
+
     CMB_ASSERT(start_addr);
     CMB_ASSERT(size);
 

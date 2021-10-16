@@ -9,5 +9,9 @@
  * 
  */
 
+#ifndef LN_SHOW_REG_INIT_H
+#define LN_SHOW_REG_INIT_H
+
 void ln_show_reg_init(void);
 
+#endif //LN_SHOW_REG_INIT_H

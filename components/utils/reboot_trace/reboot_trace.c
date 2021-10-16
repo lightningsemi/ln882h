@@ -1,10 +1,10 @@
 #include "ln882h.h"
+#include "ln_compiler.h"
 #include "ln_types.h"
-#include "utils/reboot_trace/reboot_trace.h"
-//#include "hal/hal_syscon.h"
 #include "hal/hal_wdt.h"
+#include "utils/reboot_trace/reboot_trace.h"
 
-static uint8_t  no_init_data[128]  __attribute__((section(".no_init_data"),aligned(8),zero_init)) ;
+static uint8_t  no_init_data[128]  __attribute__((section(".no_init_data"),aligned(8))) __ZERO_INIT__;
 
 static int ln_chip_set_reboot_cause(chip_reboot_cause_t cause)
 {
@@ -22,7 +22,7 @@ static int ln_chip_set_reboot_cause(chip_reboot_cause_t cause)
         default:
             return LN_FALSE;
     }
-    
+
     return LN_TRUE;
 }
 
@@ -48,7 +48,7 @@ chip_reboot_cause_t ln_chip_get_reboot_cause(void)
     return cause;
 }
 
-void ln_chip_reboot(void) 
+void ln_chip_reboot(void)
 {
 //    HAL_SYSCON_CPUResetReqMask(0);
     ln_chip_set_reboot_cause(CHIP_REBOOT_SOFTWARE);
@@ -60,10 +60,10 @@ void ln_chip_watchdog_keepalive(void)
 //    hal_wdt_rstart(REG_WDT_BASE);
 }
 
-void WDT_IRQHandler()
-{
-    //nothing to do.
-}
+// void WDT_IRQHandler(void)
+// {
+//     //nothing to do.
+// }
 
 void ln_chip_watchdog_start(watchdog_timeout_level_t level)
 {
@@ -107,7 +107,7 @@ void ln_chip_watchdog_start(watchdog_timeout_level_t level)
             break;
     }
 
-//    hal_wdt_init(REG_WDT_BASE, &config);
-//    hal_wdt_en(REG_WDT_BASE, HAL_ENABLE);
+   hal_wdt_init(WDT_BASE, &config);
+   hal_wdt_en(WDT_BASE, HAL_ENABLE);
 }
 

@@ -20,20 +20,20 @@ typedef enum nvds_valid_sect {
 static void nvds_read_flash(uint32_t offset, uint32_t len, uint8_t *buf)
 {
 #if (defined(FLASH_XIP) && (FLASH_XIP == 1))
-    FLASH_ReadByCache(offset, len, buf);
+    hal_flash_read_by_cache(offset, len, buf);
 #else
-    FLASH_Read(offset, len, buf);
+    hal_flash_read(offset, len, buf);
 #endif
 }
 
 static void nvds_write_flash(uint32_t offset, uint32_t len, uint8_t *buf)
 {
-    FLASH_Program(offset, len, buf);
+    hal_flash_program(offset, len, buf);
 }
 
 static void nvds_erase_flash(uint32_t offset, uint32_t len)
 {
-    FLASH_Erase(offset, len);
+    hal_flash_erase(offset, len);
 }
 
 static uint16_t nvds_get_valid_flag(void)

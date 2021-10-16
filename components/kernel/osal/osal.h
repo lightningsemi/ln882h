@@ -8,7 +8,7 @@
 #define __OSAL_H__
 #include "proj_config.h"
 
-#if (defined(__CONFIG_OS_KERNEL) && (__CONFIG_OS_KERNEL == RTOS_FREERTOS))
+#if (defined(__CONFIG_OS_KERNEL))
   #include "./FreeRTOS_Adapter/freertos_common.h"
   #include "./FreeRTOS_Adapter/freertos_cpuusage.h"
   #include "./FreeRTOS_Adapter/freertos_errno.h"
@@ -19,8 +19,6 @@
   #include "./FreeRTOS_Adapter/freertos_time.h"
   #include "./FreeRTOS_Adapter/freertos_timer.h"
   #include "./FreeRTOS_Adapter/freertos_debug.h"
-#elif (defined(__CONFIG_OS_KERNEL) && (__CONFIG_OS_KERNEL == RTOS_ALIOS))
-  #error "Not support AliOS!"
 #else 
   #error "No OS Kernel defined!"
 #endif

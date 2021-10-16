@@ -40,8 +40,8 @@
 #endif
 
 /** Eliminates compiler warning about unused arguments (GCC -Wextra -Wunused). */
-#ifndef LN_UNUSED_ARG
-#define LN_UNUSED_ARG(x) (void)x
+#ifndef LN_UNUSED
+#define LN_UNUSED(x)            ((void)(x))
 #endif
 
 

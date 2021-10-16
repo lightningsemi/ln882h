@@ -1,0 +1,2756 @@
+/**
+ * @file   ln_at_cmd_wifi.h
+ * @author LightningSemi WLAN Team
+ * Copyright (C) 2018-2020 LightningSemi Technology Co., Ltd. All rights reserved.
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2020-12-28     MurphyZhao   the first version
+ */
+
+#include "utils/debug/log.h"
+#include "utils/ln_psk_calc.h"
+#include "utils/system_parameter.h"
+#include "utils/ln_list.h"
+#include <stdlib.h>
+#include <string.h>
+
+#include <lwip/sockets.h>
+#include "lwip/inet.h"
+#include "wifi_manager.h"
+
+#include "dhcpd_api.h"
+#include "dhcpd.h"
+#include "wifi.h"
+#include "wifi_port.h"
+
+#include "ln_at.h"
+
+#define LN_AT_DEFAULT_MAX_CONN  (4U)
+
+typedef enum
+{
+    LN_AT_ECN_OPEN          = 0,
+    LN_AT_ECN_WPA_PSK       = 2,
+    LN_AT_ECN_WPA2_PSK      = 3,
+    LN_AT_ECN_WPA_WPA2_PSK  = 4,
+    LN_AT_ECN_MAX,
+} ln_at_ecn_type_t;
+
+typedef enum
+{
+    LN_AT_CMD_TYPE_NONE,
+    LN_AT_CMD_TYPE_CUR,
+    LN_AT_CMD_TYPE_DEF,
+} ln_at_cmd_type_e;
+
+typedef enum
+{
+    LN_AT_STORE_M_N_W_F = 0, /* Not write command config to flash */
+    LN_AT_STORE_M_W_F   = 1, /* Write command config to flash */
+} ln_at_store_mode_e;
+
+typedef struct
+{
+    wifi_mode_t     mode;
+} ln_at_ctrl_t;
+
+static ln_at_ctrl_t g_ln_at_ctrl =
+{
+    .mode = WIFI_MODE_MAX,
+};
+
+static ln_at_ctrl_t *g_ln_at_ctrl_p = &g_ln_at_ctrl;
+static void * sem_scan = NULL;
+static ln_at_store_mode_e g_at_store_mode = LN_AT_STORE_M_W_F;
+
+static void ln_at_cache_wifi_mode_set(wifi_mode_t mode);
+static ln_at_err_t ln_at_set_wifi_mode_def(uint8_t para_num, const char *name);
+
+// private command
+// char ln_at_set_pvtcmd(char *str)
+static ln_at_err_t ln_at_set_pvtcmd(uint8_t para_num, const char *name)
+{
+    LN_UNUSED(name);
+
+    bool is_default = false;
+    char *pvtcmd = NULL;
+    // uint8_t para_index = 1;
+    if (para_num != 1)
+    {
+        goto err;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(1, &is_default, &pvtcmd))
+    {
+        goto err;
+    }
+
+    if (is_default || !pvtcmd)
+    {
+        goto err;
+    }
+
+    LOG(LOG_LVL_INFO, "Raw pvtcmd:%s;len:%d\r\n", pvtcmd, strlen(pvtcmd));
+
+    if(0 != wifi_private_command(pvtcmd)){
+        LOG(LOG_LVL_ERROR, "pvt cmd parse failed!\r\n");
+        goto err;
+    }
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+err:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+/**
+ * need to be called by user when power-on
+*/
+void ln_at_cache_wifi_mode_set(wifi_mode_t mode)
+{
+    g_ln_at_ctrl_p->mode = mode;
+}
+
+/**
+ * default: get from RAM
+ *
+*/
+static ln_at_err_t _ln_at_get_wifi_mode(ln_at_cmd_type_e type, const char *name)
+{
+    int temp;
+    wifi_mode_t mode;
+
+    if (type == LN_AT_CMD_TYPE_DEF)
+    {
+        if (0 != sysparam_poweron_wifi_mode_get(&mode))
+        {
+            ln_at_printf(LN_AT_RET_ERR_STR);
+            return LN_AT_ERR_COMMON;
+        }
+    }
+    else
+    {
+        if (g_ln_at_ctrl_p->mode == WIFI_MODE_MAX)
+        {
+            mode = g_ln_at_ctrl_p->mode = wifi_current_mode_get();
+        }
+        else
+        {
+            mode = g_ln_at_ctrl_p->mode;
+        }
+
+        LOG(LOG_LVL_INFO, "current work mode:%d\r\n", mode);
+    }
+
+    if (mode == WIFI_MODE_STATION)
+    {
+        temp = 1;
+    }
+    else if (mode == WIFI_MODE_AP)
+    {
+        temp = 2;
+    }
+    else
+    {
+        ln_at_printf(LN_AT_RET_ERR_STR);
+        return LN_AT_ERR_NOT_SUPPORT;
+    }
+
+    ln_at_printf("%s:%d\r\n", name, (int)temp);
+    ln_at_printf(LN_AT_RET_OK_STR);
+
+    return LN_AT_ERR_NONE;
+}
+
+static ln_at_err_t ln_at_get_wifi_mode(const char *name)
+{
+    return _ln_at_get_wifi_mode(LN_AT_CMD_TYPE_NONE, name);
+}
+
+/**
+ * get from RAM
+*/
+static ln_at_err_t ln_at_get_wifi_mode_current(const char *name)
+{
+    return _ln_at_get_wifi_mode(LN_AT_CMD_TYPE_CUR, name);
+}
+
+/**
+ * get from flash cfg area
+*/
+static ln_at_err_t ln_at_get_wifi_mode_def(const char *name)
+{
+    return _ln_at_get_wifi_mode(LN_AT_CMD_TYPE_DEF, name);
+}
+
+/**
+ * @brief _ln_at_wifi_mode_parse
+ *     AT+CWMODE=<mode>[,<auto_connect>]
+ * @param para_num
+ * @param out_data
+ * @return ln_at_err_t
+ */
+static ln_at_err_t _ln_at_wifi_mode_parse(uint8_t para_num, wifi_mode_t *out_data)
+{
+    wifi_mode_t mode;
+    int temp = 0;
+    bool is_default = false;
+
+    if (para_num != 1 && para_num != 2)
+    {
+        return LN_AT_ERR_PARAM;
+    }
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(1, &is_default, &temp))
+    {
+        return LN_AT_ERR_PARSE;
+    }
+
+    LOG(LOG_LVL_ERROR, "is_default:%d; value:%d\r\n", is_default, temp);
+
+    if (is_default)
+    {
+        return LN_AT_ERR_FORMAT;
+    }
+
+    if (temp > 3 || temp < 0)
+    {
+        LOG(LOG_LVL_ERROR, "Input param error! param num:%d, first param:%d\r\n", para_num, temp);
+        return LN_AT_ERR_PARAM;
+    }
+
+    if (temp == 2)
+    {
+        mode = WIFI_MODE_AP;
+    }
+    else if (temp == 1)
+    {
+        mode = WIFI_MODE_STATION;
+    }
+    else
+    {
+        LOG(LOG_LVL_ERROR, "Not Support AT+STA mode! And not support switch off rf!");
+        return LN_AT_ERR_NOT_SUPPORT;
+    }
+
+    *out_data = mode;
+    return LN_AT_ERR_NONE;
+}
+
+static ln_at_err_t ln_at_set_wifi_mode(uint8_t para_num, const char *name)
+{
+    return ln_at_set_wifi_mode_def(para_num, name);
+}
+
+/**
+ * set to RAM
+*/
+static ln_at_err_t ln_at_set_wifi_mode_current(uint8_t para_num, const char *name)
+{
+    return ln_at_set_wifi_mode_def(para_num, name);
+}
+
+/**
+ * @brief ln_at_set_wifi_mode_def, Restart to take effect
+ *     mode:
+ *     0: No wifi, switch off wifi rf
+ *     1: station mode
+ *     2: ap mode
+ *     3: ap+station mode, not support
+ * @param para_num
+ * @param name
+ * @return ln_at_err_t
+ */
+static ln_at_err_t ln_at_set_wifi_mode_def(uint8_t para_num, const char *name)
+{
+    LN_UNUSED(name);
+
+    ln_at_err_t ret = LN_AT_ERR_NONE;
+    wifi_mode_t mode = WIFI_MODE_STATION;
+    wifi_mode_t curr_mode;
+    uint8_t mac_addr[MAC_ADDRESS_LEN] = {0};
+    sta_ps_mode_t ps_mode = WIFI_NO_POWERSAVE;
+
+    if (LN_AT_ERR_NONE != (ret = _ln_at_wifi_mode_parse(para_num, &mode)))
+    {
+        ln_at_printf(LN_AT_RET_ERR_STR);
+        return ret;
+    }
+
+    if (SYSPARAM_ERR_NONE != sysparam_sta_mac_get(mac_addr))
+    {
+        goto __exit;
+    }
+
+    if (SYSPARAM_ERR_NONE != sysparam_sta_powersave_get(&ps_mode))
+    {
+        goto __exit;
+    }
+
+    curr_mode = wifi_current_mode_get();
+    if (curr_mode == mode)
+    {
+        g_ln_at_ctrl_p->mode = curr_mode;
+        LOG(LOG_LVL_INFO, "No need to switch mode\r\n");
+        goto __ok;
+    }
+
+    wifi_stop();
+
+    if (mode == WIFI_MODE_STATION)
+    {
+        netdev_set_mac_addr(NETIF_IDX_STA, mac_addr);
+        netdev_set_active(NETIF_IDX_STA);
+        wifi_sta_start(mac_addr, ps_mode);
+    }
+
+    g_ln_at_ctrl_p->mode = mode;
+
+    if (g_at_store_mode != LN_AT_STORE_M_N_W_F)
+    {
+        if (SYSPARAM_ERR_NONE != sysparam_poweron_wifi_mode_update(mode))
+        {
+            goto __exit;
+        }
+    }
+
+__ok:
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ret = LN_AT_ERR_COMMON;
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return ret;
+}
+
+/**
+ * @brief ln_at_help_wifi_mode
+ *     mode:
+ *     0: No wifi, switch off wifi rf
+ *     1: station mode
+ *     2: ap mode
+ *     3: ap+station mode, not support
+ * @param name
+ * @return ln_at_err_t
+ */
+static ln_at_err_t ln_at_help_wifi_mode(const char *name)
+{
+    ln_at_printf("%s:(0-3)\r\n", name);
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+}
+
+static ln_at_err_t ln_at_help_wifi_mode_current(const char *name)
+{
+    return ln_at_help_wifi_mode(name);
+}
+
+static ln_at_err_t ln_at_help_wifi_mode_def(const char *name)
+{
+    return ln_at_help_wifi_mode(name);
+}
+
+/**
+ * AT+CWJAP
+ * AT+CWJAP_CUR
+ * AT+CWJAP_DEF
+ *
+ * GET:
+ *     AT+CWJAP?  -->
+ *       +CWJAP:<ssid>,<bssid>,<channel>,<rssi>,<pci_en>,<reconn_interval>,<listen_interval>,<scan_mode>,<pmf>
+ *       OK
+ * SET:
+ *     AT+CWJAP=[<ssid>],[<pwd>][,<bssid>][,<pci_en>][,<reconn_interval>][,<listen_interval>][,<scan_mode>][,<jap_timeout>][,<pmf>]
+ *
+ *       WIFI CONNECTED
+ *       WIFI GOT IP
+ *
+ *       OK
+ *       [WIFI GOT IPv6 LL]
+ *       [WIFI GOT IPv6 GL]
+ *   or
+ *       +CWJAP:<error code>
+ *       ERROR
+ * EXEC: Connect to the AP in the last Wi-Fi configuration
+ *     AT+CWJAP
+ * As station mode to join specific ap.
+ *
+ * If at cache mode is equal to flash cache mode, means that wifi is in this mode in the current;
+ * If at cache mode is not equal to flash cache mode, means that wifi need to be switch to at cache mode.
+ *
+ * if at cache mode and flash cache mode both are not sta mode, return error.
+ * if at cache mode is ap, and flash cache mode is sta or ap, return error.
+*/
+
+static ln_at_err_t _ln_at_sta_get_link_ap_info(const char *name)
+{
+    wifi_mode_t mode;
+    wifi_sta_status_t sta_status = WIFI_STA_STATUS_STARTUP;
+    wifi_scan_cfg_t   scan_cfg   = {0,};
+
+    int8_t         rssi  = 0;
+    const char    *ssid  = NULL;
+    const uint8_t *bssid = NULL;
+
+    if (!name)
+    {
+        ln_at_printf(LN_AT_RET_ERR_STR);
+        return LN_AT_ERR_PARAM;
+    }
+
+    if (g_ln_at_ctrl_p->mode == WIFI_MODE_MAX)
+    {
+        mode = g_ln_at_ctrl_p->mode = wifi_current_mode_get();
+    }
+    else
+    {
+        mode = g_ln_at_ctrl_p->mode;
+    }
+
+    if (mode != WIFI_MODE_STATION)
+    {
+        ln_at_printf("No AP\r\n");
+        ln_at_printf(LN_AT_RET_OK_STR);
+        return LN_AT_ERR_NONE;     /* Future adaptation 8266 */
+    }
+
+    if (WIFI_ERR_NONE != wifi_get_sta_conn_info(&ssid, &bssid) || \
+        WIFI_ERR_NONE != wifi_get_sta_status(&sta_status))
+    {
+        ln_at_printf(LN_AT_RET_ERR_STR);
+        return LN_AT_ERR_COMMON;
+    }
+
+    /* Check that the STA is connected to the AP */
+    if (sta_status != WIFI_STA_STATUS_CONNECTED) /* sta is not connected */
+    {
+        ln_at_printf("No AP\r\n");
+        ln_at_printf(LN_AT_RET_OK_STR);
+        return LN_AT_ERR_NONE;     /* Future adaptation 8266 */
+    }
+
+    if (!ssid || !bssid)
+    {
+        ln_at_printf(LN_AT_RET_ERR_STR);
+        return LN_AT_ERR_COMMON;
+    }
+
+    if (WIFI_ERR_NONE != wifi_get_sta_scan_cfg(&scan_cfg) || \
+        WIFI_ERR_NONE != wifi_sta_get_rssi(&rssi))
+    {
+        ln_at_printf(LN_AT_RET_ERR_STR);
+        return LN_AT_ERR_COMMON;
+    }
+
+    ln_at_printf("%s:\"%s\",\"%02x:%02x:%02x:%02x:%02x:%02x\",%d,%d\r\n", name, ssid,
+                bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5],
+                scan_cfg.channel, (int8_t)(rssi));
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+}
+
+/**
+ * default: get from RAM
+ *
+*/
+static ln_at_err_t ln_at_get_wifi_join_ap(const char *name)
+{
+    return _ln_at_sta_get_link_ap_info(name);
+}
+
+/**
+ * get from RAM
+*/
+static ln_at_err_t ln_at_get_wifi_join_ap_current(const char *name)
+{
+    return _ln_at_sta_get_link_ap_info(name);
+}
+
+/**
+ * get from flash cfg area
+*/
+static ln_at_err_t ln_at_get_wifi_join_ap_def(const char *name)
+{
+    return _ln_at_sta_get_link_ap_info(name);
+}
+
+/**
+ * AT+CWJAP=<ssid>,<pwd>[,<bssid>]
+ * AT+CWJAP=[<ssid>],[<pwd>][,<bssid>][,<pci_en>][,<reconn_interval>][,<listen_interval>][,<scan_mode>][,<jap_timeout>][,<pmf>]
+ * WIFI DISCONNECT
+ * WIFI CONNECTED
+ * WIFI GOT IP
+ *
+ * OK
+*/
+static ln_at_err_t _ln_at_parse_cwjap(uint8_t para_num, const char *name)
+{
+    bool is_default = false;
+    uint8_t para_index = 1;
+
+    wifi_mode_t mode;
+    sta_ps_mode_t ps_mode;
+    wifi_scan_cfg_t scan_cfg = {0};
+    wifi_sta_connect_t conn = {0};
+    uint8_t psk_value[40] = {0x0};
+    uint8_t mac_addr[MAC_ADDRESS_LEN] = {0};
+
+    char *ssid_p = NULL;
+    char *pwd_p = NULL;
+    char *bssid_p = NULL;
+
+    uint8_t bssid_hex[BSSID_LEN];
+
+    if (!name || (para_num > 3))
+    {
+        return LN_AT_ERR_PARAM;
+    }
+
+    if (g_ln_at_ctrl_p->mode == WIFI_MODE_MAX)
+    {
+        mode = g_ln_at_ctrl_p->mode = wifi_current_mode_get();
+    }
+    else
+    {
+        mode = g_ln_at_ctrl_p->mode;
+    }
+
+    if (mode != WIFI_MODE_STATION)
+    {
+        ln_at_printf(LN_AT_RET_ERR_STR);
+        return LN_AT_ERR_NONE;     /* Future adaptation 8266 */
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &ssid_p))
+    {
+        ln_at_printf(LN_AT_RET_ERR_STR);
+        return LN_AT_ERR_PARSE;
+    }
+
+    if (is_default || !ssid_p)
+    {
+        ln_at_printf(LN_AT_RET_ERR_STR);
+        return LN_AT_ERR_FORMAT;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &pwd_p))
+    {
+        ln_at_printf(LN_AT_RET_ERR_STR);
+        return LN_AT_ERR_PARSE;
+    }
+
+    if (is_default || !pwd_p)
+    {
+        ln_at_printf(LN_AT_RET_ERR_STR);
+        return LN_AT_ERR_FORMAT;
+    }
+
+    if (para_num == 3)
+    {
+        if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &bssid_p))
+        {
+            ln_at_printf(LN_AT_RET_ERR_STR);
+            return LN_AT_ERR_PARSE;
+        }
+
+        if (is_default || !bssid_p)
+        {
+            ln_at_printf(LN_AT_RET_ERR_STR);
+            return LN_AT_ERR_FORMAT;
+        }
+    }
+
+    LOG(LOG_LVL_INFO, "ssid:%s; pwd:%s; bssid:%s\r\n",
+        ssid_p, pwd_p, bssid_p == NULL ? "NULL" : bssid_p);
+
+    if (bssid_p != NULL)
+    {
+        wlib_mac_str2hex((const uint8_t *)bssid_p, (uint8_t *)bssid_hex);
+    }
+
+    if (SYSPARAM_ERR_NONE != sysparam_sta_mac_get(mac_addr))
+    {
+        goto __exit;
+    }
+
+    if (SYSPARAM_ERR_NONE != sysparam_sta_powersave_get(&ps_mode))
+    {
+        goto __exit;
+    }
+
+    wifi_sta_disconnect();
+    wifi_stop();
+
+    netdev_set_mac_addr(NETIF_IDX_STA, mac_addr);
+    netdev_set_active(NETIF_IDX_STA);
+    wifi_sta_start(mac_addr, ps_mode);
+
+    conn.ssid = ssid_p;
+    conn.pwd = pwd_p;
+    conn.bssid = ((bssid_p != NULL) ? bssid_hex : NULL);
+    conn.psk_value = NULL;
+
+    if (SYSPARAM_ERR_NONE != sysparam_sta_scan_cfg_get(&scan_cfg))
+    {
+        goto __exit;
+    }
+
+    if (strlen(conn.pwd) != 0) {
+        if (0 == ln_psk_calc(conn.ssid, conn.pwd, psk_value, sizeof (psk_value))) {
+            conn.psk_value = psk_value;
+            hexdump(LOG_LVL_INFO, "psk value ", psk_value, sizeof(psk_value));
+        }
+        else
+        {
+            goto __exit;
+        }
+    }
+
+    // if (0 != wifi_stop())
+    // {
+    //     goto __exit;
+    // }
+
+    if (wifi_sta_connect(&conn, &scan_cfg) != 0)
+    {
+        LOG(LOG_LVL_ERROR, "Join failed! ssid:%s, pwd:%s\r\n",
+                conn.ssid, conn.pwd);
+        goto __exit;
+    }
+
+    if (g_at_store_mode != LN_AT_STORE_M_N_W_F)
+    {
+        /* save scan config and connect config into flash */
+        if (0 != sysparam_sta_conn_cfg_update(&conn))
+        {
+            goto __exit;
+        }
+    }
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+__exit:
+    ln_at_printf("%s:%d\r\n", name, 4); /* 4: connect fail */
+    ln_at_printf(LN_AT_RET_FAIL_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_set_wifi_join_ap(uint8_t para_num, const char *name)
+{
+    return _ln_at_parse_cwjap(para_num, name);
+}
+
+static ln_at_err_t ln_at_set_wifi_join_ap_current(uint8_t para_num, const char *name)
+{
+    return _ln_at_parse_cwjap(para_num, name);
+}
+
+static ln_at_err_t ln_at_set_wifi_join_ap_def(uint8_t para_num, const char *name)
+{
+    return _ln_at_parse_cwjap(para_num, name);
+}
+
+static ln_at_err_t ln_at_help_wifi_join_ap(const char *name)
+{
+    ln_at_printf("%s=<ssid>,<pwd>[,<bssid>]\r\n", name);
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+}
+
+static ln_at_err_t ln_at_help_wifi_join_ap_current(const char *name)
+{
+    return ln_at_help_wifi_join_ap(name);
+}
+
+static ln_at_err_t ln_at_help_wifi_join_ap_def(const char *name)
+{
+    return ln_at_help_wifi_join_ap(name);
+}
+
+/**
+ * AT+CWQAP
+ *
+ * Disable auto connect, then disconnect.
+ *
+ * This AT CMD can also be used in ap mode.
+*/
+static ln_at_err_t ln_at_exec_sta_disconn_ap(const char *name)
+{
+    LN_UNUSED(name);
+
+    if (wifi_sta_disconnect() != 0)
+    {
+        ln_at_printf(LN_AT_RET_ERR_STR);
+        return LN_AT_ERR_COMMON;
+    }
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+}
+
+#if 0
+/**
+ * AT+CWLAPOPT=<sort_enable>,<mask>
+*/
+static ln_at_err_t ln_at_set_scan_rst_list_opt(uint8_t para_num, const char *name)
+{
+    bool is_default = false;
+    uint8_t para_index = 1;
+
+    int sort_en = 0;
+    int mask = 0;
+    sort_rule_t rule = RSSI_SORT;
+
+    if (para_num != 2)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &sort_en))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        sort_en = 1;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &mask))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        mask = 2047;
+    }
+
+    LOG(LOG_LVL_ERROR, "sort en:%d; mask:%d\r\n", sort_en, mask);
+
+    if (sort_en != 0 && sort_en != 1)
+    {
+        goto __exit;
+    }
+
+    if (mask > 0x7FF)
+    {
+        goto __exit;
+    }
+
+    if (sort_en) {
+        rule = RSSI_SORT;
+    } else {
+        rule = NORMAL_SORT;
+    }
+
+    wifi_manager_set_ap_list_sort_rule(rule);
+    sysparam_ap_list_info_mask_update(mask);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+/**
+ * AT+CWLAP
+ *
+ * AT+CWLAP=<ssid>[,<mac>,<channel>,<scan_type>,<scan_time_min>,<scan_time_max>]
+*/
+static ln_at_err_t ln_at_set_scan_opt(uint8_t para_num, const char *name)
+{
+    int ret = 0;
+    bool is_default = false;
+    uint8_t para_index = 1;
+
+    /* Four bytes of space are reserved for possible characters \r\n */
+    char *ssid_p = NULL;
+    char *bssid_p = NULL;
+    uint8_t bssid_hex[BSSID_LEN];
+
+    int channel = 6;
+    int scan_type = 0;
+    int scan_time_min = 100;
+    int scan_time_max = 1500;
+
+    LN_AT_MEMSET(bssid_hex, 0X0, sizeof(bssid_hex));
+
+    if (!(para_num == 1 || para_num == 6))
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &ssid_p))
+    {
+        goto __exit;
+    }
+
+    if (is_default || !ssid_p)
+    {
+        goto __exit;
+    }
+
+    if (para_num >= 2)
+    {
+        if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &bssid_p))
+        {
+            goto __exit;
+        }
+    }
+
+    if (para_num >= 3)
+    {
+        if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &channel))
+        {
+            goto __exit;
+        }
+    }
+
+    if (para_num >= 4)
+    {
+        if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &scan_type))
+        {
+            goto __exit;
+        }
+    }
+
+    if (para_num >= 5)
+    {
+        if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &scan_time_min))
+        {
+            goto __exit;
+        }
+    }
+
+    if (para_num >= 6)
+    {
+        if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &scan_time_max))
+        {
+            goto __exit;
+        }
+    }
+
+
+    LOG(LOG_LVL_ERROR, "ssid:%s; bssid:%s; chl:%d; scan type:%d, mini time:%d, max time:%d\r\n",
+        ssid_p, bssid_p, channel, scan_type, scan_time_min, scan_time_max);
+
+    ret = ln_at_cmd_args_get(bssid_p, "%x:%x:%x:%x:%x:%x",
+            &bssid_hex[0], &bssid_hex[1], &bssid_hex[2], &bssid_hex[3], &bssid_hex[4], &bssid_hex[5]);
+
+    LOG(LOG_LVL_ERROR, "ret:%d; mac addr:%02x:%02x:%02x:%02x:%02x:%02x\r\n", ret,
+            bssid_hex[0], bssid_hex[1], bssid_hex[2], bssid_hex[3], bssid_hex[4], bssid_hex[5]);
+
+    if (ret != 6)
+    {
+        goto __exit;
+    }
+
+    /* TODO */
+
+    ln_at_printf("+CWLAP:TODO\r\n");
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+#endif /* 0 */
+
+static void wifi_scan_complete_cb(void * arg)
+{
+    LN_UNUSED(arg);
+
+    ln_at_sem_release(sem_scan);
+}
+
+static void output_ap_list(void)
+{
+    ln_list_t *list;
+    uint8_t node_count = 0;
+    ap_info_node_t *pnode;
+
+    wifi_manager_ap_list_update_enable(LN_FALSE);
+    wifi_manager_get_ap_list(&list, &node_count);
+
+    LN_LIST_FOR_EACH_ENTRY(pnode, ap_info_node_t, list,list)
+    {
+        uint8_t * mac = (uint8_t*)pnode->info.bssid;
+        ap_info_t *info = &pnode->info;
+
+        //a good format
+        ln_at_printf("+CWLAP:[%02X:%02X:%02X:%02X:%02X:%02X]enc=%d,ch=%02d,rssi=%3d,ssid:\"%s\"\r\n", \
+        mac[0],mac[1],mac[2],mac[3],mac[4],mac[5],info->authmode,info->channel,info->rssi,info->ssid);
+    }
+
+    wifi_manager_ap_list_update_enable(LN_TRUE);
+}
+
+static ln_at_err_t ln_at_exec_scan(const char *name)
+{
+    LN_UNUSED(name);
+
+    #define CONNECTED_SCAN_TIMES     (6)
+    #define DEFAULT_SCAN_TIMES       (1)
+    #define SCAN_TIMEOUT             (1500)
+
+    int8_t scan_cnt = DEFAULT_SCAN_TIMES;
+
+    wifi_sta_status_t sta_status = WIFI_STA_STATUS_STARTUP;
+    wifi_scan_cfg_t   scan_cfg   = {0,};
+    wifi_mode_t mode;
+
+    if (g_ln_at_ctrl_p->mode == WIFI_MODE_MAX)
+    {
+        mode = g_ln_at_ctrl_p->mode = wifi_current_mode_get();
+    }
+    else
+    {
+        mode = g_ln_at_ctrl_p->mode;
+    }
+
+    if (mode != WIFI_MODE_STATION)
+    {
+        ln_at_printf(LN_AT_RET_ERR_STR);
+        return LN_AT_ERR_COMMON;
+    }
+
+    sysparam_sta_scan_cfg_get(&scan_cfg);
+
+    //1. creat sem, reg scan complete callback.
+    sem_scan = ln_at_sem_create(0, 1);
+    wifi_manager_reg_event_callback(WIFI_MGR_EVENT_STA_SCAN_COMPLETE, &wifi_scan_complete_cb);
+
+    //2. start scan, wait scan complete
+    wifi_get_sta_status(&sta_status);
+    if (sta_status == WIFI_STA_STATUS_CONNECTED || \
+        sta_status == WIFI_STA_STATUS_DISCONNECTING)
+    {
+        scan_cnt = CONNECTED_SCAN_TIMES;
+    }
+    LOG(LOG_LVL_INFO, "Scan cnt:%d; scan timeout:%d\r\n", scan_cnt, SCAN_TIMEOUT);
+
+    for (; scan_cnt > 0; scan_cnt--)
+    {
+        wifi_sta_scan(&scan_cfg);
+        ln_at_sem_wait(sem_scan, SCAN_TIMEOUT);
+    }
+
+    //3. scan complete,output ap list.
+    output_ap_list();
+
+    //4. delete sem, callback
+    wifi_manager_reg_event_callback(WIFI_MGR_EVENT_STA_SCAN_COMPLETE, NULL);
+    ln_at_sem_delete(sem_scan);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+}
+
+/**
+ * read from flash
+ *
+ * AT+CWSAP?
+ * +CWSAP:<ssid>,<pwd>,<chl>,<ecn>,<max	conn>,<ssid	hidden>
+ *
+*/
+static ln_at_err_t _ln_at_cwsap_get_parse(ln_at_cmd_type_e type, const char *name)
+{
+    LN_UNUSED(type);
+
+    wifi_mode_t mode;
+    int ecn = 0;
+    ecn = ecn;
+
+    char ssid[SSID_MAX_LEN + 1] = {0};
+    char pwd[PASSWORD_MAX_LEN + 1] = {0};
+    wifi_softap_ext_cfg_t ap_cfg;
+
+    if (g_ln_at_ctrl_p->mode == WIFI_MODE_MAX)
+    {
+        mode = g_ln_at_ctrl_p->mode = wifi_current_mode_get();
+    }
+    else
+    {
+        mode = g_ln_at_ctrl_p->mode;
+    }
+
+    if (mode != WIFI_MODE_AP)
+    {
+        ln_at_printf(LN_AT_RET_ERR_STR);
+        return LN_AT_ERR_COMMON;
+    }
+
+    LN_AT_MEMSET(&ap_cfg, 0x0, sizeof(wifi_softap_ext_cfg_t));
+    if (0 != sysparam_softap_ext_cfg_get(&ap_cfg))
+    {
+        goto __exit;
+    }
+
+    if (0 != sysparam_softap_ssidpwd_cfg_get(ssid, pwd))
+    {
+        goto __exit;
+    }
+
+    switch (ap_cfg.authmode)
+    {
+    case WIFI_AUTH_OPEN:
+        ecn = 0;
+        break;
+    case WIFI_AUTH_WPA_PSK:
+        ecn = 2;
+        break;
+    case WIFI_AUTH_WPA2_PSK:
+        ecn = 3;
+        break;
+    case WIFI_AUTH_WPA_WPA2_PSK:
+        ecn = 4;
+        break;
+    default:
+        break;
+    }
+
+    ln_at_printf("%s:\"%s\",\"%s\",%d,%d,%d,%d",
+            name, ssid, pwd, ap_cfg.channel, ap_cfg.authmode, 4, ap_cfg.ssid_hidden);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_get_ap_start(const char *name)
+{
+    return _ln_at_cwsap_get_parse(LN_AT_CMD_TYPE_NONE, name);
+}
+
+static ln_at_err_t ln_at_get_ap_start_cur(const char *name)
+{
+    return _ln_at_cwsap_get_parse(LN_AT_CMD_TYPE_CUR, name);
+}
+
+static ln_at_err_t ln_at_get_ap_start_def(const char *name)
+{
+    return _ln_at_cwsap_get_parse(LN_AT_CMD_TYPE_DEF, name);
+}
+
+/**
+ * AT+CWSAP=<ssid>,<pwd>,<chl>,<ecn>[,<max conn>][,<ssid hidden>]
+ *
+ * OK OR ERROR
+ * AT+CWSAP="ap_name","12345678",1,4,2,0
+ *
+ * OK
+ * +STA_CONNECTED:"96:ee:14:96:4c:55"
+ * +DIST_STA_IP:"96:ee:14:96:4c:55","192.168.4.2"
+ *
+ * +STA_DISCONNECTED:"96:ee:14:96:4c:55"
+*/
+static ln_at_err_t _ln_at_cwsap_set_parse(ln_at_cmd_type_e type, uint8_t para_num, const char *name)
+{
+    LN_UNUSED(type);
+
+    bool is_default = false;
+    uint8_t para_index = 1;
+    wifi_softap_cfg_t ap_cfg;
+    wifi_mode_t mode;
+    uint8_t psk_value[40] = {0x0};
+
+    char *ssid_p = NULL;
+    uint8_t bssid[BSSID_LEN] = {0};
+    char *pwd_p = NULL;
+
+    int chl = 6;                           /* default 6 */
+    int ecn = 4;                           /* default 4: WPA_WPA2_PSK */
+    int max_conn = LN_AT_DEFAULT_MAX_CONN; /* default 4 */
+    int is_hidden = 0;
+
+    if (!name || (para_num > 6))
+    {
+        goto __exit;
+    }
+
+    if (g_ln_at_ctrl_p->mode == WIFI_MODE_MAX)
+    {
+        mode = g_ln_at_ctrl_p->mode = wifi_current_mode_get();
+    }
+    else
+    {
+        mode = g_ln_at_ctrl_p->mode;
+    }
+
+    if (mode != WIFI_MODE_AP)
+    {
+        LOG(LOG_LVL_ERROR, "Not work in AP mode\r\n");
+        goto __exit;
+    }
+
+    if (0 != sysparam_softap_mac_get(bssid))
+    {
+        goto __exit;
+    }
+
+    LOG(LOG_LVL_ERROR, "bssid: %02x:%02x:%02x:%02x:%02x:%02x\r\n",
+        bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &ssid_p))
+    {
+        goto __exit;
+    }
+
+    if (is_default || !ssid_p)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &pwd_p))
+    {
+        goto __exit;
+    }
+
+    if (is_default)
+    {
+        pwd_p = NULL; /* open */
+    }
+
+    if (SYSPARAM_ERR_NONE != sysparam_softap_ext_cfg_get(&ap_cfg.ext_cfg))
+    {
+        goto __exit;
+    }
+    // LOG(LOG_LVL_INFO, "Factory data:\r\n"
+    //         "ssid:%s; pwd:%s; channel:%d, ecn:%d, max conn:%d, hidden:%d\r\n",
+    // ap_cfg.ssid, ap_cfg.pwd, ap_cfg.ext_cfg.channel, ap_cfg.ext_cfg.authmode,
+    // max_conn, ap_cfg.ext_cfg.ssid_hidden);
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &chl))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        chl = ap_cfg.ext_cfg.channel;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &ecn))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        ecn = LN_AT_ECN_MAX;
+    }
+
+    if (para_num >= 5)
+    {
+        if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &max_conn))
+        {
+            goto __exit;
+        }
+        if (is_default)
+        {
+            max_conn = (int)LN_AT_DEFAULT_MAX_CONN;
+        }
+    }
+
+    if (para_num >= 6)
+    {
+        if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &is_hidden))
+        {
+            goto __exit;
+        }
+        if (is_default)
+        {
+            is_hidden = (int)ap_cfg.ext_cfg.ssid_hidden;
+        }
+    }
+
+    ap_cfg.ext_cfg.channel = chl;
+
+    if (ecn == (int)LN_AT_ECN_OPEN)
+    {
+        ap_cfg.ext_cfg.authmode = WIFI_AUTH_OPEN;
+    }
+    else if (ecn == (int)LN_AT_ECN_WPA_PSK)
+    {
+        ap_cfg.ext_cfg.authmode = WIFI_AUTH_WPA_PSK;
+    }
+    else if (ecn == (int)LN_AT_ECN_WPA2_PSK)
+    {
+        ap_cfg.ext_cfg.authmode = WIFI_AUTH_WPA2_PSK;
+    }
+    else if (ecn == (int)LN_AT_ECN_WPA_WPA2_PSK)
+    {
+        ap_cfg.ext_cfg.authmode = WIFI_AUTH_WPA_WPA2_PSK;
+    }
+    else if (ecn == (int)LN_AT_ECN_MAX)
+    {
+        ap_cfg.ext_cfg.authmode = ap_cfg.ext_cfg.authmode;
+    }
+    else
+    {
+        ap_cfg.ext_cfg.authmode = WIFI_AUTH_OPEN;
+    }
+    ap_cfg.ext_cfg.ssid_hidden = is_hidden;
+
+    ap_cfg.ssid = ssid_p;
+    ap_cfg.pwd = pwd_p;
+    ap_cfg.bssid = bssid;
+
+    LOG(LOG_LVL_INFO, "ssid:%s; pwd:%s; channel:%d, ecn:%d, max conn:%d, hidden:%d" \
+        "beacon:%d\r\n",
+        ap_cfg.ssid, ap_cfg.pwd, ap_cfg.ext_cfg.channel,
+        ap_cfg.ext_cfg.authmode, max_conn, ap_cfg.ext_cfg.ssid_hidden,
+        ap_cfg.ext_cfg.beacon_interval);
+
+    wifi_stop();
+
+    {
+        tcpip_ip_info_t  ip_info = {0};
+        server_config_t  server_config = {0};
+        sysparam_softap_ip_info_get(&ip_info);
+        sysparam_dhcpd_cfg_get(&server_config);
+
+        // ip_info.ip.addr      = ipaddr_addr((const char *)"192.168.4.1");
+        // ip_info.gw.addr      = ipaddr_addr((const char *)"192.168.4.1");
+        // ip_info.netmask.addr = ipaddr_addr((const char *)"255.255.255.0");
+
+        // server_config.server.addr   = ip_info.ip.addr;
+        // server_config.port          = 67;
+        // server_config.lease         = 2880;
+        // server_config.renew         = 2880;
+        // server_config.ip_start.addr = ipaddr_addr((const char *)"192.168.4.100");
+        // server_config.ip_end.addr   = ipaddr_addr((const char *)"192.168.4.150");
+        // server_config.client_max    = 3;
+
+        if (LN_FALSE != dhcpd_is_running())
+        {
+            /* dhcpd is running, stop it first */
+            dhcpd_stop();
+        }
+
+        if (DHCPD_ERR_NONE != dhcpd_curr_config_set(&server_config))
+        {
+            LOG(LOG_LVL_INFO, "dhcpd has been running!\r\n");
+        }
+
+        LOG(LOG_LVL_INFO, "ip info: \r\nip:     %s\r\n", ip4addr_ntoa(&ip_info.ip));
+        LOG(LOG_LVL_INFO, "ip info: \r\ngw:     %s\r\n", ip4addr_ntoa(&ip_info.gw));
+        LOG(LOG_LVL_INFO, "ip info: \r\nnetmask:%s\r\n", ip4addr_ntoa(&ip_info.netmask));
+
+        LOG(LOG_LVL_INFO, "server config:\r\nip: %s\r\n", ip4addr_ntoa(&server_config.server));
+        LOG(LOG_LVL_INFO, "ip info: \r\nip start:%s\r\n", ip4addr_ntoa(&server_config.ip_start));
+        LOG(LOG_LVL_INFO, "ip info: \r\nip end:  %s\r\n", ip4addr_ntoa(&server_config.ip_end));
+
+
+        LOG(LOG_LVL_INFO,
+                "port:%d\r\n" \
+                "lease:%d\r\n" \
+                "renew:%d\r\n" \
+                "client:%d\r\n",
+                server_config.port,
+                server_config.lease, server_config.renew, server_config.client_max);
+
+        netdev_set_mac_addr(NETIF_IDX_AP, bssid);
+        netdev_set_ip_info(NETIF_IDX_AP, &ip_info);
+
+        netdev_set_state(NETIF_IDX_AP, NETDEV_UP);
+        netdev_set_active(NETIF_IDX_AP);
+    }
+
+    ap_cfg.ext_cfg.psk_value = NULL;
+    if ((ap_cfg.pwd != NULL && strlen(ap_cfg.pwd) > 0) &&
+        (ap_cfg.ext_cfg.authmode != WIFI_AUTH_OPEN) &&
+        (ap_cfg.ext_cfg.authmode != WIFI_AUTH_WEP)) {
+        memset(psk_value, 0, sizeof(psk_value));
+        if (0 == ln_psk_calc(ap_cfg.ssid, ap_cfg.pwd, psk_value, sizeof (psk_value))) {
+            ap_cfg.ext_cfg.psk_value = psk_value;
+            hexdump(LOG_LVL_INFO, "psk value ", psk_value, sizeof(psk_value));
+        }
+    }
+
+    if (0 != wifi_softap_start(&ap_cfg))
+    {
+        LOG(LOG_LVL_ERROR, "[%s:%d] wifi_softap_start() failed!", __func__, __LINE__);
+        goto __exit;
+    }
+
+    /* save new mode into flash */
+    if (0 != sysparam_softap_ssidpwd_cfg_update(ap_cfg.ssid, ap_cfg.pwd))
+    {
+        goto __exit;
+    }
+
+    if (0 != sysparam_softap_ext_cfg_update(&ap_cfg.ext_cfg))
+    {
+        goto __exit;
+    }
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_set_ap_start(uint8_t para_num, const char *name)
+{
+    return _ln_at_cwsap_set_parse(LN_AT_CMD_TYPE_NONE, para_num, name);
+}
+
+static ln_at_err_t ln_at_set_ap_start_cur(uint8_t para_num, const char *name)
+{
+    return _ln_at_cwsap_set_parse(LN_AT_CMD_TYPE_CUR, para_num, name);
+}
+
+static ln_at_err_t ln_at_set_ap_start_def(uint8_t para_num, const char *name)
+{
+    return _ln_at_cwsap_set_parse(LN_AT_CMD_TYPE_DEF, para_num, name);
+}
+
+#if 0
+/**
+ * AT+CIPSTAMAC?
+ * AT+CIPSTAMAC=<mac>
+*/
+static ln_at_err_t _ln_at_get_cipstamac_parse(wifi_mode_t mode, const char *name)
+{
+    uint8_t bssid_hex[BSSID_LEN];
+
+    if (mode == WIFI_MODE_STATION)
+    {
+        if (0 != sysparam_sta_mac_get(bssid_hex))
+        {
+            goto __exit;
+        }
+    }
+    else if (mode == WIFI_MODE_AP)
+    {
+        if (0 != sysparam_softap_mac_get(bssid_hex))
+        {
+            goto __exit;
+        }
+    }
+    else
+    {
+        goto __exit;
+    }
+
+    ln_at_printf("%s:\"%02x:%02x:%02x:%02x:%02x:%02x\"\r\n", name,
+            bssid_hex[0], bssid_hex[1], bssid_hex[2], bssid_hex[3], bssid_hex[4], bssid_hex[5]);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_get_sta_mac(const char *name)
+{
+    return _ln_at_get_cipstamac_parse(WIFI_MODE_STATION, name);
+}
+
+static ln_at_err_t ln_at_get_sta_mac_cur(const char *name)
+{
+    return _ln_at_get_cipstamac_parse(WIFI_MODE_STATION, name);
+}
+
+static ln_at_err_t ln_at_get_sta_mac_def(const char *name)
+{
+    return _ln_at_get_cipstamac_parse(WIFI_MODE_STATION, name);
+}
+
+static ln_at_err_t _ln_at_set_mac_parse(wifi_mode_t mode, uint8_t para_num, const char *name)
+{
+    int ret = 0;
+    bool is_default = false;
+    uint8_t para_index = 1;
+
+    uint8_t bssid_hex[BSSID_LEN];
+    char *bssid_p = NULL;
+
+    if (para_num != 1)
+    {
+        goto __exit;
+    }
+
+    LN_AT_MEMSET(bssid_hex, 0X0, sizeof(bssid_hex));
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &bssid_p))
+    {
+        goto __exit;
+    }
+
+    if (is_default)
+    {
+        goto __exit;
+    }
+
+    ret = ln_at_cmd_args_get(bssid_p, "%x:%x:%x:%x:%x:%x",
+            &bssid_hex[0], &bssid_hex[1], &bssid_hex[2], &bssid_hex[3], &bssid_hex[4], &bssid_hex[5]);
+
+    LOG(LOG_LVL_ERROR, "ret:%d; mac addr:\"%02x:%02x:%02x:%02x:%02x:%02x\"\r\n", ret,
+            bssid_hex[0], bssid_hex[1], bssid_hex[2], bssid_hex[3], bssid_hex[4], bssid_hex[5]);
+
+    if (ret != 6)
+    {
+        goto __exit;
+    }
+
+    if (mode == WIFI_MODE_STATION)
+    {
+        if (0 != sysparam_sta_mac_update((const uint8_t *)bssid_hex))
+        {
+            goto __exit;
+        }
+    }
+    else if (mode == WIFI_MODE_AP)
+    {
+        if (0 != sysparam_softap_mac_update((const uint8_t *)bssid_hex))
+        {
+            goto __exit;
+        }
+    }
+    else
+    {
+        goto __exit;
+    }
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_set_sta_mac(uint8_t para_num, const char *name)
+{
+    return _ln_at_set_mac_parse(WIFI_MODE_STATION, para_num, name);
+}
+
+static ln_at_err_t ln_at_set_sta_mac_cur(uint8_t para_num, const char *name)
+{
+    return _ln_at_set_mac_parse(WIFI_MODE_STATION, para_num, name);
+}
+
+static ln_at_err_t ln_at_set_sta_mac_def(uint8_t para_num, const char *name)
+{
+    return _ln_at_set_mac_parse(WIFI_MODE_STATION, para_num, name);
+}
+
+/**
+ * CIPAPMAC
+*/
+static ln_at_err_t ln_at_get_ap_mac(const char *name)
+{
+    return _ln_at_get_cipstamac_parse(WIFI_MODE_AP, name);
+}
+
+static ln_at_err_t ln_at_get_ap_mac_cur(const char *name)
+{
+    return _ln_at_get_cipstamac_parse(WIFI_MODE_AP, name);
+}
+
+static ln_at_err_t ln_at_get_ap_mac_def(const char *name)
+{
+    return _ln_at_get_cipstamac_parse(WIFI_MODE_AP, name);
+}
+
+static ln_at_err_t ln_at_set_ap_mac(uint8_t para_num, const char *name)
+{
+    return _ln_at_set_mac_parse(WIFI_MODE_AP, para_num, name);
+}
+
+static ln_at_err_t ln_at_set_ap_mac_cur(uint8_t para_num, const char *name)
+{
+    return _ln_at_set_mac_parse(WIFI_MODE_AP, para_num, name);
+}
+
+static ln_at_err_t ln_at_set_ap_mac_def(uint8_t para_num, const char *name)
+{
+    return _ln_at_set_mac_parse(WIFI_MODE_AP, para_num, name);
+}
+
+/**
+ * exec:
+ *
+ * AT+CWLIF
+ * +CWLIF:<ip	addr>,<mac>
+ * OK
+*/
+static ln_at_err_t ln_at_exec_ap_query_sta_list(const char *name)
+{
+    /* TODO */
+
+    ln_at_printf("+CWLIF:TODO\r\n");
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+}
+
+/**
+ * AT+CWDHCP?
+ * +CWDHCP:3
+ * OK
+ *
+ * AT+CWDHCP=<mode>,<en>
+*/
+static ln_at_err_t _ln_at_get_dhcp_parse(const char *name)
+{
+    uint8_t dhcp_c_en = 0;
+    uint8_t dhcp_d_en = 0;
+    sysparam_dhcp_en_get(&dhcp_c_en);
+    sysparam_dhcpd_en_get(&dhcp_d_en);
+
+    ln_at_printf("%s:%d\r\n", name, (dhcp_c_en | dhcp_d_en << 1));
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+}
+
+static ln_at_err_t ln_at_get_dhcp(const char *name)
+{
+    return _ln_at_get_dhcp_parse(name);
+}
+
+static ln_at_err_t ln_at_get_dhcp_cur(const char *name)
+{
+    return _ln_at_get_dhcp_parse(name);
+}
+
+static ln_at_err_t ln_at_get_dhcp_def(const char *name)
+{
+    return _ln_at_get_dhcp_parse(name);
+}
+
+static ln_at_err_t _ln_at_set_dhcp_parse(uint8_t para_num, const char *name)
+{
+    bool is_default = false;
+    uint8_t para_index = 1;
+
+    int dhcp_mode = 0;
+    int dhcp_en = 0;
+
+    if (para_num != 2)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &dhcp_mode))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        dhcp_mode = 2;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &dhcp_en))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        dhcp_en = 1;
+    }
+
+    if (dhcp_en != 0 && dhcp_en != 1)
+    {
+        goto __exit;
+    }
+
+    if (dhcp_mode == 0)
+    {
+        sysparam_dhcpd_en_update(dhcp_en);
+    }
+    else if (dhcp_mode == 1)
+    {
+        sysparam_dhcp_en_update(dhcp_en);
+    }
+    else if (dhcp_mode == 2)
+    {
+        sysparam_dhcpd_en_update(dhcp_en);
+        sysparam_dhcp_en_update(dhcp_en);
+    }
+    else
+    {
+        goto __exit;
+    }
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_set_dhcp(uint8_t para_num, const char *name)
+{
+    return _ln_at_set_dhcp_parse(para_num, name);
+}
+
+static ln_at_err_t ln_at_set_dhcp_cur(uint8_t para_num, const char *name)
+{
+    return _ln_at_set_dhcp_parse(para_num, name);
+}
+
+static ln_at_err_t ln_at_set_dhcp_def(uint8_t para_num, const char *name)
+{
+    return _ln_at_set_dhcp_parse(para_num, name);
+}
+
+/**
+ * AT+CWDHCPS_CUR?
+ * +CWDHCPS_CUR=<lease time>,<start IP>,<end IP>
+ * OK
+ *
+ * AT+CWDHCPS_CUR=<enable>,<lease time>,<start IP>,<end IP>
+*/
+static ln_at_err_t _ln_at_get_dhcpd_cfg_parse(const char *name)
+{
+    int ret = 0;
+    uint8_t dhcp_d_en = 0;
+    wifi_mode_t mode;
+    server_config_t dhcpd_cfg;
+
+    char start_ip[16] = {0};
+    char end_ip[16] = {0};
+
+    mode = g_ln_at_ctrl_p->mode;
+    if (mode != WIFI_MODE_AP)
+    {
+        goto __exit;
+    }
+
+    ret = sysparam_dhcpd_en_get(&dhcp_d_en);
+    if (ret != 0 || dhcp_d_en == 0)
+    {
+        goto __exit;
+    }
+
+    ret = sysparam_dhcpd_cfg_get(&dhcpd_cfg);
+    if (ret != 0)
+    {
+        goto __exit;
+    }
+
+    if (inet_ntop(AF_INET, &dhcpd_cfg.ip_start, start_ip, sizeof(start_ip)) == NULL)
+    {
+        goto __exit;
+    }
+
+    if (inet_ntop(AF_INET, &dhcpd_cfg.ip_end, end_ip, sizeof(end_ip)) == NULL)
+    {
+        goto __exit;
+    }
+
+    ln_at_printf("%s:%d,\"%s\",\"%s\"\r\n", name, dhcpd_cfg.lease,
+            start_ip, end_ip);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_get_dhcp_cfg(const char *name)
+{
+    return _ln_at_get_dhcpd_cfg_parse(name);
+}
+
+static ln_at_err_t ln_at_get_dhcp_cfg_cur(const char *name)
+{
+    return _ln_at_get_dhcpd_cfg_parse(name);
+}
+
+static ln_at_err_t ln_at_get_dhcp_cfg_def(const char *name)
+{
+    return _ln_at_get_dhcpd_cfg_parse(name);
+}
+
+static ln_at_err_t _ln_at_set_dhcpd_cfg_parse(uint8_t para_num, const char *name)
+{
+    int ret = 0;
+    bool is_default = false;
+    uint8_t para_index = 1;
+    int dhcp_d_en = 0;
+
+    wifi_mode_t mode;
+    server_config_t dhcpd_cfg;
+
+    int lease_time = 0;
+    char *start_ip_p = NULL;
+    char *end_ip_p = NULL;
+
+    if (para_num < 1)
+    {
+        goto __exit;
+    }
+
+    mode = g_ln_at_ctrl_p->mode;
+    if (mode != WIFI_MODE_AP)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &dhcp_d_en))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        goto __exit;
+    }
+
+    if (para_num >= 2)
+    {
+        if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &lease_time))
+        {
+            goto __exit;
+        }
+        if (is_default)
+        {
+            goto __exit;
+        }
+    }
+
+    if (para_num >= 3)
+    {
+        if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &start_ip_p))
+        {
+            goto __exit;
+        }
+        if (is_default || !start_ip_p)
+        {
+            goto __exit;
+        }
+    }
+
+    if (para_num >= 4)
+    {
+        if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &end_ip_p))
+        {
+            goto __exit;
+        }
+        if (is_default || !end_ip_p)
+        {
+            goto __exit;
+        }
+    }
+
+    ret = sysparam_dhcpd_en_update(dhcp_d_en);
+    if (ret != 0)
+    {
+        goto __exit;
+    }
+
+    if (dhcp_d_en != 0)
+    {
+        ret = dhcpd_curr_config_get(&dhcpd_cfg);
+        if (ret != 0)
+        {
+            goto __exit;
+        }
+
+        dhcpd_cfg.lease = lease_time;
+        ret = inet_aton(start_ip_p, &dhcpd_cfg.ip_start.addr);
+        if (ret == 0)
+        {
+            goto __exit;
+        }
+
+        ret = inet_aton(end_ip_p, &dhcpd_cfg.ip_end.addr);
+        if (ret == 0)
+        {
+            goto __exit;
+        }
+
+        ret = sysparam_dhcpd_cfg_update(&dhcpd_cfg);
+        if (ret != 0)
+        {
+            goto __exit;
+        }
+    }
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_set_dhcp_cfg(uint8_t para_num, const char *name)
+{
+    return _ln_at_set_dhcpd_cfg_parse(para_num, name);
+}
+
+static ln_at_err_t ln_at_set_dhcp_cfg_cur(uint8_t para_num, const char *name)
+{
+    return _ln_at_set_dhcpd_cfg_parse(para_num, name);
+}
+
+static ln_at_err_t ln_at_set_dhcp_cfg_def(uint8_t para_num, const char *name)
+{
+    return _ln_at_set_dhcpd_cfg_parse(para_num, name);
+}
+
+/**
+ * set:
+ *
+ * AT+CWAUTOCONN=<enable>
+ *
+ * only work in sta mode.
+ * enable: 1-auto connect ap; 0-don't auto connect ap
+*/
+static ln_at_err_t ln_at_set_auto_conn(uint8_t para_num, const char *name)
+{
+    wifi_mode_t mode;
+    int enable = 0;
+    uint8_t origin = 0;
+
+    bool is_default = false;
+    uint8_t para_index = 1;
+
+    if (para_num != 1)
+    {
+        goto __exit;
+    }
+
+    mode = g_ln_at_ctrl_p->mode;
+    if (mode != WIFI_MODE_STATION)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &enable))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        goto __exit;
+    }
+
+    if (enable != 0 && enable != 1)
+    {
+        goto __exit;
+    }
+
+    if (0 != sysparam_poweron_auto_conn_get(&origin))
+    {
+        goto __exit;
+    }
+
+    if ((int)origin != enable)
+    {
+        sysparam_poweron_auto_conn_update((uint8_t)enable);
+    }
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+/**
+ * Set/Get ip:
+ *
+ * AT+CIPSTA
+*/
+#include "netif/ethernetif.h"
+static ln_at_err_t _ln_at_cipsta_get_parser(ln_at_cmd_type_e cmd_type, wifi_mode_t mode, const char *name)
+{
+    wifi_mode_t cur_mode;
+    wifi_sta_description_t sta;
+    tcpip_ip_info_t ip_info;
+    char ip[16] = {0};
+    char netmask[16] = {0};
+    char gw[16] = {0};
+
+    cur_mode = g_ln_at_ctrl_p->mode;
+    if (mode != cur_mode)
+    {
+        goto __exit;
+    }
+
+    if (mode == WIFI_MODE_STATION)
+    {
+        if (wifi_sta_description_get(&sta) != 0)
+        {
+            goto __exit;
+        }
+
+        /* Check that the STA is connected to the AP */
+        if (sta.is_connected != 1) /* sta is not connected */
+        {
+            goto __exit;
+        }
+    }
+    else if (mode == WIFI_MODE_AP)
+    {
+        /* code */
+    }
+    else
+    {
+        goto __exit;
+    }
+
+    if (cmd_type != LN_AT_CMD_TYPE_DEF)
+    {
+        if (0 != netdev_get_ip_info(netdev_get_active(), &ip_info))
+        {
+            goto __exit;
+        }
+    }
+    else
+    {
+        if (mode == WIFI_MODE_STATION)
+        {
+            if (0 != sysparam_sta_ip_info_get(&ip_info))
+            {
+                goto __exit;
+            }
+        }
+        else
+        {
+            if (0 != sysparam_softap_ip_info_get(&ip_info))
+            {
+                goto __exit;
+            }
+        }
+    }
+
+    if (inet_ntop(AF_INET, &ip_info.ip, ip, sizeof(ip)) == NULL)
+    {
+        goto __exit;
+    }
+
+    if (inet_ntop(AF_INET, &ip_info.netmask, netmask, sizeof(netmask)) == NULL)
+    {
+        goto __exit;
+    }
+
+    if (inet_ntop(AF_INET, &ip_info.gw, gw, sizeof(gw)) == NULL)
+    {
+        goto __exit;
+    }
+
+    ln_at_printf("%s:ip:\"%s\"\r\n", name, ip);
+    ln_at_printf("%s:gateway:\"%s\"\r\n", name, gw);
+    ln_at_printf("%s:netmask:\"%s\"\r\n", name, netmask);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_get_cipsta(const char *name)
+{
+    /* LN_AT_CMD_TYPE_NONE */
+    return _ln_at_cipsta_get_parser(LN_AT_CMD_TYPE_NONE, WIFI_MODE_STATION, name);
+}
+
+static ln_at_err_t ln_at_get_cipsta_cur(const char *name)
+{
+    return _ln_at_cipsta_get_parser(LN_AT_CMD_TYPE_CUR, WIFI_MODE_STATION, name);
+}
+
+static ln_at_err_t ln_at_get_cipsta_def(const char *name)
+{
+    return _ln_at_cipsta_get_parser(LN_AT_CMD_TYPE_DEF, WIFI_MODE_STATION, name);
+}
+
+static ln_at_err_t _ln_at_cipsta_set_parser(ln_at_cmd_type_e cmd_type, wifi_mode_t mode, uint8_t para_num, const char *name)
+{
+    bool is_default = false;
+    uint8_t para_index = 1;
+
+    tcpip_ip_info_t ip_info;
+    wifi_mode_t cur_mode;
+    uint8_t dhcp_c_en = 0;
+
+    char *ip_p = NULL;
+    char *gw_p = NULL;
+    char *netmask_p = NULL;
+
+    if (para_num < 1)
+    {
+        goto __exit;
+    }
+
+    cur_mode = g_ln_at_ctrl_p->mode;
+    if (mode != cur_mode)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &ip_p))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        goto __exit;
+    }
+
+    if (para_num >= 2)
+    {
+        if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &gw_p))
+        {
+            goto __exit;
+        }
+        if (is_default)
+        {
+            goto __exit;
+        }
+    }
+
+    if (para_num >= 3)
+    {
+        if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &netmask_p))
+        {
+            goto __exit;
+        }
+        if (is_default)
+        {
+            goto __exit;
+        }
+    }
+
+    if (mode == WIFI_MODE_STATION)
+    {
+        /* disable dhcp client */
+        sysparam_dhcp_en_get(&dhcp_c_en);
+        if (dhcp_c_en)
+        {
+            dhcp_c_en = 0;
+            // sysparam_dhcp_en_update(dhcp_c_en); /* TODO */
+        }
+    }
+    else if (mode == WIFI_MODE_AP)
+    {
+        /* disable dhcp server */
+        sysparam_dhcpd_en_get(&dhcp_c_en);
+        if (dhcp_c_en)
+        {
+            dhcp_c_en = 0;
+            // sysparam_dhcpd_en_update(dhcp_c_en); /* TODO */
+        }
+    }
+    else
+    {
+        goto __exit;
+    }
+
+    if (cmd_type != LN_AT_CMD_TYPE_DEF)
+    {
+        if (0 != netdev_get_ip_info(netdev_get_active(), &ip_info))
+        {
+            goto __exit;
+        }
+    }
+    else
+    {
+        if (mode == WIFI_MODE_STATION)
+        {
+            if (0 != sysparam_sta_ip_info_get(&ip_info))
+            {
+                goto __exit;
+            }
+        }
+        else
+        {
+            if (0 != sysparam_softap_ip_info_get(&ip_info))
+            {
+                goto __exit;
+            }
+        }
+    }
+
+    if (0 == inet_pton(AF_INET, ip_p, &ip_info.ip))
+    {
+        goto __exit;
+    }
+
+    if (para_num >= 2)
+    {
+        if (0 == inet_pton(AF_INET, gw_p, &ip_info.gw))
+        {
+            goto __exit;
+        }
+
+    }
+
+    if (para_num >= 3)
+    {
+        if (0 == inet_pton(AF_INET, netmask_p, &ip_info.netmask))
+        {
+            goto __exit;
+        }
+    }
+
+    /* set static ip addr, and save into flash */
+    if (0 != netdev_set_ip_info(netdev_get_active(), &ip_info))
+    {
+        goto __exit;
+    }
+
+    if (cmd_type == LN_AT_CMD_TYPE_DEF)
+    {
+        if (mode == WIFI_MODE_STATION)
+        {
+            if (0 != sysparam_sta_ip_info_update(&ip_info))
+            {
+                goto __exit;
+            }
+        }
+        else
+        {
+            if (0 != sysparam_softap_ip_info_update(&ip_info))
+            {
+                goto __exit;
+            }
+        }
+    }
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_set_cipsta(uint8_t para_num, const char *name)
+{
+    return _ln_at_cipsta_set_parser(LN_AT_CMD_TYPE_NONE, WIFI_MODE_STATION, para_num, name);
+}
+
+static ln_at_err_t ln_at_set_cipsta_cur(uint8_t para_num, const char *name)
+{
+    return _ln_at_cipsta_set_parser(LN_AT_CMD_TYPE_CUR, WIFI_MODE_STATION, para_num, name);
+}
+
+static ln_at_err_t ln_at_set_cipsta_def(uint8_t para_num, const char *name)
+{
+    return _ln_at_cipsta_set_parser(LN_AT_CMD_TYPE_DEF, WIFI_MODE_STATION, para_num, name);
+}
+
+/**
+ * Set/Get ip:
+ *
+ * AT+CIPAP
+*/
+static ln_at_err_t ln_at_get_cipap(const char *name)
+{
+    return _ln_at_cipsta_get_parser(LN_AT_CMD_TYPE_NONE, WIFI_MODE_AP, name);
+}
+
+static ln_at_err_t ln_at_get_cipap_cur(const char *name)
+{
+    return _ln_at_cipsta_get_parser(LN_AT_CMD_TYPE_CUR, WIFI_MODE_AP, name);
+}
+
+static ln_at_err_t ln_at_get_cipap_def(const char *name)
+{
+    return _ln_at_cipsta_get_parser(LN_AT_CMD_TYPE_DEF, WIFI_MODE_AP, name);
+}
+
+static ln_at_err_t ln_at_set_cipap(uint8_t para_num, const char *name)
+{
+    return _ln_at_cipsta_set_parser(LN_AT_CMD_TYPE_NONE, WIFI_MODE_AP, para_num, name);
+}
+
+static ln_at_err_t ln_at_set_cipap_cur(uint8_t para_num, const char *name)
+{
+    return _ln_at_cipsta_set_parser(LN_AT_CMD_TYPE_CUR, WIFI_MODE_AP, para_num, name);
+}
+
+static ln_at_err_t ln_at_set_cipap_def(uint8_t para_num, const char *name)
+{
+    return _ln_at_cipsta_set_parser(LN_AT_CMD_TYPE_DEF, WIFI_MODE_AP, para_num, name);
+}
+
+/**
+ * set/exec
+ *
+ * AT+CWSTARTSMART
+ * AT+CWSTARTSMART=<type>
+ *
+ * type: 1-ESP-TOUCH; 2-Airkiss; 3-ESP-TOUCH + Airkiss
+*/
+static ln_at_err_t ln_at_set_start_smartconfig(uint8_t para_num, const char *name)
+{
+    bool is_default = false;
+    uint8_t para_index = 1;
+
+    int type;
+    wifi_mode_t mode = WIFI_MODE_STATION;
+
+    if (para_num != 1)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &type))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        goto __exit;
+    }
+
+    if (!(type <= 3 && type >= 1))
+    {
+        goto __exit;
+    }
+
+    mode = g_ln_at_ctrl_p->mode;
+
+    ln_at_printf("\r\nTODO!!!\r\n");
+
+    ln_at_printf("smartconfig type: <type>\r\n");
+    ln_at_printf("smart get wifi info\r\n");
+    ln_at_printf("ssid:<AP's SSID>\r\n");
+    ln_at_printf("password:<AP's password>\r\n");
+
+    ln_at_printf("WIFI CONNECTED\r\n");
+    ln_at_printf("WIFI GOT IP\r\n");
+    ln_at_printf("smartconfig connected wifi\r\n");
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_exec_start_smartconfig(const char *name)
+{
+    ln_at_printf("\r\n%s:TODO!!!\r\n", name);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+//__exit:
+//    ln_at_printf(LN_AT_RET_ERR_STR);
+//    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_exec_stop_smartconfig(const char *name)
+{
+    ln_at_printf("\r\n%s:TODO!!!\r\n", name);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+//__exit:
+//    ln_at_printf(LN_AT_RET_ERR_STR);
+//    return LN_AT_ERR_COMMON;
+}
+
+/**
+ * AT+CWSTARTDISCOVER=<WeChat number>,<dev_type>,<time>
+*/
+static ln_at_err_t ln_at_set_start_wechat_discovery(uint8_t para_num, const char *name)
+{
+    bool is_default = false;
+    uint8_t para_index = 1;
+    char *wechat_number_p = NULL;
+    char *wechat_dev_type_p = NULL;
+
+    /**
+     * time:
+     *
+     * Time interval for active send pkt,
+     * Used for LAN devices found by WeChat
+    */
+    int time = 0;
+
+    if (para_num != 3)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &wechat_number_p))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &wechat_dev_type_p))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &time))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        goto __exit;
+    }
+
+    ln_at_printf("\r\nwechat number:%s, dev type:%s, time:%d\r\n",
+            wechat_number_p, wechat_dev_type_p, time);
+
+    ln_at_printf("\r\n:%s:TODO!!!\r\n", name);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_exec_stop_wechat_discovery(const char *name)
+{
+    ln_at_printf("\r\n%s:TODO!!!\r\n", name);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+//__exit:
+//    ln_at_printf(LN_AT_RET_ERR_STR);
+//    return LN_AT_ERR_COMMON;
+}
+
+/**
+ * AT+WPS
+ *
+ * Not support!
+*/
+static ln_at_err_t ln_at_set_wps_cfg(uint8_t para_num, const char *name)
+{
+    bool is_default = false;
+    uint8_t para_index = 1;
+    int wps_en = 0;
+    wifi_mode_t mode = g_ln_at_ctrl_p->mode;
+    if (mode != WIFI_MODE_STATION)
+    {
+        goto __exit;
+    }
+
+    if (para_num != 1)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &wps_en))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        goto __exit;
+    }
+
+    if (wps_en != 1 && wps_en != 0)
+    {
+        goto __exit;
+    }
+    ln_at_printf("\r\n%s:TODO!!!\r\n", name);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+/**
+ * AT+MDNS=<enable>[,<hostname>,<server_name>,<server_port>]
+ *
+ * Not support!
+*/
+static ln_at_err_t ln_at_set_mdns_cfg(uint8_t para_num, const char *name)
+{
+    wifi_mode_t mode = g_ln_at_ctrl_p->mode;
+    if (mode != WIFI_MODE_STATION)
+    {
+        goto __exit;
+    }
+
+    if (para_num < 1)
+    {
+        goto __exit;
+    }
+
+    ln_at_printf("\r\n%s:TODO!!!\r\n", name);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+/**
+ * Get/Set
+ * AT+CWHOSTNAME?
+ * AT+CWHOSTNAME=<hostname>
+*/
+#define LN_AT_HOST_NAME_LEN (33u)
+static ln_at_err_t ln_at_set_hostname_cfg(uint8_t para_num, const char *name)
+{
+    bool is_default = false;
+    uint8_t para_index = 1;
+    char *host_nam_p = NULL;
+    wifi_mode_t mode = g_ln_at_ctrl_p->mode;
+
+    if (para_num != 1)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &host_nam_p))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        goto __exit;
+    }
+
+    if (mode == WIFI_MODE_STATION)
+    {
+        if (0 != sysparam_sta_hostname_update(host_nam_p))
+        {
+            goto __exit;
+        }
+    }
+    else if (mode == WIFI_MODE_AP)
+    {
+        if (0 != sysparam_softap_hostname_update(host_nam_p))
+        {
+            goto __exit;
+        }
+    }
+    else
+    {
+        goto __exit;
+    }
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_get_hostname(const char *name)
+{
+    char host_name[LN_AT_HOST_NAME_LEN];
+
+    if (sysparam_sta_hostname_get(host_name) != 0)
+    {
+        goto __exit;
+    }
+
+    ln_at_printf("%s:%s", name, host_name);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+/**
+ * Get/Set
+ * AT+CWCOUNTRY_CUR
+ * AT+CWCOUNTRY_DEF
+*/
+#define LN_AT_DEFAULT_COUNTRY_POLICY (1u)
+static ln_at_err_t _ln_at_set_country_cfg_parse(ln_at_cmd_type_e type, uint8_t para_num, const char *name)
+{
+    bool is_default = false;
+    uint8_t para_index = 1;
+    wifi_country_code_t country;
+
+    int policy;
+    int start_channel;
+    int channel_num;
+
+    char *country_code_p = NULL;
+
+    if (para_num != 4)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &policy))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_str_param(para_index++, &is_default, &country_code_p))
+    {
+        goto __exit;
+    }
+    if (is_default || !country_code_p)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &start_channel))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        goto __exit;
+    }
+
+    if(LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(para_index++, &is_default, &channel_num))
+    {
+        goto __exit;
+    }
+    if (is_default)
+    {
+        goto __exit;
+    }
+
+    LOG(LOG_LVL_ERROR, "policy:%d, country code:%s, start channel:%d, total channel:%d\r\n",
+            policy, country_code_p, start_channel, channel_num);
+
+    if (0 == strncmp(country_code_p, "CN", 2))
+    {
+        country = CTRY_CODE_CN;
+    }
+    else if (0 == strncmp(country_code_p, "US", 2))
+    {
+        country = CTRY_CODE_US;
+    }
+    else if (0 == strncmp(country_code_p, "JP", 2))
+    {
+        country = CTRY_CODE_JP;
+    }
+    else if (0 == strncmp(country_code_p, "IL", 2)) /* Israel */
+    {
+        country = CTRY_CODE_ISR;
+    }
+    else
+    {
+        country = CTRY_CODE_CN;
+    }
+
+    LOG(LOG_LVL_ERROR, "country:%d\r\n", country);
+
+    if (type == LN_AT_CMD_TYPE_CUR)
+    {
+        wifi_set_country_code(country);
+    }
+    else if (type == LN_AT_CMD_TYPE_DEF)
+    {
+        sysparam_country_code_update(country);
+    }
+    else
+    {
+        goto __exit;
+    }
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_set_country_cfg_cur(uint8_t para_num, const char *name)
+{
+    return _ln_at_set_country_cfg_parse(LN_AT_CMD_TYPE_CUR, para_num, name);
+}
+
+static ln_at_err_t ln_at_set_country_cfg_def(uint8_t para_num, const char *name)
+{
+    return _ln_at_set_country_cfg_parse(LN_AT_CMD_TYPE_DEF, para_num, name);
+}
+
+/**
+ * +CWCOUNTRY_CUR:<country_policy>,<country_code>,<start_channel>,<total_channel_number>
+*/
+static ln_at_err_t _ln_at_get_country_cfg_parse(ln_at_cmd_type_e type, const char *name)
+{
+    wifi_country_code_t country;
+    const char *country_code;
+
+    if (type == LN_AT_CMD_TYPE_CUR)
+    {
+        if (0 != wifi_get_country_code(&country))
+        {
+            goto __exit;
+        }
+    }
+    else if (type == LN_AT_CMD_TYPE_DEF)
+    {
+        if (0 != sysparam_country_code_get(&country))
+        {
+            goto __exit;
+        }
+    }
+    LOG(LOG_LVL_ERROR, "country:%d\r\n", country);
+
+    if (country == CTRY_CODE_CN)
+    {
+        country_code = "CN";
+    }
+    else if (country == CTRY_CODE_US)
+    {
+        country_code = "US";
+    }
+    else if (country == CTRY_CODE_JP)
+    {
+        country_code = "JP";
+    }
+    else if (country == CTRY_CODE_ISR)
+    {
+        country_code = "IL";
+    }
+    else
+    {
+        country_code = "CN";
+    }
+
+    ln_at_printf("%s:%d,%s,1,13\r\n", name, LN_AT_DEFAULT_COUNTRY_POLICY, country_code);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+static ln_at_err_t ln_at_get_country_cfg_cur(const char *name)
+{
+    return _ln_at_get_country_cfg_parse(LN_AT_CMD_TYPE_CUR, name);
+}
+
+static ln_at_err_t ln_at_get_country_cfg_def(const char *name)
+{
+    return _ln_at_get_country_cfg_parse(LN_AT_CMD_TYPE_DEF, name);
+}
+#endif /* 0 */
+
+
+/**
+ * name, get, set, test, exec
+*/
+LN_AT_CMD_REG(CWMODE,     ln_at_get_wifi_mode,         ln_at_set_wifi_mode,         ln_at_help_wifi_mode,         NULL);
+LN_AT_CMD_REG(CWMODE_CUR, ln_at_get_wifi_mode_current, ln_at_set_wifi_mode_current, ln_at_help_wifi_mode_current, NULL);
+LN_AT_CMD_REG(CWMODE_DEF, ln_at_get_wifi_mode_def,     ln_at_set_wifi_mode_def,     ln_at_help_wifi_mode_def,     NULL);
+
+
+LN_AT_CMD_REG(CWJAP,     ln_at_get_wifi_join_ap,         ln_at_set_wifi_join_ap,         ln_at_help_wifi_join_ap,         NULL);
+LN_AT_CMD_REG(CWJAP_CUR, ln_at_get_wifi_join_ap_current, ln_at_set_wifi_join_ap_current, ln_at_help_wifi_join_ap_current, NULL);
+LN_AT_CMD_REG(CWJAP_DEF, ln_at_get_wifi_join_ap_def,     ln_at_set_wifi_join_ap_def,     ln_at_help_wifi_join_ap_def,     NULL);
+
+LN_AT_CMD_REG(CWQAP,     NULL, NULL, NULL, ln_at_exec_sta_disconn_ap);
+
+LN_AT_CMD_REG(CWLAP, NULL, NULL, NULL, ln_at_exec_scan);
+
+LN_AT_CMD_REG(CWSAP,     ln_at_get_ap_start,     ln_at_set_ap_start,     NULL, NULL);
+LN_AT_CMD_REG(CWSAP_CUR, ln_at_get_ap_start_cur, ln_at_set_ap_start_cur, NULL, NULL);
+LN_AT_CMD_REG(CWSAP_DEF, ln_at_get_ap_start_def, ln_at_set_ap_start_def, NULL, NULL);
+
+LN_AT_CMD_REG(PVTCMD, NULL, ln_at_set_pvtcmd, NULL, NULL);
+
+#if 0
+LN_AT_CMD_REG(CIPSTAMAC,     ln_at_get_sta_mac,     ln_at_set_sta_mac,     NULL, NULL);
+LN_AT_CMD_REG(CIPSTAMAC_CUR, ln_at_get_sta_mac_cur, ln_at_set_sta_mac_cur, NULL, NULL);
+LN_AT_CMD_REG(CIPSTAMAC_DEF, ln_at_get_sta_mac_def, ln_at_set_sta_mac_def, NULL, NULL);
+
+LN_AT_CMD_REG(CIPAPMAC,     ln_at_get_ap_mac,     ln_at_set_ap_mac,     NULL, NULL);
+LN_AT_CMD_REG(CIPAPMAC_CUR, ln_at_get_ap_mac_cur, ln_at_set_ap_mac_cur, NULL, NULL);
+LN_AT_CMD_REG(CIPAPMAC_DEF, ln_at_get_ap_mac_def, ln_at_set_ap_mac_def, NULL, NULL);
+
+LN_AT_CMD_REG(CWLIF, NULL, NULL, NULL, ln_at_exec_ap_query_sta_list);
+
+// LN_AT_CMD_ITEM_DEF("CWDHCP",     ln_at_get_dhcp,     ln_at_set_dhcp,     NULL, NULL)
+// LN_AT_CMD_ITEM_DEF("CWDHCP_CUR", ln_at_get_dhcp_cur, ln_at_set_dhcp_cur, NULL, NULL)
+// LN_AT_CMD_ITEM_DEF("CWDHCP_DEF", ln_at_get_dhcp_def, ln_at_set_dhcp_def, NULL, NULL)
+
+// LN_AT_CMD_ITEM_DEF("CWDHCPS",     ln_at_get_dhcp_cfg,     ln_at_set_dhcp_cfg,     NULL, NULL)
+// LN_AT_CMD_ITEM_DEF("CWDHCPS_CUR", ln_at_get_dhcp_cfg_cur, ln_at_set_dhcp_cfg_cur, NULL, NULL)
+// LN_AT_CMD_ITEM_DEF("CWDHCPS_DEF", ln_at_get_dhcp_cfg_def, ln_at_set_dhcp_cfg_def, NULL, NULL)
+
+LN_AT_CMD_REG(CWAUTOCONN,  NULL, ln_at_set_auto_conn, NULL, NULL);
+
+/**
+ * Set/Get ip:
+ *
+ * AT+CIPSTA
+*/
+// LN_AT_CMD_ITEM_DEF("CIPSTA",     ln_at_get_cipsta,     ln_at_set_cipsta,     NULL, NULL)
+// LN_AT_CMD_ITEM_DEF("CIPSTA_CUR", ln_at_get_cipsta_cur, ln_at_set_cipsta_cur, NULL, NULL)
+// LN_AT_CMD_ITEM_DEF("CIPSTA_DEF", ln_at_get_cipsta_def, ln_at_set_cipsta_def, NULL, NULL)
+
+/**
+ * Set/Get ip:
+ *
+ * AT+CIPSTA
+*/
+// LN_AT_CMD_ITEM_DEF("CIPAP",     ln_at_get_cipap,     ln_at_set_cipap,     NULL, NULL)
+// LN_AT_CMD_ITEM_DEF("CIPAP_CUR", ln_at_get_cipap_cur, ln_at_set_cipap_cur, NULL, NULL)
+// LN_AT_CMD_ITEM_DEF("CIPAP_DEF", ln_at_get_cipap_def, ln_at_set_cipap_def, NULL, NULL)
+
+/**
+ * Set/Exec
+ *
+ * AT+CWSTARTSMART
+ * AT+CWSTARTSMART=<type>
+ *
+ * type: 1-ESP-TOUCH; 2-Airkiss; 3-ESP-TOUCH + Airkiss
+*/
+// LN_AT_CMD_ITEM_DEF("CWSTARTSMART", NULL, ln_at_set_start_smartconfig, NULL, ln_at_exec_start_smartconfig)
+// LN_AT_CMD_ITEM_DEF("CWSTOPSMART", NULL, NULL, NULL, ln_at_exec_stop_smartconfig)
+
+/**
+ * AT+CWSTARTDISCOVER=<WeChat number>,<dev_type>,<time>
+ * AT+CWSTOPDISCOVER
+*/
+// LN_AT_CMD_ITEM_DEF("CWSTARTDISCOVER", NULL, ln_at_set_start_wechat_discovery, NULL, NULL)
+// LN_AT_CMD_ITEM_DEF("CWSTOPDISCOVER", NULL, NULL, NULL, ln_at_exec_stop_wechat_discovery)
+
+// LN_AT_CMD_ITEM_DEF("WPS",  NULL, ln_at_set_wps_cfg,  NULL, NULL)
+// LN_AT_CMD_ITEM_DEF("MDNS", NULL, ln_at_set_mdns_cfg, NULL, NULL)
+// LN_AT_CMD_ITEM_DEF("CWHOSTNAME", ln_at_get_hostname, ln_at_set_hostname_cfg, NULL, NULL)
+
+// LN_AT_CMD_ITEM_DEF("CWCOUNTRY_CUR", ln_at_get_country_cfg_cur, ln_at_set_country_cfg_cur, NULL, NULL)
+// LN_AT_CMD_ITEM_DEF("CWCOUNTRY_DEF", ln_at_get_country_cfg_def, ln_at_set_country_cfg_def, NULL, NULL)
+#endif /* 0 */

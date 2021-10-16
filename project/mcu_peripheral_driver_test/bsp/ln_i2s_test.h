@@ -9,6 +9,9 @@
  * 
  */
  
+#ifndef LN_I2S_TEST_H
+#define LN_I2S_TEST_H
+
 void ln_i2s_test(void);
 
-
+#endif

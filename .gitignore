@@ -20,7 +20,7 @@ SI/
 
 Objects/
 Listings/
-
+build-*/
 
 *.asm
 *.bin

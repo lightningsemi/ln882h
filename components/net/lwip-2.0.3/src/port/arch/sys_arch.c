@@ -479,16 +479,22 @@ u32_t sys_now(void)
 __attribute__((weak)) void mem_init(void)
 {
 }
-
+#include "ln_utils.h"
 void * mem_calloc(mem_size_t count, mem_size_t size)
 {
     /* not support calloc yet */
+    LN_UNUSED(count);
+    LN_UNUSED(size);
+
     return NULL;
 }
 
 void * mem_trim(void *mem, mem_size_t size)
 {
     /* not support trim yet */
+    LN_UNUSED(mem);
+    LN_UNUSED(size);
+
     return mem;
 }
 

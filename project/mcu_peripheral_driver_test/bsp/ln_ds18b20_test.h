@@ -8,6 +8,10 @@
  * @copyright Copyright (c) 2021 Shanghai Lightning Semiconductor Technology Co. Ltd
  * 
  */
+
+#ifndef LN_DS18B20_TEST_H
+#define LN_DS18B20_TEST_H
+
 #include "hal/hal_common.h"
 #include "hal/hal_gpio.h"
 
@@ -86,3 +90,6 @@ extern ds18b20_data_str    ds18b20_data[1];
 void ln_ds18b20_test(void);
 
 
+
+
+#endif

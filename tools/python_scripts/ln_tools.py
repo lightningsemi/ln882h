@@ -10,6 +10,7 @@
 import os
 import sys
 
+
 def realpath(path):
     return os.path.normcase(os.path.realpath(path))
 
@@ -54,11 +55,13 @@ def dump_bytes_in_hex(byte_arr=None, lineSize=16, bytesMax=256, title=""):
         if cnt % lineSize == (lineSize-1):
             print("")
 
+
 def check_python_version():
     major = sys.version_info.major
     minor = sys.version_info.minor
-    if (major == 3) and (minor > 6):
+    if (major == 3) and (minor >= 6):
         return True
     else:
-        print('WARNING: Python 3 versions older than 3.6 are not supported.', file=sys.stderr)
+        print('WARNING: Python 2 or Python 3 versions older than 3.6 are not supported.', file=sys.stderr)
         exit(-100)
+    return False

@@ -37,7 +37,7 @@
 
 #include "hal_aes.h"
 #include "ln_test_common.h"
-#include "log.h"
+#include "utils/debug/log.h"
 
 
 // 输入明文

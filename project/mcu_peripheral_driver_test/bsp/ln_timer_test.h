@@ -9,8 +9,11 @@
  * 
  */
 
-
+#ifndef LN_TIMER_TEST_H
+#define LN_TIMER_TEST_H
  
  
- void ln_timer_test(void);
+void ln_timer_test(void);
 
+
+#endif

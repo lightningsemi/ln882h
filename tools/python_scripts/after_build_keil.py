@@ -11,46 +11,37 @@ import os
 import argparse
 import subprocess
 from ln_tools import check_python_version
-from makeimage import MakeImageTool
-from ota_image_generator import OTATOOL
 import xml.etree.ElementTree as ET
+from after_build_base import AfterBuildBase
 
 
-class AfterBuild:
-    __FLASH_IMAGE_VER_MAJOR_STR = "FLASH_IMAGE_VER_MAJOR"
-    __FLASH_IMAGE_VER_MINOR_STR = "FLASH_IMAGE_VER_MINOR"
-    __SOC_CRP_FLAG_STR          = "SOC_CRP_FLAG"
-
+class AfterBuildKeil(AfterBuildBase):
     def __init__(self) -> None:
-        self.keil_proj_path     = None # abcd.uvprojx filepath
-        self.cur_working_dir    = None
-        self.keil_output_dir    = None # abs dire, in which abcd.axf resides
-        self.keil_output_name   = None # no suffix
+        super().__init__()
 
-        # MakeImageTool parameters
-        self.ramcode_filepath   = None
-        self.app_filepath       = None
-        self.output_filepath    = None # default is 'flashimage.bin'
-        self.partcfg_filepath   = None
-        self.ver_str            = None
-        self.crp_flag           = 0
+    def prepare(self, *args) -> bool:
+        if len(args) == 0:
+            print("keil_proj_filepath MUST be provided!!!")
+            return False
 
-    def prepare(self, keil_proj_filepath, output_filename=None) -> bool:
+        keil_proj_filepath = args[0]
+        output_filename = None
+        if len(args) > 1:
+            output_filename = args[1]
+
         if not os.path.exists(keil_proj_filepath):
             print("\nError: not exist: {}".format(keil_proj_filepath))
             return False
 
-        self.keil_proj_path     = keil_proj_filepath
-        self.cur_working_dir    = os.path.dirname(os.path.abspath(keil_proj_filepath))
-
+        keil_proj_dir    = os.path.dirname(os.path.abspath(keil_proj_filepath))
         chip_type = None
-        tree = ET.ElementTree(file=self.keil_proj_path)
+        tree = ET.ElementTree(file=keil_proj_filepath)
         root_node = tree.getroot()
         for ele in root_node.iter():
             if "OutputDirectory" == ele.tag:
-                self.keil_output_dir = os.path.abspath(os.path.join(self.cur_working_dir, ele.text))
+                self.buildout_dir = os.path.abspath(os.path.join(keil_proj_dir, ele.text))
             if "OutputName" == ele.tag:
-                self.keil_output_name = ele.text
+                self.buildout_name = ele.text
             if "VariousControls" == ele.tag:
                 define_ele = ele.find("Define")
                 if define_ele.text:
@@ -63,16 +54,16 @@ class AfterBuild:
             print("Error: chip type macro (such as LN882H) has not been found!!!")
             return False
 
-        self.ramcode_filepath = os.path.abspath(os.path.join(self.cur_working_dir, "../../../lib/boot_{}.bin".format(chip_type)))
-        self.app_filepath = os.path.join(self.cur_working_dir, self.keil_output_name + ".bin")
+        self.boot_filepath = os.path.abspath(os.path.join(keil_proj_dir, "../../../lib/boot_{}.bin".format(chip_type)))
+        self.app_filepath = os.path.join(keil_proj_dir, self.buildout_name + ".bin")
 
         if (output_filename is None) or len(output_filename) == 0:
             output_filename = "flashimage.bin"
-        self.output_filepath = os.path.join(self.cur_working_dir, output_filename)
+        self.output_filepath = os.path.join(keil_proj_dir, output_filename)
 
-        self.partcfg_filepath = os.path.abspath(os.path.join(self.cur_working_dir, "../cfg/flash_partition_cfg.json"))
+        self.partcfg_filepath = os.path.abspath(os.path.join(keil_proj_dir, "../cfg/flash_partition_cfg.json"))
 
-        projcfg_filepath = os.path.abspath(os.path.join(self.cur_working_dir, "../cfg/proj_config.h"))
+        projcfg_filepath = os.path.abspath(os.path.join(keil_proj_dir, "../cfg/proj_config.h"))
         major = None
         minor = None
         crp   = None
@@ -81,13 +72,13 @@ class AfterBuild:
                 for line in fObj:
                     if not line.strip(" ").startswith("#define"):
                         continue
-                    if line.find(AfterBuild.__FLASH_IMAGE_VER_MAJOR_STR) > 0:
+                    if line.find(AfterBuildKeil.FLASH_IMAGE_VER_MAJOR_STR) > 0:
                         strlist = line.strip(" ").split(" ")
                         major = int(strlist[-1])
-                    if line.find(AfterBuild.__FLASH_IMAGE_VER_MINOR_STR) > 0:
+                    if line.find(AfterBuildKeil.FLASH_IMAGE_VER_MINOR_STR) > 0:
                         strlist = line.strip(" ").split(" ")
                         minor = int(strlist[-1])
-                    if line.find(AfterBuild.__SOC_CRP_FLAG_STR) > 0:
+                    if line.find(AfterBuildKeil.SOC_CRP_FLAG_STR) > 0:
                         strlist = line.strip(" ").split(" ")
                         crp = int(strlist[-1])
         except OSError as err:
@@ -103,7 +94,7 @@ class AfterBuild:
         if isinstance(crp, int):
             self.crp_flag = crp
 
-        if not (self.keil_output_dir and self.keil_output_name and self.ramcode_filepath and self.app_filepath \
+        if not (self.buildout_dir and self.buildout_name and self.boot_filepath and self.app_filepath \
                 and self.output_filepath and self.partcfg_filepath and self.ver_str):
             return False
 
@@ -113,7 +104,7 @@ class AfterBuild:
         """
         app.axf -> app.bin
         """
-        axf_filepath = os.path.join(self.keil_output_dir, self.keil_output_name + ".axf")
+        axf_filepath = os.path.join(self.buildout_dir, self.buildout_name + ".axf")
         app_filepath = self.app_filepath
         cmd = " ".join(["fromelf", "--bin", "--output=" + app_filepath, axf_filepath])
         try:
@@ -132,37 +123,13 @@ class AfterBuild:
         """
         flashimage.bin
         """
-        mkimage = MakeImageTool()
-        mkimage.ramcode_filepath = self.ramcode_filepath
-        mkimage.app_filepath = self.app_filepath
-        mkimage.flashimage_filepath = self.output_filepath
-        mkimage.part_cfg_filepath = self.partcfg_filepath
-        mkimage.ver_str = self.ver_str
-        mkimage.swd_crp = self.crp_flag
-        if not mkimage.doAllWork():
-            print("Failed to build: {}".format(self.output_filepath))
-            return False
-        print("Succeed to build: {}".format(self.output_filepath))
-        return True
+        return super().build_stage_second()
 
     def build_stage_third(self) -> bool:
         """
         OTA image
         """
-
-        flashimage_filepath = self.output_filepath
-        ota_save_dir = os.path.dirname(flashimage_filepath)
-
-        ota_tool = OTATOOL()
-        ota_tool.input_filepath = flashimage_filepath
-        ota_tool.output_dir     = ota_save_dir
-
-        if not ota_tool.doAllWork():
-            print("Failed to build {}".format(ota_tool.output_filepath))
-            return False
-
-        print("Succeed to build: {}".format(ota_tool.output_filepath))
-        return True
+        return super().build_stage_third()
 
     def doAllWork(self) -> bool:
         if not self.build_stage_first():
@@ -189,7 +156,7 @@ if __name__ == "__main__":
         print("Error: no filepath of *.uvprojx is provided!!!")
         exit(-1)
 
-    buildObj = AfterBuild()
+    buildObj = AfterBuildKeil()
 
     if not buildObj.prepare(args.keilproj, args.output):
         exit(-2)

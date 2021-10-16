@@ -271,8 +271,8 @@ static void wifi_callback_init(void)
 
 int wifi_manager_init(void)
 {
-    wifi_callback_init();
     ap_info_list_init();
+    wifi_callback_init();
     return LN_TRUE;
 }
 

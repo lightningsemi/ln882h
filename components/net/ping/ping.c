@@ -10,9 +10,7 @@
 #include "lwip/netif.h"
 #include "lwip/inet_chksum.h"
 #include "netif/ethernetif.h"
-
 #include "utils/debug/log.h"
-#include "utils/debug/art_assert.h"
 
 #if PING_USE_SOCKETS
 #include "lwip/sockets.h"
@@ -164,8 +162,8 @@ static OS_Thread_t g_ping_thread;
 #define USR_PING_TASK_STACK_SIZE  5*256 //Byte
 uint8_t ping_status = 0;
 
-void
-ping_sender(void *arg)
+static void ping_sender(void *arg);
+void ping_sender(void *arg)
 {
     int s;
 
@@ -175,9 +173,9 @@ ping_sender(void *arg)
     uint32_t  pind_times;
     uint32_t  pind_interval;
     tcpip_ip_info_t  ip_info;
-    
+
     netdev_get_ip_info(netdev_get_active(), &ip_info);
-    
+
     if(! ip4addr_aton(((ping_param_t *)arg)->host, &target_ip)) {
         ping_status = 0;
         OS_ThreadDelete(&g_ping_thread);

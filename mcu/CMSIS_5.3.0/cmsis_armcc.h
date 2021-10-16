@@ -97,8 +97,7 @@
 #ifndef   __RESTRICT
   #define __RESTRICT                             __restrict
 #endif
-#define __BLEIRQ
-#define __ARRAY_EMPTY 0
+
 #ifndef   __STATIC
   #define __STATIC                        static
 #endif

@@ -10,3 +10,10 @@
  */
 
 
+#ifndef LN_AES_TEST_H
+#define LN_AES_TEST_H
+
+
+void ln_aes_test();
+
+#endif  //LN_AES_TEST_H

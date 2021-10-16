@@ -390,21 +390,21 @@ uint16_t hal_adv_tim_get_load_value(uint32_t adv_tim_x_base)
     return pwm_load_getf(adv_tim_x_base);
 }
 
-uint16_t hal_adv_time_get_count(uint32_t adv_tim_x_base)
+uint16_t hal_adv_tim_get_count(uint32_t adv_tim_x_base)
 {
     /* check the parameters */
     hal_assert(IS_ADV_TIMER_ALL_PERIPH(adv_tim_x_base));
     return pwm_count_get(adv_tim_x_base);
 }
 
-uint16_t hal_adv_time_get_comp_b(uint32_t adv_tim_x_base)
+uint16_t hal_adv_tim_get_comp_b(uint32_t adv_tim_x_base)
 {
     /* check the parameters */
     hal_assert(IS_ADV_TIMER_ALL_PERIPH(adv_tim_x_base));
     return pwm_cmp_b_getf(adv_tim_x_base);
 }
 
-uint16_t hal_adv_time_get_comp_a(uint32_t adv_tim_x_base)
+uint16_t hal_adv_tim_get_comp_a(uint32_t adv_tim_x_base)
 {
     /* check the parameters */
     hal_assert(IS_ADV_TIMER_ALL_PERIPH(adv_tim_x_base));

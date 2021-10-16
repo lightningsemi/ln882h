@@ -8,8 +8,10 @@
  * @copyright Copyright (c) 2021 Shanghai Lightning Semiconductor Technology Co. Ltd
  * 
  */
-
+#ifndef LN_SDIO_TEST_H
+#define LN_SDIO_TEST_H
 
 void ln_sdio_test(void);
 
 
+#endif

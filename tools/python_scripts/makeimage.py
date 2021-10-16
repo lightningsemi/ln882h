@@ -4,21 +4,21 @@
 """
 @date: 2021-09-26 10:18:52
 @author: shenglin.zhan@lightningsemi.com
-@description: Deal with compiler products, ramcode, partition table and other partitions,
+@description: Deal with compiler products, boot, partition table and other partitions,
             to produce a specific image file (that is flashimage.bin).
 """
 
 import argparse
-import os
 import json
-from part_desc_info import *
-from image_header import *
+
 from boot_header import *
+from image_header import *
+from part_desc_info import *
 
 
 class MakeImageTool:
     def __init__(self) -> None:
-        self.__ramcode_filepath     = None
+        self.__boot_filepath        = None
         self.__app_filepath         = None
         self.__flashimage_filepath  = None
         self.__part_cfg_filepath    = None
@@ -58,11 +58,17 @@ class MakeImageTool:
 
                     part_info = PartDescInfo(parttype=parttype, startaddr=startaddr, partsize=partsize)
                     self.__part_desc_info_list.append(part_info)
+
         except Exception as err:
             print("Error: open partition cfg file failed: {}".format(str(err)))
             return False
 
         if len(self.__part_desc_info_list) >= 4:
+            print("----------" * 10)
+            for item in self.__part_desc_info_list:
+                print(item)
+            print("----------" * 10)
+
             return True
 
         return False
@@ -100,17 +106,22 @@ class MakeImageTool:
         return None
 
     def checkFileSize(self) -> bool:
-        boot_fileinfo = os.stat(self.ramcode_filepath)
+        boot_fileinfo = os.stat(self.boot_filepath)
         app_fileinfo = os.stat(self.app_filepath)
 
         max_boot_filesize = self.getPartDescInfoFromList(PART_TYPE_BOOT).part_size
         max_app_filesize = self.getPartDescInfoFromList(PART_TYPE_APP).part_size
 
         if boot_fileinfo.st_size >= max_boot_filesize:
+            print("FAIL -- checking {}".format(self.boot_filepath))
             return False
+        print("PASS -- checking {}".format(self.boot_filepath))
 
         if app_fileinfo.st_size >= max_app_filesize:
+            print("FAIL -- checking {}".format(self.app_filepath))
             return False
+        print("PASS -- checking {}".format(self.app_filepath))
+
 
         return True
 
@@ -123,9 +134,9 @@ class MakeImageTool:
         bootram_buffer = bytearray(boot_part.part_size)
         bootram_buffer = bootram_buffer.replace(b'\x00', b'\xFF')
 
-        fileInfo = os.stat(self.ramcode_filepath)
+        fileInfo = os.stat(self.boot_filepath)
         try:
-            with open(self.ramcode_filepath, "rb") as fObj:
+            with open(self.boot_filepath, "rb") as fObj:
                 bootram_content = fObj.read()
                 bootheader = BootHeader(bootram_content)
                 if self.swd_crp == 0:
@@ -138,7 +149,7 @@ class MakeImageTool:
                 self.__partbuf_bootram = bootram_buffer
 
         except Exception as err:
-            print("Error: open ramcode file failed: {}".format(str(err)))
+            print("Error: open boot file failed: {}".format(str(err)))
             return False
 
         return True
@@ -286,14 +297,14 @@ class MakeImageTool:
         return True
 
     @property
-    def ramcode_filepath(self):
-        return self.__ramcode_filepath
+    def boot_filepath(self):
+        return self.__boot_filepath
 
-    @ramcode_filepath.setter
-    def ramcode_filepath(self, boot):
+    @boot_filepath.setter
+    def boot_filepath(self, boot):
         if isinstance(boot, str):
             if os.path.exists(boot):
-                self.__ramcode_filepath = boot
+                self.__boot_filepath = boot
             else:
                 raise ValueError("Error: not exist: {} !!!".format(boot))
         else:
@@ -394,7 +405,7 @@ class MakeImageTool:
                         "output  : {_flash}\n"  \
                         "part_cfg: {_part}\n"   \
                         "ver str : {_ver}\n"    \
-                        .format(_boot=self.ramcode_filepath, _app=self.app_filepath,
+                        .format(_boot=self.boot_filepath, _app=self.app_filepath,
                                 _flash=self.flashimage_filepath, _part=self.part_cfg_filepath, _ver=self.ver_str))
         return output_str
 
@@ -402,7 +413,7 @@ class MakeImageTool:
 if __name__ == "__main__":
     """
     The following arguments are required:
-    --ramcode   /path/to/boot_ln88xx.bin, that is ramcode;
+    --boot      /path/to/boot_ln88xx.bin, that is ramcode;
     --app       /path/to/app.bin, that is compiler output;
     --output    /path/to/flashimage.bin, that is our final image file which can be downloaded to flash;
     --part      /path/to/flash_partition_cfg.json, that is configuration for flash partition;
@@ -413,21 +424,21 @@ if __name__ == "__main__":
 
     Usage
     =====
-    python  makeimage.py  -h
+    python3  makeimage.py  -h
     """
     prog = os.path.basename(__file__)
     desc = "makeimage tool for LN88XX"
     parser = argparse.ArgumentParser(prog=prog, description=desc)
-    parser.add_argument("--ramcode", help="/path/to/boot_ln88xx.bin", type=str)
-    parser.add_argument("--app",  help="/path/to/app.bin", type=str)
+    parser.add_argument("--boot",   help="/path/to/boot_ln88xx.bin", type=str)
+    parser.add_argument("--app",    help="/path/to/app.bin", type=str)
     parser.add_argument("--output", help="/path/to/flashimage.bin, that is output filepath", type=str)
-    parser.add_argument("--part", help="/path/to/flash_partition_cfg.json", type=str)
-    parser.add_argument("--ver", help="APP version (only used for LN SDK boot), such as 1.2", type=str)
-    parser.add_argument("--crp", help="SWD protect bit [0 -- disable, 1 -- enable]", type=int, choices=[0, 1])
+    parser.add_argument("--part",   help="/path/to/flash_partition_cfg.json", type=str)
+    parser.add_argument("--ver",    help="APP version (only used for LN SDK boot), such as 1.2", type=str)
+    parser.add_argument("--crp",    help="SWD protect bit [0 -- disable, 1 -- enable]", type=int, choices=[0, 1])
 
     args = parser.parse_args()
 
-    if args.ramcode is None:
+    if args.boot is None:
         print("Error: /path/to/boot_ln88xx.bin has not been set!!!")
         exit(-1)
 
@@ -448,7 +459,7 @@ if __name__ == "__main__":
         exit(-5)
 
     mkimage = MakeImageTool()
-    mkimage.ramcode_filepath    = args.ramcode
+    mkimage.boot_filepath       = args.boot
     mkimage.app_filepath        = args.app
     mkimage.flashimage_filepath = args.output
     mkimage.part_cfg_filepath   = args.part

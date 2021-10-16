@@ -1,0 +1,48 @@
+/**
+ * @file   ln_at_cmd_system.c
+ * @author LightningSemi WLAN Team
+ * Copyright (C) 2018-2020 LightningSemi Technology Co., Ltd. All rights reserved.
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2021-02-01     MurphyZhao   the first version
+ */
+
+#include "ln_at.h"
+#include "ln_at_cmd/ln_at_cmd_version.h"
+#include "hal/hal_misc.h"
+#include "wifi.h"
+#include "ln_utils.h"
+
+/**
+ * name, get, set, test, exec
+*/
+
+/* declarations */
+ln_at_err_t ln_at_exec_sys_rst(const char *name);
+ln_at_err_t ln_at_exec_gmr(const char *name);
+
+ln_at_err_t ln_at_exec_sys_rst(const char *name)
+{
+    LN_UNUSED(name);
+    //HAL_SYSCON_SoftwareResetCore(SW_RST_CORE_ALL);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+}
+LN_AT_CMD_REG(RST, NULL, NULL, NULL, ln_at_exec_sys_rst);
+
+ln_at_err_t ln_at_exec_gmr(const char *name)
+{
+    LN_UNUSED(name);
+
+    ln_at_printf("AT       version: v%d.%d.%d\r\n", LN_AT_VERSION, LN_AT_SUBVERSION, LN_AT_REVISION);
+    ln_at_printf("AT CMD   version: v%d.%d.%d\r\n", LN_AT_CMD_VERSION, LN_AT_CMD_SUBVERSION, LN_AT_CMD_REVISION);
+    ln_at_printf("SDK      version: vx.x.x\r\n");
+    ln_at_printf("WiFi lib version: %s[build time:%s]\r\n",
+            wifi_lib_version_string_get(), wifi_lib_build_time_get());
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+}
+LN_AT_CMD_REG(GMR, NULL, NULL, NULL, ln_at_exec_gmr);

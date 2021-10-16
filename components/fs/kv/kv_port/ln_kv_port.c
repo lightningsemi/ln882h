@@ -1,3 +1,4 @@
+#include "ln_kv_api.h"
 #include "ln_kv_port.h"
 #include "ln_kv_flash.h"
 #include "ln_kv.h"
@@ -10,20 +11,20 @@ static kv_flash_prop_t  flash_prop;
 static int flash_read(uint32_t offset, void *buf, uint32_t len)
 {
 #if (defined(FLASH_XIP) && (FLASH_XIP == 1))
-    return FLASH_ReadByCache(offset, len, buf);
+    return hal_flash_read_by_cache(offset, len, buf);
 #else
-    return FLASH_Read(offset, len, buf);
+    return hal_flash_read(offset, len, buf);
 #endif
 }
 
 static int flash_write(uint32_t offset, const void *buf, uint32_t len)
 {
-    return FLASH_Program(offset, len, (uint8_t*)buf);
+    return hal_flash_program(offset, len, (uint8_t*)buf);
 }
 
 static int flash_erase(uint32_t offset, uint32_t len)
 {
-    FLASH_Erase(offset, len);
+    hal_flash_erase(offset, len);
     return 0;
 }
 

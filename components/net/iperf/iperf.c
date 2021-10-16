@@ -25,6 +25,9 @@
 
 #define IPERF_PRINTF(...)       LOG(LOG_LVL_INFO, __VA_ARGS__)
 
+/* declarations */
+void iperf_server(void *thread_param);
+
 typedef struct {
     volatile int mode;
     int port;
@@ -79,6 +82,8 @@ static unsigned char *iperf_get_data(int size)
 }
 static void iperf_udp_client(void *thread_param)
 {
+    LN_UNUSED(thread_param);
+
     int sock;
     int flag = 1;
     unsigned char *buffer;
@@ -151,6 +156,8 @@ __exit:
 
 static void iperf_udp_server(void *thread_param)
 {
+    LN_UNUSED(thread_param);
+
     int sock;
     int rcv_len;
     unsigned char *buffer;
@@ -229,7 +236,7 @@ static void iperf_udp_server(void *thread_param)
             if (sentlen > 0) {
                 f = (float)(sentlen * OS_HZ / 125 / (tick2 - tick1));
                 f /= 1000.0f;
-                snprintf(speed, sizeof(speed), "%.4f Mbps! lost:%d total:%d\r\n", f, lost, total);
+                snprintf(speed, sizeof(speed), "%.4f Mbps! lost:%u total:%u\r\n", (double)f, (uint32_t)lost, (uint32_t)total);
                 IPERF_PRINTF("%s", speed);
             }
         }
@@ -248,6 +255,9 @@ __exit:
 static unsigned char *iperf_tx_buffer = NULL;
 static void iperf_client_conn_err(void *arg, err_t err)
 {
+    LN_UNUSED(arg);
+    LN_UNUSED(err);
+
     param.mode = IPERF_MODE_STOP;
 }
 
@@ -284,16 +294,24 @@ static err_t iperf_client_send_more(struct tcp_pcb * pcb)
 
 static err_t iperf_client_poll(void *arg, struct tcp_pcb *tpcb)
 {
+    LN_UNUSED(arg);
+
     return iperf_client_send_more(tpcb);
 }
 
 static err_t iperf_client_sent(void *arg, struct tcp_pcb *tpcb, u16_t len)
 {
+    LN_UNUSED(arg);
+    LN_UNUSED(len);
+
     return iperf_client_send_more(tpcb);
 }
 
 static err_t iperf_client_connected(void *arg, struct tcp_pcb *pcb, err_t err)
 {
+    LN_UNUSED(arg);
+    LN_UNUSED(err);
+
 	tcp_sent(pcb, iperf_client_sent);
     tcp_poll(pcb, iperf_client_poll, 2);
     tcp_write(pcb, iperf_tx_buffer, param.pkt_len, 0);
@@ -320,6 +338,8 @@ static void iperf_client_close(struct tcp_pcb *tpcb)
 
 static void iperf_client(void *thread_param)
 {
+    LN_UNUSED(thread_param);
+
     struct tcp_pcb *pcb = NULL;
     ip4_addr_t server_ip;
     err_t err = ERR_OK;
@@ -453,6 +473,8 @@ static void iperf_client(void *thread_param)
 
 void iperf_server(void *thread_param)
 {
+    LN_UNUSED(thread_param);
+
     int recv_len;
     unsigned char *recv_data;
     socklen_t sin_size;
@@ -536,7 +558,7 @@ void iperf_server(void *thread_param)
 
                     f = (float)(recvlen * OS_HZ / 125 / (tick2 - tick1));
                     f /= 1000.0f;
-                    snprintf(speed, sizeof(speed), "%.4f Mbps!\r\n", f);
+                    snprintf(speed, sizeof(speed), "%.4f Mbps!\r\n", (double)f);
                     IPERF_PRINTF("%s", speed);
                     tick1 = tick2;
                     recvlen = 0;

@@ -137,7 +137,10 @@ class OTATOOL:
         return True
 
     def writeOTAImage(self):
-        ota_filename = "{_a}-ota-v{_ma}.{_mi}.bin" \
+        """
+        OTA image, XZ format.
+        """
+        ota_filename = "{_a}-ota-xz-v{_ma}.{_mi}.bin" \
             .format(_a= os.path.basename(self.input_filepath).split(".")[0],
             _ma=self.image_header.getVerMajor(), _mi=self.image_header.getVerMinor())
         self.output_filepath = os.path.join(self.output_dir, ota_filename)
@@ -212,7 +215,7 @@ if __name__ == "__main__":
     prog = os.path.basename(__file__)
     usage = ("\nargv1: /path/to/flashimage.bin \n"
             "Example: \n"
-            "python  {_p}  E:/ln_sdk/build/bin/flashimage.bin".format(_p=prog))
+            "python3  {_p}  E:/ln_sdk/build/bin/flashimage.bin".format(_p=prog))
 
     parser = argparse.ArgumentParser(prog=prog, usage=usage)
     parser.add_argument("path_to_flashimage", help="absolute path of flashimage.bin")

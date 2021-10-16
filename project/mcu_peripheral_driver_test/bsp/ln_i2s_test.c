@@ -35,7 +35,7 @@
 #include "hal_i2s.h"
 #include "ln_i2s_test.h"
 #include "reg_sysc_cmp.h"
-#include "log.h"
+#include "utils/debug/log.h"
 #include "ln_test_common.h"
 
 static unsigned short tx_data_left[256];

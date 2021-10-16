@@ -1,12 +1,10 @@
-#ifndef __OLED_H
-#define __OLED_H 
+#ifndef LN_OLED_TEST_H
+#define LN_OLED_TEST_H 
 
 #include "hal/hal_common.h"
 
 #define OLED_CMD  0    
 #define OLED_DATA 1    
-#define uint8_t unsigned char
-#define uint32_t unsigned int
 
 void ln_oled_clear_point(uint8_t x,uint8_t y);
 void ln_oled_color_turn(uint8_t i);

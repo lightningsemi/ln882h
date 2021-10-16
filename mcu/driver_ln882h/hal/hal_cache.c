@@ -1,16 +1,16 @@
 /**
  * @file     hal_cache.c
- * @author   BSP Team 
- * @brief 
+ * @author   BSP Team
+ * @brief
  * @version  0.0.0.1
  * @date     2021-08-17
- * 
+ *
  * @copyright Copyright (c) 2021 Shanghai Lightning Semiconductor Technology Co. Ltd
- * 
+ *
  */
 
 
-#include "proj_config.h" 
+#include "proj_config.h"
 #include <stdint.h>
 
 #include "hal/hal_cache.h"
@@ -22,10 +22,10 @@
 #include "reg_sysc_awo.h"
 
 
-#if (__CC_ARM)
+#if defined(__CC_ARM)
   #pragma push
   #pragma O2
-#elif (__GNUC__)
+#elif defined(__GNUC__)
   #pragma GCC push_options
   #pragma GCC optimize(2)
 #endif
@@ -77,16 +77,16 @@ void flash_cache_init(uint32_t flash_base_addr)
     #define FLASH_QUAD_READ_CMD             (0x6b)
     #define FLASH_STANDARD_READ_CMD         (0x03)
     #define CACHE_LINE_SIZE_IN_BYTES        (32)
-    
+
     qspi_ssi_en_setf( QSPI_DISABLE );
     qspi_sckdv_setf( 2 );
     qspi_rsd_setf(1);//QSPI_RxSampleDlySet(1);
-    
+
     qspi_ctrlr0_pack( QSPI_QUAD, DFS_32_32_BITS, 0, 0, 0, QSPI_RX_ONLY, CLK_INACTIVE_LOW, CLK_TOGGLE_IN_MIDDLE, QSPI_MOTOROLA);
     qspi_ctrlr1_pack( (CACHE_LINE_SIZE_IN_BYTES / sizeof(uint32_t)) - 1 );
-    
+
     qspi_spi_ctrlr0_pack( 8, QSPI_INSTRUCTION_LEN_8_BITS, 6, QSPI_BOTH_STANDARD_SPI_MODE );
-    
+
     qspi_imr_set(0);                  //QSPI_IntMaskAll
     qspi_ser_setf( QSPI_SLAVE_INDEX );//LL_QSPI_SlaveSelect
     qspi_ssi_en_setf( QSPI_ENABLE );  //LL_QSPI_Enable
@@ -112,7 +112,7 @@ void flash_cache_flush(uint32_t low_addr,uint32_t high_addr)
 {
     cache_reg_flush_addr_l_set(low_addr);
     cache_reg_flush_addr_h_set(high_addr);
-    
+
     cache_flush_en_setf(CACHE_FLUSH_ENABLE);
     while(cache_flush_en_getf() == CACHE_FLUSH_STATE_INPROGRESS){};
 }
@@ -125,8 +125,8 @@ void flash_cache_flush_all(void)
 }
 
 
-#if (__CC_ARM)
+#if defined(__CC_ARM)
   #pragma pop
-#elif (__GNUC__)
+#elif defined(__GNUC__)
   #pragma GCC pop_options
 #endif

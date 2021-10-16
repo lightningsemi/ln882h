@@ -8,6 +8,8 @@
  * @copyright Copyright (c) 2021 Shanghai Lightning Semiconductor Technology Co. Ltd
  * 
  */
+#ifndef LN_SHT30_TEST_H
+#define LN_SHT30_TEST_H
 
 #define TEM_HUM_ADDR        0x88
 
@@ -51,3 +53,6 @@ typedef enum{
     // CMD_NO_SLEEP        = 0x303E,
 }sensor_cmd;
 
+
+
+#endif

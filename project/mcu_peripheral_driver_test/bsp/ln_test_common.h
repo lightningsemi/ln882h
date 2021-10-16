@@ -8,8 +8,12 @@
  * @copyright Copyright (c) 2021 Shanghai Lightning Semiconductor Technology Co. Ltd
  * 
  */
-
+#ifndef LN_TEST_COMMON_H
+#define LN_TEST_COMMON_H
 
 void ln_delay_us(volatile unsigned int time);
 void ln_delay_ms(unsigned int time);
 
+
+
+#endif

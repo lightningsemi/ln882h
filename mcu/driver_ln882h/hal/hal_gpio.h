@@ -156,6 +156,7 @@ uint16_t        hal_gpio_port_input_read(uint32_t gpio_base);
 uint16_t        hal_gpio_port_output_read(uint32_t gpio_base);
 hal_flag_t      hal_gpio_pin_input_read(uint32_t gpio_base, gpio_pin_t pin);
 hal_flag_t      hal_gpio_pin_output_read(uint32_t gpio_base, gpio_pin_t pin);
+hal_flag_t      hal_gpio_pin_read(uint32_t gpio_base, gpio_pin_t pin);
 void            hal_gpio_port_output_write(uint32_t gpio_base, uint16_t port_val);
 void            hal_gpio_pin_set(uint32_t gpio_base, gpio_pin_t pin);
 void            hal_gpio_pin_reset(uint32_t gpio_base, gpio_pin_t pin);

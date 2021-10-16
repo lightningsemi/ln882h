@@ -44,7 +44,7 @@
 #include "hal/hal_dma.h"
 #include "hal/hal_ws2811.h"
 #include "ln_test_common.h"
-#include "log.h"
+#include "utils/debug/log.h"
 
 #define LED_AMOUNT  50  
 

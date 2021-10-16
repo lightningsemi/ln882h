@@ -13,7 +13,7 @@
 #endif
 
 
-void qspi_init(uint16_t clk_divider, uint8_t rx_sample_dly)
+void hal_qspi_init(uint16_t clk_divider, uint8_t rx_sample_dly)
 {
     //select spif IO as pad
     sysc_cmp_spif_io_en_setf(1);
@@ -27,7 +27,7 @@ void qspi_init(uint16_t clk_divider, uint8_t rx_sample_dly)
     qspi_sckdv_setf(clk_divider);
 }
 
-void qspi_deinit()
+void hal_qspi_deinit()
 {
     //QSPI IO disable
     sysc_cmp_spif_io_en_setf(0);
@@ -36,7 +36,7 @@ void qspi_deinit()
     qspi_imr_set(0);
 }
 
-void qspi_standard_read_byte(uint8_t *rd_ptr, uint32_t rd_len, uint8_t *wr_ptr, uint8_t wr_len)
+void hal_qspi_standard_read_byte(uint8_t *rd_ptr, uint32_t rd_len, uint8_t *wr_ptr, uint8_t wr_len)
 {
     uint32_t i = 0;
 
@@ -62,7 +62,7 @@ void qspi_standard_read_byte(uint8_t *rd_ptr, uint32_t rd_len, uint8_t *wr_ptr, 
     qspi_ssi_en_setf( QSPI_DISABLE );
 }
 
-void qspi_standard_read_word(uint32_t *rd_ptr, uint32_t rd_len_in_word, uint8_t instruction, uint32_t addr)
+void hal_qspi_standard_read_word(uint32_t *rd_ptr, uint32_t rd_len_in_word, uint8_t instruction, uint32_t addr)
 {
     uint32_t i = 0, rd_tmp = 0;
     uint8_t * pdata = (uint8_t *)rd_ptr;
@@ -91,7 +91,7 @@ void qspi_standard_read_word(uint32_t *rd_ptr, uint32_t rd_len_in_word, uint8_t 
     qspi_ssi_en_setf(QSPI_DISABLE);
 }
 
-void qspi_standard_write(uint8_t *bufptr, uint32_t length)
+void hal_qspi_standard_write(uint8_t *bufptr, uint32_t length)
 {
     qspi_sckdv_setf(16); //QSPI SCK DIV
 

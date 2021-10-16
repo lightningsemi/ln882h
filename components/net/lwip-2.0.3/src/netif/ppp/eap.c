@@ -291,7 +291,7 @@ static void eap_send_success(ppp_pcb *pcb) {
 	}
 
 	outp = (u_char*)p->payload;
-    
+
 	MAKEHEADER(outp, PPP_EAP);
 
 	PUTCHAR(EAP_SUCCESS, outp);
@@ -692,7 +692,7 @@ static void eap_send_request(ppp_pcb *pcb) {
 	}
 
 	outp = (u_char*)p->payload;
-    
+
 	MAKEHEADER(outp, PPP_EAP);
 
 	PUTCHAR(EAP_REQUEST, outp);
@@ -735,7 +735,7 @@ static void eap_send_request(ppp_pcb *pcb) {
 		INCPTR(pcb->eap.es_server.ea_namelen, outp);
 
 		ts = (struct t_server *)pcb->eap.es_server.ea_session;
-		assert(ts != NULL);
+		LN_ASSERT(ts != NULL);
 		PUTCHAR(ts->s.len, outp);
 		MEMCPY(outp, ts->s.data, ts->s.len);
 		INCPTR(ts->s.len, outp);
@@ -760,7 +760,7 @@ static void eap_send_request(ppp_pcb *pcb) {
 		PUTCHAR(EAPSRP_SKEY, outp);
 
 		ts = (struct t_server *)pcb->eap.es_server.ea_session;
-		assert(ts != NULL);
+		LN_ASSERT(ts != NULL);
 		MEMCPY(outp, ts->B.data, ts->B.len);
 		INCPTR(ts->B.len, outp);
 		break;
@@ -770,7 +770,7 @@ static void eap_send_request(ppp_pcb *pcb) {
 		PUTCHAR(EAPSRP_SVALIDATOR, outp);
 		PUTLONG(SRPVAL_EBIT, outp);
 		ts = (struct t_server *)pcb->eap.es_server.ea_session;
-		assert(ts != NULL);
+		LN_ASSERT(ts != NULL);
 		MEMCPY(outp, t_serverresponse(ts), SHA_DIGESTSIZE);
 		INCPTR(SHA_DIGESTSIZE, outp);
 
@@ -1061,7 +1061,7 @@ static void eap_chap_response(ppp_pcb *pcb, u_char id, u_char *hash, const char 
 	}
 
 	outp = (u_char*)p->payload;
-    
+
 	MAKEHEADER(outp, PPP_EAP);
 
 	PUTCHAR(EAP_RESPONSE, outp);
@@ -1909,7 +1909,7 @@ static void eap_response(ppp_pcb *pcb, u_char *inp, int id, int len) {
 			A.data = inp;
 			A.len = len;
 			ts = (struct t_server *)pcb->eap.es_server.ea_session;
-			assert(ts != NULL);
+			LN_ASSERT(ts != NULL);
 			pcb->eap.es_server.ea_skey = t_servergetkey(ts, &A);
 			if (pcb->eap.es_server.ea_skey == NULL) {
 				/* Client's A value is bogus; terminate now */
@@ -1934,7 +1934,7 @@ static void eap_response(ppp_pcb *pcb, u_char *inp, int id, int len) {
 			}
 			GETLONG(pcb->eap.es_server.ea_keyflags, inp);
 			ts = (struct t_server *)pcb->eap.es_server.ea_session;
-			assert(ts != NULL);
+			LN_ASSERT(ts != NULL);
 			if (t_serververify(ts, inp)) {
 				ppp_info("EAP: unable to validate client identity");
 				eap_send_failure(pcb);

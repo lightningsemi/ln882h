@@ -95,12 +95,13 @@ void SetSysClock(void)
     clock_init.clk_hclk_div     = CLK_HCLK_NO_DIV;
     clock_init.clk_pllclk_mul   = CLK_PLL_CLK_4_MUL;
 
-
-    //1. power manager unit config
+    //1. xtal40m config
     //hal_misc_awo_set_ldo18_2_vset(5);       // tx_rx_filter LDO18_2 vol set
-    hal_misc_awo_set_r_xtal40m_ldo_vbit(3); // xtal40m LDO (1.2V ~ )
-    hal_misc_awo_set_r_xtal40m_cap_bit(0);  // xtal40m Cap (pf)
+    hal_misc_awo_set_r_xtal40m_ldo_vbit(5); // xtal40m LDO (1.2V ~ )
+    hal_misc_awo_set_r_xtal40m_cap_bit(0); // xtal40m Cap (pf)
     hal_misc_awo_set_r_xtal40m_ibsel(1);
+    hal_misc_awo_set_ldo18_2_vset(6);
+    hal_misc_awo_set_ldo15_1_vset(6);
 
     //2. clock
     hal_clock_init(&clock_init);

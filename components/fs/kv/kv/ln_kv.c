@@ -1,5 +1,6 @@
 #include "ln_kv.h"
 #include "ln_kv_api.h"
+#include "ln_utils.h"
 #include <string.h>
 
 
@@ -99,7 +100,7 @@ static kv_err_t kv_blk_hdr_read(uint32_t blk_start, kv_blk_hdr_t *blk_hdr)
     kv_err_t err = kv_flash_read(blk_start, blk_hdr, sizeof(kv_blk_hdr_t));
 
     //log_i("blk info @ 0x%08x:\n", blk_start);
-    //log_i("magic: 0x%08llx, gc_src: 0x%08llx --> gc_dst: 0x%08llx, gc_done: 0x%08llx\n\n", \
+    //log_i("magic: 0x%08llx, gc_src: 0x%08llx --> gc_dst: 0x%08llx, gc_done: 0x%08llx\n\n",
     //       blk_hdr->magic, blk_hdr->gc_src, blk_hdr->gc_dst, blk_hdr->gc_done);
 
     return err;
@@ -535,6 +536,8 @@ static kv_err_t kv_item_do_fetch(kv_item_t *item, const void *key)
 
 static kv_err_t kv_item_do_recovery(kv_item_t *item, const void *dummy)
 {
+    LN_UNUSED(dummy);
+
     kv_err_t err;
 
     err = kv_item_body_read(item);
@@ -1217,6 +1220,7 @@ static kv_err_t kv_try_gc(void)
     return KV_ERR_GC_NOTHING;
 }
 
+#if 0
 static void kv_u8_disp(uint8_t *buf, size_t buf_len)
 {
     // int i = 0;
@@ -1371,6 +1375,7 @@ kv_err_t tos_kv_walkthru(void)
 
     return KV_ERR_NONE;
 }
+#endif
 
 kv_err_t ln_kv_init(uint32_t flash_start, uint32_t flash_end, kv_flash_drv_t *flash_drv, kv_flash_prop_t *flash_prop)
 {

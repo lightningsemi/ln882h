@@ -1,12 +1,12 @@
 /**
  * @file     hal_wdt.c
- * @author   BSP Team 
- * @brief 
+ * @author   BSP Team
+ * @brief
  * @version  0.0.0.1
  * @date     2021-08-24
- * 
+ *
  * @copyright Copyright (c) 2021 Shanghai Lightning Semiconductor Technology Co. Ltd
- * 
+ *
  */
 
 
@@ -64,14 +64,14 @@ void hal_wdt_en(uint32_t wdt_base,hal_en_t en)
 {
     hal_assert(IS_WDT_ALL_PERIPH(wdt_base));
     hal_assert(IS_FUNCTIONAL_STATE(en));
-    
+
     if (en == HAL_DISABLE) {
-        wdt_wdt_en_setf(wdt_base,0); 
+        wdt_wdt_en_setf(wdt_base,0);
         sysc_awo_o_wdt_rst_mask_setf(1);
     }
     else if(en == HAL_ENABLE)
     {
-        wdt_wdt_en_setf(wdt_base,1); 
+        wdt_wdt_en_setf(wdt_base,1);
         sysc_awo_o_wdt_rst_mask_setf(0);
     }
     wdt_wdt_crr_set(wdt_base,0x76);
@@ -83,6 +83,7 @@ void hal_wdt_cnt_restart(uint32_t wdt_base)
     wdt_wdt_crr_set(wdt_base,0x76);
 }
 
+// FIXME: value ???
 void hal_wdt_set_top_value(uint32_t wdt_base,uint8_t value)
 {
     hal_assert(IS_WDT_ALL_PERIPH(wdt_base));
@@ -124,7 +125,7 @@ uint8_t hal_wdt_get_it_flag(uint32_t wdt_base,wdt_it_flag_t wdt_it_flag)
         case WDT_IT_FLAG_ACTIVE:
             it_flag = wdt_interruptstatusregister_getf(wdt_base);
             break;
-        
+
         default:
             break;
     }
@@ -140,7 +141,7 @@ void hal_wdt_clr_it_flag(uint32_t wdt_base,wdt_it_flag_t wdt_it_flag)
         case WDT_IT_FLAG_ACTIVE:
             wdt_interruptclearregister_getf(wdt_base);
             break;
-        
+
         default:
             break;
     }

@@ -1,49 +1,46 @@
-# CMake 使用及常见问题
+# LN882H SDK 简介
 
-# 环境检查 
-检查是否安装**cmke**
-检查是否安装**python3**
+# 编译方式
 
-# 使用方法
-### 使用build.sh脚本
-- 1 根目录下执行`./build.sh build`,这个命令会建立build文件夹并执行**cmake**命令，生成makefile文件，如果执行失败请检查**build.sh**是否有可执行权限,添加可执行权限。
-    ```shell
-    chmod +x build.sh && ./build.sh build
-    ```
-- 2 `./build.sh build`执行成功后执行命令，这个命令会使用上一步生成的makefile文件生成最终的可执行文件**flashimage.bin**。
-    ```shell
-    ./build.sh all
-    ```
-  
-- 3 执行`./build.sh clean`命令会清除**build**文件夹
-    ```shell
-    ./build.sh clean
-    ```
+## 1. Keil MDK
 
-### 直接使用cmake
+### 环境配置
+参见`doc/LN882H Keil ARMCC开发环境搭建指导.pdf`文件搭建环境。
 
-- 1 在项目根目录下建立并进入**build**文件夹
-    ```shell
-    mkdir build && cd build
-    ```
-- 2 执行**cmake**命令
-    ```shell
-    cmake -DPROJECT=wifi_mcu_develop ..
-    ```
-- 3 生成**Makefile**文件之后执行`make`命令生成可执行文件，可执行文件**flashimage.bin**在**build/bin**文件夹下
-    ```shell
-    make
-    ```
+### 用户工程选择
+用户工程在 `project/xxxx`，例如 `wifi_mcu_basic_example` 工程，打开子目录中的 Keil 工程，点击 Keil IDE
+界面中的 **编译**、**下载**、**调试** 按钮即可开始对应的功能。
 
+## 2. CMake+GCC
 
-# 常见问题
+### 环境配置
 
-### 1 执行`./build.sh build`后出现CMAKE_CXX_COMPILER not set
+参见 `doc/lightningsemi_sdk_cross_build_setup.pdf` 文件搭建环境。
 
-检查是否安装**g++**
+### 用户工程选择
+工程以 `CMakeLists.txt` 文件进行组织，顶层的 `CMakeLists.txt` 选择了用户工程，参见顶层 `CMakeLists.txt` 中如下指令：
 
+```
+################################################################################
+#########################   NOTE: select user project here  ####################
+################################################################################
+set(USER_PROJECT  wifi_mcu_basic_example)
+```
 
-### 2 tools/Linux/arm-none-eabi-gcc/bin/arm-none-eabi-gcc: Permission denied
-出现这个问题很大原因是这个可执行文件没有可执行权限，并且除`tools/Linux/arm-none-eabi-gcc/bin`之外其他文件也可能没有可执行权限，因此可对`tools/Linux/arm-none-eabi-gcc/`文件夹以及相关子目录添加可执行权限。
+### 用户工程编译、下载
 
+以脚本 `start_build.py` 开始编译、下载动作。用法如下：
 
+```
+    *****************************  usage  *****************************
+    argv[1] -- build action, such as clean/config/build/rebuild/jflash.
+    Example:
+                python3   start_build.py   rebuild
+    *******************************************************************
+```
+
+- 清除结果： `python3  start_build.py  clean`
+- 配置工程： `python3  start_build.py  config`
+- 编译工程： `python3  start_build.py  build`
+- 清除、配置、编译三合一： `python3  start_build.py  rebuild`
+- 烧录镜像文件： `python3  start_build.py  jflash`

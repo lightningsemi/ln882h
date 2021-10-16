@@ -9,12 +9,13 @@
  * 
  */
 
-
+#ifndef LN_TRNG_TEST_H
+#define LN_TRNG_TEST_H
 
 #include "hal/hal_trng.h"
 #include "hal/hal_gpio.h"
 #include "ln_trng_test.h"
-#include "log.h"
+#include "utils/debug/log.h"
 
 volatile unsigned int random_num[4]; 
 void ln_trng_test(void)
@@ -59,3 +60,5 @@ void ln_trng_test(void)
     }
 }
 
+
+#endif

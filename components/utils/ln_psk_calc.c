@@ -1,5 +1,6 @@
 
 #include "ln_compiler.h"
+#include "ln_psk_calc.h"
 #include "ln_sha1.h"
 #include <stdlib.h>
 #include <stdint.h>
@@ -123,18 +124,18 @@ __STATIC_INLINE__ uint8_t pbkdf2_sha1(uint8_t *key, uint8_t key_len,
 
 /**
  * @brief calc psk with ssid and pwd
- * 
- * @param ssid 
- * @param pwd 
- * @param psk_buff 
+ *
+ * @param ssid
+ * @param pwd
+ * @param psk_buff
  * @return int    -1: fail; 0: success
  */
 int ln_psk_calc(const char *ssid, const char *pwd, uint8_t *psk_buff, uint8_t psk_buff_size)
 {
     uint8_t ssid_len = 0;
     uint8_t pwd_len  = 0;
-    
-    if ((NULL == psk_buff) || (NULL == ssid) || (NULL == pwd) || 
+
+    if ((NULL == psk_buff) || (NULL == ssid) || (NULL == pwd) ||
         (psk_buff_size < MAX_PSK_PASS_PHRASE_LEN/2)) {
         return -1;
     }

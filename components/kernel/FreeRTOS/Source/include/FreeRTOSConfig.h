@@ -124,8 +124,8 @@
 #endif
 
 #if defined(OS_TICK_COMPENSATE)
-    #include "stdint.h"
-    extern void ln_get_os_tick_comp_val(uint16_t ** comp_val);
+    #include "utils/runtime/runtime.h"
+    #include <stdint.h>
     #define portGET_OS_TICK_COMPENSATE_VAL(x)    ln_get_os_tick_comp_val(x)
 #endif
 
@@ -140,7 +140,7 @@
 #define configTIMER_TASK_PRIORITY		(7)
 #define configTIMER_QUEUE_LENGTH		10
 
-#if BLE_MESH_SUPPORT== 1//mesh timer need more stack size
+#if defined(BLE_MESH_SUPPORT) //mesh timer need more stack size
 #define configTIMER_TASK_STACK_DEPTH	( configMINIMAL_STACK_SIZE * 2*2 )
 #else
 #define configTIMER_TASK_STACK_DEPTH	( configMINIMAL_STACK_SIZE * 2 )
@@ -172,7 +172,7 @@ function. */
 routine that makes calls to interrupt safe FreeRTOS API functions.  DO NOT CALL
 INTERRUPT SAFE FREERTOS API FUNCTIONS FROM ANY INTERRUPT THAT HAS A HIGHER
 PRIORITY THAN THIS! (higher priorities are lower numeric values. */
-#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY	2
+#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY	1
 
 /* Interrupt priorities used by the kernel port layer itself.  These are generic
 to all Cortex-M ports, and do not rely on any particular library functions. */

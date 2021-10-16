@@ -31,7 +31,7 @@
 #include "hal_gpio.h"
 #include "ln_test_common.h"
 #include "ln_ext_test.h"
-#include "log.h"
+#include "utils/debug/log.h"
 
 void ln_ext_test()
 {

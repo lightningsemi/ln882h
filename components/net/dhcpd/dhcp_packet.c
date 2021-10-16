@@ -105,7 +105,7 @@ int dhcpd_parse_option(uint8_t *packet, uint16_t packet_len, dhcp_option_t *opti
     return LN_TRUE;
 }
 
-int dhcpd_recv_packet_check(uint8_t *packet, int len)
+int dhcpd_recv_packet_check(uint8_t *packet, uint16_t len)
 {
     int ret = LN_FALSE;
     if (len < (BOOTP_ABSOLUTE_MIN_LEN + DHCP_MAGIC_COOKIE_LEN + 4)) {

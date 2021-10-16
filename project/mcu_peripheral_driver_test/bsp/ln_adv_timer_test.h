@@ -9,7 +9,9 @@
  * 
  */
 
-
+#ifndef LN_ADV_TIMER_TEST
+#define LN_ADV_TIMER_TEST
 
 void ln_adv_timer_test(void);
 
+#endif //LN_ADV_TIMER_TEST

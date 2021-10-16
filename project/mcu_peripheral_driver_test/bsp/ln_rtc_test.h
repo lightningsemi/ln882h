@@ -9,6 +9,10 @@
  * 
  */
 
-
+#ifndef LN_RTC_TEST_H
+#define LN_RTC_TEST_H
 
 void ln_rtc_test(void);
+
+
+#endif

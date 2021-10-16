@@ -175,7 +175,7 @@ struct dhcp_packet
 
 void dhcpd_packet_printf(struct dhcp_packet * p);
 int  dhcpd_parse_option(uint8_t *packet, uint16_t packet_len, dhcp_option_t *option);
-int  dhcpd_recv_packet_check(uint8_t *packet, int len);
+int  dhcpd_recv_packet_check(uint8_t *packet, uint16_t len);
 
 #ifdef __cplusplus /* If this is a C++ compiler, end C linkage */
 }

@@ -21,7 +21,7 @@
 #include "hal_gpio.h"
 #include "ln_test_common.h"
 #include "ln_gpio_test.h"
-#include "log.h"
+#include "utils/debug/log.h"
 
 void ln_gpio_test()
 {

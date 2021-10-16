@@ -2,7 +2,7 @@
 #include "hal/hal_uart.h"
 #include "serial.h"
 #include "serial_hw.h"
-#include "ln_assert.h"
+#include "utils/debug/ln_assert.h"
 #include "hal/hal_gpio.h"
 
 
@@ -35,11 +35,26 @@ ln_serial_t uart_serial[1];
 
 static void uart0_io_pin_request(struct Serial *serial)
 {
-    hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_2,UART0_TX);
-    hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_3,UART0_RX);
-
-    hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_2,HAL_ENABLE);
-    hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_3,HAL_ENABLE);
+    if (serial->port_id == SER_PORT_UART0) {
+#if 1 // pin same as uart0 of ROM
+        hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_2,UART0_TX);
+        hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_3,UART0_RX);
+        hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_2,HAL_ENABLE);
+        hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_3,HAL_ENABLE);
+#else //pin same as uart0 of LN8825 EVK
+        hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_7,UART0_TX);
+        hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_6,UART0_RX);
+        hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_7,HAL_ENABLE);
+        hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_6,HAL_ENABLE);
+#endif
+    } else if (serial->port_id == SER_PORT_UART1){
+        hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_9,UART1_TX);
+        hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_8,UART1_RX);
+        hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_9,HAL_ENABLE);
+        hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_8,HAL_ENABLE);
+    } else if (serial->port_id == SER_PORT_UART2){
+        
+    }
 }
 
 static void hw_uart0_init(struct SerialHardware *_hw, struct Serial *serial, uint32_t baudrate)
@@ -61,11 +76,11 @@ static void hw_uart0_init(struct SerialHardware *_hw, struct Serial *serial, uin
     hal_uart_rx_mode_enable(UART0_BASE, HAL_ENABLE);
     hal_uart_tx_mode_enable(UART0_BASE, HAL_ENABLE);
     hal_uart_enable(UART0_BASE, HAL_ENABLE);
-    
+
     hal_uart_it_enable(UART0_BASE, USART_IT_RXNE);
     //uart_it_enable(UART0_BASE, USART_IT_TXE);//uart_it_enable(UART0_BASE, USART_IT_TXE);
-    NVIC_EnableIRQ(UART0_IRQn);    
-    
+    NVIC_EnableIRQ(UART0_IRQn);
+
     //request pin for uart
     uart0_io_pin_request(hw->serial);
 }
@@ -202,7 +217,7 @@ static inline void uart0_recv_data_isr(void)
     while (fifo_isfull(&hw->serial->rxfifo)){
         serial_purge_rx(hw->serial);
     }
-    
+
     ch = hal_uart_recv_data(UART0_BASE);
 
     fifo_push(&hw->serial->rxfifo, ch);
@@ -210,7 +225,7 @@ static inline void uart0_recv_data_isr(void)
 }
 
 static inline void serial_uart0_isr_callback(void)
-{    
+{
     if (hal_uart_flag_get(UART0_BASE, USART_FLAG_RXNE) && hal_uart_it_flag_en_sta_get(UART0_BASE,USART_IT_RXNE)) {
         uart0_recv_data_isr();
     }
