@@ -1,13 +1,13 @@
-#ifndef __HAL_QSPI_H__
-#define __HAL_QSPI_H__
-
-#include <stdint.h>
+#ifndef __HAL_QSPI_H
+#define __HAL_QSPI_H
 
 #ifdef __cplusplus
     extern "C" {
 #endif // __cplusplus
 
-        
+#include "hal/hal_common.h"
+#include "reg_qspi.h"
+
 #define QSPI_READ_MAX_LENGTH            0x10000
 #define QSPI_TX_FIFO_DEPTH              16
 #define QSPI_RX_FIFO_DEPTH              16
@@ -106,4 +106,4 @@ void  hal_qspi_standard_read_word(uint32_t *rd_ptr, uint32_t rd_len_in_word, uin
     extern "C" {
 #endif // __cplusplus
 
-#endif /* __HAL_QSPI_H__ */
+#endif /* __HAL_QSPI_H*/

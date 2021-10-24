@@ -12,7 +12,7 @@
 /**
         SPI主机调试说明：
                     1. 接线说明：
-                                LN8620          25WQ16
+                                LN882H          25WQ16
 
                                 PA5    ->       SCLK(6)
                                 PA10   ->       CS(1)
@@ -32,7 +32,7 @@
                     4. CS引脚也可以由SPI_CR1中的NSS和SSM控制，对应控制函数为：
 
                         SSOE -> hal_spi_ssoe_en();            
-                        SSM  -> hal_spi_nss_cfg(); 
+                        SSM  -> hal_spi_set_nss(); 
 
                         通过这两个函数可以设置CS引脚状态：
                         
@@ -89,17 +89,17 @@ void hal_spi_write_and_read_data(unsigned int spi_x_base,unsigned char *send_dat
 void ln_spi_master_init()
 {
     /* 1. 配置引脚 */
-    hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_5,SPI0_CLK);
-    //hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_10,SPI0_CSN);
-    hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_6,SPI0_MOSI);
-    hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_7,SPI0_MISO);
-    hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_5,HAL_ENABLE);
-    hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_10,HAL_DISABLE);
-    hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_6,HAL_ENABLE);
-    hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_7,HAL_ENABLE);
+    hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_5,SPI0_CLK);
+    //hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_10,SPI0_CSN);
+    hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_6,SPI0_MOSI);
+    hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_7,SPI0_MISO);
+    hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_5,HAL_ENABLE);
+    hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_10,HAL_DISABLE);
+    hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_6,HAL_ENABLE);
+    hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_7,HAL_ENABLE);
     
     //配置CS引脚
-    gpio_init_t gpio_init;
+    gpio_init_t_def gpio_init;
     memset(&gpio_init,0,sizeof(gpio_init));
     gpio_init.dir = GPIO_OUTPUT;
     gpio_init.pin = LN_SPI_TEST_CS_PIN;
@@ -467,13 +467,13 @@ void ln_spi_master_test(void)
         tx_data[i] = i + 2;
     }
 
-    LOG(LOG_LVL_INFO,"ln8620 SPI + 25WQ16 test start! \n");
+    LOG(LOG_LVL_INFO,"LN882H SPI + 25WQ16 test start! \n");
 
     /********************************SPI直接读写Flash芯片****************************************************************/
 
     //读取ID
     hal_25wq16_read_id(SPI0_BASE,rx_data);
-    LOG(LOG_LVL_INFO,"ln8620 25WQ16 ID: %x %x %x \n",rx_data[0],rx_data[1],rx_data[2]);
+    LOG(LOG_LVL_INFO,"LN882H 25WQ16 ID: %x %x %x \n",rx_data[0],rx_data[1],rx_data[2]);
     
     //读取状态
     hal_25wq16_read_status(SPI0_BASE,rx_data);
@@ -522,23 +522,23 @@ void ln_spi_master_test(void)
     //打印LOG
     if(err_cnt != 0)
     {
-        LOG(LOG_LVL_INFO,"ln8620 SPI + 25WQ16 test fail! \n");
+        LOG(LOG_LVL_INFO,"LN882H SPI + 25WQ16 test fail! \n");
     }
     else
     {
-        LOG(LOG_LVL_INFO,"ln8620 SPI + 25WQ16 test success! \n");
+        LOG(LOG_LVL_INFO,"LN882H SPI + 25WQ16 test success! \n");
     }
 
 
     /********************************SPI + DMA 读写Flash芯片****************************************************************/
-    LOG(LOG_LVL_INFO,"ln8620 SPI + DMA + 25WQ16 test start! \n");
+    LOG(LOG_LVL_INFO,"LN882H SPI + DMA + 25WQ16 test start! \n");
 
     LN_DMA_EN_STATUS = 1;
     ln_spi_dma_init();
 
     //读取ID
     hal_25wq16_read_id(SPI0_BASE,rx_data);
-    LOG(LOG_LVL_INFO,"ln8620 25WQ16 ID: %x %x %x \n",rx_data[0],rx_data[1],rx_data[2]);
+    LOG(LOG_LVL_INFO,"LN882H 25WQ16 ID: %x %x %x \n",rx_data[0],rx_data[1],rx_data[2]);
     
     //读取状态
     hal_25wq16_read_status(SPI0_BASE,rx_data);
@@ -589,11 +589,11 @@ void ln_spi_master_test(void)
     //打印LOG
     if(err_cnt != 0)
     {
-        LOG(LOG_LVL_INFO,"ln8620 SPI + DMA + 25WQ16 test fail! \n");
+        LOG(LOG_LVL_INFO,"LN882H SPI + DMA + 25WQ16 test fail! \n");
     }
     else
     {
-        LOG(LOG_LVL_INFO,"ln8620 SPI + DMA + 25WQ16 test success! \n");
+        LOG(LOG_LVL_INFO,"LN882H SPI + DMA + 25WQ16 test success! \n");
     }
     
 //    while(1)

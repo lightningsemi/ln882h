@@ -16,14 +16,10 @@
     extern "C" {
 #endif /* __cplusplus */
 
-
-#include "ln882h.h"
+#include "hal/hal_common.h"
 #include "reg_wdt.h"
-#include "hal_common.h"
 
 #define IS_WDT_ALL_PERIPH(PERIPH) ((PERIPH) == WDT_BASE)
-
-
 
 typedef enum
 {
@@ -99,10 +95,11 @@ typedef struct
 
 
             //WDT init and config
-void        hal_wdt_init(uint32_t wdt_base,wdt_init_t_def *wdt_init_struct);
+void        hal_wdt_init(uint32_t wdt_base,wdt_init_t_def *wdt_init);
+void        hal_wdt_deinit(void);
 void        hal_wdt_en(uint32_t wdt_base,hal_en_t en);
 void        hal_wdt_cnt_restart(uint32_t wdt_base);
-void        hal_wdt_set_top_value(uint32_t wdt_base,uint8_t value);
+void        hal_wdt_set_top_value(uint32_t wdt_base,wdt_top_value_t value);
 
             //WDT Interrupt
 //void        hal_wdt_it_cfg(uint32_t wdt_base,wdt_it_flag_t wdt_it_flag ,hal_en_t en);

@@ -9,7 +9,7 @@
  * 
  */
 
-#include "hal_ext.h"
+#include "hal/hal_ext.h"
 
 void hal_ext_init(ext_int_sense_t ext_int_sense,ext_trig_mode_t ext_trig_mode,hal_en_t en)
 {
@@ -336,7 +336,7 @@ uint8_t hal_ext_get_raw_it_flag(ext_it_raw_flag_t ext_raw_it_flag)
     }
     return raw_it_flag;
 }
-void hal_ext_clear_it_flag(ext_it_flag_t ext_it_flag)
+void hal_ext_clr_it_flag(ext_it_flag_t ext_it_flag)
 {
     /* check the parameters */
     hal_assert(IS_EXT_IT_FLAG(ext_it_flag));

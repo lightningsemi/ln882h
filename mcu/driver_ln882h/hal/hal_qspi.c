@@ -1,8 +1,15 @@
+/**
+ * @file     hal_qspi.c
+ * @author   BSP Team 
+ * @brief 
+ * @version  0.0.0.1
+ * @date     2021-10-19
+ * 
+ * @copyright Copyright (c) 2021 Shanghai Lightning Semiconductor Technology Co. Ltd
+ * 
+ */
 
-#include "hal/hal_common.h"
 #include "hal/hal_qspi.h"
-#include "reg_qspi.h"
-#include "reg_sysc_cmp.h"
 
 #if defined (__CC_ARM)
   #pragma push

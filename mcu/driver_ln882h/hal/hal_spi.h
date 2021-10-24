@@ -12,15 +12,15 @@
 #define __HAL_SPI_H
 
 #ifdef __cplusplus
- extern "C" {
+    extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "hal_common.h"
+#include "hal/hal_common.h"
 #include "reg_spi.h"
 
 
-#define IS_SPI_ALL_PERIPH(PERIPH) ((PERIPH) == SPI0_BASE) 
+#define IS_SPI_ALL_PERIPH(PERIPH) ((PERIPH) == SPI0_BASE || (PERIPH) == SPI1_BASE) 
 
 
 typedef enum
@@ -198,12 +198,12 @@ typedef struct
 
 
                 //spi init and config
-void            hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init_struct);
-void            hal_spi_deinit(uint32_t spi_x_base);
-void            hal_spi_nss_cfg(uint32_t spi_x_base,spi_nss_model_t software_config);
+void            hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init);
+void            hal_spi_deinit(void);
+void            hal_spi_set_nss(uint32_t spi_x_base,spi_nss_model_t software_config);
 void            hal_spi_ssoe_en(uint32_t spi_x_base,hal_en_t en);
-void            hal_spi_data_size_cfg(uint32_t spi_x_base,spi_data_size_t data_size);
-void            hal_spi_bidirectional_line_cfg(uint32_t spi_x_base,spi_direction_t spi_direction);
+void            hal_spi_set_data_size(uint32_t spi_x_base,spi_data_size_t data_size);
+void            hal_spi_set_bidirectional_line(uint32_t spi_x_base,spi_direction_t spi_direction);
 
 void            hal_spi_en(uint32_t spi_x_base,hal_en_t en);
 void            hal_spi_dma_en(uint32_t spi_x_base,spi_dma_en_t spi_dma_en, hal_en_t en);
@@ -211,13 +211,13 @@ void            hal_spi_dma_en(uint32_t spi_x_base,spi_dma_en_t spi_dma_en, hal_
                 //send / receive data 
 void            hal_spi_send_data(uint32_t spi_x_base,uint16_t data);
 uint16_t        hal_spi_recv_data(uint32_t spi_x_base);
-hal_status_t    hal_spi_wait_txe(uint32_t spi_x_base,uint32_t  timeout);
-hal_status_t    hal_spi_wait_rxne(uint32_t spi_x_base,uint32_t  timeout);
-hal_status_t    hal_spi_wait_bus_idle(uint32_t spi_x_base,uint32_t  timeout);
+uint8_t         hal_spi_wait_txe(uint32_t spi_x_base,uint32_t  timeout);
+uint8_t         hal_spi_wait_rxne(uint32_t spi_x_base,uint32_t  timeout);
+uint8_t         hal_spi_wait_bus_idle(uint32_t spi_x_base,uint32_t  timeout);
 
                 //CRC
 void            hal_spi_transmit_crc(uint32_t spi_x_base);
-void            hal_calculate_crc_en(uint32_t spi_x_base,hal_en_t en);
+void            hal_spi_calculate_crc_en(uint32_t spi_x_base,hal_en_t en);
 uint16_t        hal_spi_get_crc(uint32_t spi_x_base,spi_crc_model_t spi_crc_model);
 uint16_t        hal_spi_get_crc_polynomial(uint32_t spi_x_base);
 void            hal_spi_set_crc_polynomial(uint32_t spi_x_base,uint32_t crc_poly);
@@ -226,10 +226,10 @@ void            hal_spi_set_crc_polynomial(uint32_t spi_x_base,uint32_t crc_poly
 void            hal_spi_it_cfg(uint32_t spi_x_base,spi_it_flag_t spi_it,hal_en_t en);
 
 uint8_t         hal_spi_get_status_flag(uint32_t spi_x_base,spi_status_flag_t spi_status_flag);
-void            hal_spi_clear_status_flag(uint32_t spi_x_base,spi_status_flag_t spi_status_flag);
+void            hal_spi_clr_status_flag(uint32_t spi_x_base,spi_status_flag_t spi_status_flag);
 
 uint8_t         hal_spi_get_it_flag(uint32_t spi_x_base,spi_it_flag_t spi_it_flag);
-void            hal_spi_clear_it_flag(uint32_t spi_x_base,spi_it_flag_t spi_it_flag);
+void            hal_spi_clr_it_flag(uint32_t spi_x_base,spi_it_flag_t spi_it_flag);
 
 #ifdef __cplusplus
 }

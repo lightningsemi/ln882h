@@ -26,12 +26,12 @@
 void ln_clk_test()
 {
     /* 1. set fullmux funtion 52&53 (clk_test0 & clk_test1) */
-    hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_10,CLK_TEST0);
-    hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_11,CLK_TEST1);
+    hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_10,CLK_TEST0);
+    hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_11,CLK_TEST1);
 
     /* 2. fullmux enable*/   
-    hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_10,HAL_ENABLE);
-    hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_11,HAL_ENABLE);
+    hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_10,HAL_ENABLE);
+    hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_11,HAL_ENABLE);
 
     /* 3. clock test enable*/   
     sysc_cmp_clk_test_en0_setf(1);

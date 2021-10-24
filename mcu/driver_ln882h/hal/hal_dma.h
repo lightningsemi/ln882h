@@ -12,17 +12,12 @@
 #ifndef __HAL_DMA_H
 #define __HAL_DMA_H
 
-
 #ifdef __cplusplus
- extern "C" {
+    extern "C" {
 #endif
 
-#include "ln882h.h"
+#include "hal/hal_common.h"
 #include "reg_dma.h"
-#include "hal_common.h"
-
-
-
 
 
 #define WS2811_DATA_REG      (WS2811_BASE + 0x10)
@@ -44,8 +39,6 @@
 #define ADC_DATA_REG_5       (ADC_BASE    + 0x34)
 #define ADC_DATA_REG_6       (ADC_BASE    + 0x38)
 #define ADC_DATA_REG_7       (ADC_BASE    + 0x3C)
-
-
 
 /*
     DMA_CH1  ->   QSPI_TX
@@ -231,7 +224,8 @@ typedef struct
 
 
             //DMA init and config
-void        hal_dma_init(uint32_t dma_x_base,dma_init_t_def* dma_init_struct);    
+void        hal_dma_init(uint32_t dma_x_base,dma_init_t_def* dma_init);    
+void        hal_dma_deinit(void);
 void        hal_dma_en(uint32_t dma_x_base,hal_en_t en);
 void        hal_dma_set_dir(uint32_t dma_x_base,dma_dir_t dma_dir);         
 void        hal_dma_set_mem_addr(uint32_t dma_x_base,uint32_t dma_mem_addr);         
@@ -249,10 +243,10 @@ uint16_t    hal_dma_get_data_num(uint32_t dma_x_base);
             //interrupt
 void        hal_dma_it_cfg(uint32_t dma_x_base,dma_it_flag_t dma_it_flag,hal_en_t en);
 uint8_t     hal_dma_get_it_flag(uint32_t dma_x_base,dma_it_flag_t dma_it_flag);
-void        hal_dma_clear_it_flag(uint32_t dma_x_base,dma_it_flag_t dma_it_flag);
+void        hal_dma_clr_it_flag(uint32_t dma_x_base,dma_it_flag_t dma_it_flag);
 
 uint8_t     hal_dma_get_status_flag(uint32_t dma_x_base,dma_status_flag_t dma_status_flag);
-void        hal_dma_clear_status_flag(uint32_t dma_x_base,dma_status_flag_t dma_status_flag);
+void        hal_dma_clr_status_flag(uint32_t dma_x_base,dma_status_flag_t dma_status_flag);
 
 
 

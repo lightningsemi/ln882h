@@ -12,7 +12,11 @@
 #ifndef __HAL_ADV_TIMER_H
 #define __HAL_ADV_TIMER_H
 
-#include "hal_common.h"
+#ifdef __cplusplus
+    extern "C" {
+#endif /* __cplusplus */
+
+#include "hal/hal_common.h"
 #include "reg_adv_timer.h"
 
 
@@ -193,13 +197,6 @@ typedef enum
     ADV_TIMER_STATUS_FLAG_TRIG_RAW    = 1,        // [1] trigger flag
     ADV_TIMER_STATUS_FLAG_CMPA_RAW    = 2,        // [2] compare a flag
     ADV_TIMER_STATUS_FLAG_CMPB_RAW    = 3,        // [3] compare b flag 
-    
-    //isr
-    ADV_TIMER_STATUS_FLAG_LOAD        = 4,        // [0] load flag
-    ADV_TIMER_STATUS_FLAG_TRIG        = 5,        // [1] trigger flag
-    ADV_TIMER_STATUS_FLAG_CMPA        = 6,        // [2] compare a flag
-    ADV_TIMER_STATUS_FLAG_CMPB        = 7,        // [3] compare b flag 
-
 }adv_tim_status_flag_t;
 
 #define IS_ADV_TIM_STATUS_FLAG(FLAG)        (( FLAG >= 0) && ( FLAG >= 7 ))
@@ -298,7 +295,8 @@ typedef struct
 
 
             //Advanced Timer init and config
-void        hal_adv_tim_init(uint32_t adv_tim_x_base,adv_tim_init_t_def* adv_tim_init_struct);             
+void        hal_adv_tim_init(uint32_t adv_tim_x_base,adv_tim_init_t_def* adv_tim_init);             
+void        hal_adv_tim_deinit(void);
 
 void        hal_adv_tim_cap_en(uint32_t adv_tim_x_base,hal_en_t en);
 void        hal_adv_tim_tim_en(uint32_t adv_tim_x_base,hal_en_t en);
@@ -325,15 +323,17 @@ uint8_t     hal_adv_tim_get_cap_dege(uint32_t adv_tim_x_base);
             //interrupt
 void        hal_adv_tim_it_cfg(uint32_t adv_tim_x_base,adv_tim_it_flag_t adv_tim_it_flag,hal_en_t en);
 uint8_t     hal_adv_tim_get_it_flag(uint32_t adv_tim_x_base,adv_tim_it_flag_t adv_tim_it_flag);
-void        hal_adv_tim_clear_it_flag(uint32_t adv_tim_x_base,adv_tim_it_flag_t adv_tim_it_flag);
+void        hal_adv_tim_clr_it_flag(uint32_t adv_tim_x_base,adv_tim_it_flag_t adv_tim_it_flag);
 
 uint8_t     hal_adv_tim_get_status_flag(uint32_t adv_tim_x_base,adv_tim_status_flag_t adv_tim_status_flag);
-void        hal_adv_tim_clear_status_flag(uint32_t adv_tim_x_base,adv_tim_status_flag_t adv_tim_status_flag);
+void        hal_adv_tim_clr_status_flag(uint32_t adv_tim_x_base,adv_tim_status_flag_t adv_tim_status_flag);
 
 
 
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __HAL_ADV_TIMER_H */
 

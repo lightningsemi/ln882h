@@ -10,25 +10,29 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "hal_rtc.h"
+#include "hal/hal_rtc.h"
 
-
-        
-void hal_rtc_init(uint32_t rtc_base,rtc_init_t_def* rtc_init_struct)
+void hal_rtc_init(uint32_t rtc_base,rtc_init_t_def* rtc_init)
 {
     /* check the parameters */
     hal_assert(IS_RTC_ALL_PERIPH(rtc_base));
 
     /* Check the RTC parameters */
-    hal_assert(IS_RTC_WRAP_EN(rtc_init_struct->rtc_warp_en));
+    hal_assert(IS_RTC_WRAP_EN(rtc_init->rtc_warp_en));
 
     /* Set the RTC swap enable status */
-    if (rtc_init_struct->rtc_warp_en == RTC_WRAP_EN) {
+    if (rtc_init->rtc_warp_en == RTC_WRAP_EN) {
         rtc_rtc_wen_setf(rtc_base,1);
     }
-    else if (rtc_init_struct->rtc_warp_en == RTC_WRAP_DIS) {
+    else if (rtc_init->rtc_warp_en == RTC_WRAP_DIS) {
         rtc_rtc_wen_setf(rtc_base,0);
     }
+}
+
+void hal_rtc_deinit(void)
+{
+    sysc_awo_srstn_rtc_setf(0);
+    sysc_awo_srstn_rtc_setf(1);
 }
 
 void hal_rtc_en(uint32_t rtc_base,hal_en_t en)
@@ -60,6 +64,13 @@ void hal_rtc_set_cnt_load(uint32_t rtc_base,uint32_t load_value)
     hal_assert(IS_RTC_ALL_PERIPH(rtc_base));
     hal_assert(IS_RTC_CNT_LOAD_VALUE(load_value));
     rtc_counterload_setf(rtc_base,load_value);
+}
+
+uint32_t hal_rtc_get_cnt(uint32_t rtc_base)
+{
+    /* check the parameters */
+    hal_assert(IS_RTC_ALL_PERIPH(rtc_base));
+    return rtc_rtc_ccvr_get(rtc_base);
 }
 
         
@@ -111,7 +122,7 @@ uint8_t hal_rtc_get_it_flag(uint32_t rtc_base,rtc_it_flag_t rtc_it_flag)
     return it_flag;
 }
 
-void hal_rtc_clear_it_flag(uint32_t rtc_base,rtc_it_flag_t rtc_it_flag)
+void hal_rtc_clr_it_flag(uint32_t rtc_base,rtc_it_flag_t rtc_it_flag)
 {
     /* check the parameters */
     hal_assert(IS_RTC_ALL_PERIPH(rtc_base));

@@ -4,15 +4,15 @@
 #include "netif/ethernetif.h"
 #include "usr_app.h"
 #include "utils/system_parameter.h"
-#include "hal/hal_interrupt.h"
 #include "utils/debug/CmBacktrace/cm_backtrace.h"
+#include "utils/reboot_trace/reboot_trace.h"
+#include "utils/runtime/runtime.h"
+#include "hal/hal_interrupt.h"
 #include "ln_nvds.h"
 #include "ln_kv_api.h"
 #include "ln_at.h"
 #include "ln_utils.h"
 #include "flash_partition_table.h"
-#include "utils/reboot_trace/reboot_trace.h"
-#include "utils/runtime/runtime.h"
 
 
 int main (int argc, char* argv[])
@@ -59,10 +59,10 @@ int main (int argc, char* argv[])
 	//init system parameter
 	sysparam_integrity_check_all();
 
-    //Init wifi
+    //Init wifi stack.
     wifi_init();
 
-    //Init lwip stack(Creat lwip tack).
+    //Init lwip stack.
     lwip_tcpip_init();
 
     //Creat usr app task.

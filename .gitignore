@@ -33,3 +33,4 @@ tools/Linux/arm-none-eabi-gcc
 out
 .lib
 build/
+buildout*.txt

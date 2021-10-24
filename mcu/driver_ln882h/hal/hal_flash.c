@@ -1,12 +1,15 @@
-#include "proj_config.h"
-#include <string.h>
-#include "ln882h.h"
-#include "hal/hal_qspi.h"
+/**
+ * @file     hal_flash.c
+ * @author   BSP Team 
+ * @brief    This file provides Flash function.
+ * @version  0.0.0.1
+ * @date     2021-10-19
+ * 
+ * @copyright Copyright (c) 2021 Shanghai Lightning Semiconductor Technology Co. Ltd
+ * 
+ */
+
 #include "hal/hal_flash.h"
-#include "hal/hal_common.h"
-#include "hal/hal_cache.h"
-
-
 
 #if (defined(OS_TICK_COMPENSATE))
 #include "utils/runtime/runtime.h"
@@ -678,7 +681,7 @@ void hal_flash_security_area_read(uint32_t offset, uint32_t len, uint8_t * buf)
 /**
  * @brief Set Quad mode.
  * That is, WP# becomes IO2 and HOLD# becoms IO3. The WP# and HOLD# inputs are not monitored
- * for their normal functions and are internally set to haigh (inactive).
+ * for their normal functions and are internally set to high (inactive).
  *
  * @return uint8_t
  */

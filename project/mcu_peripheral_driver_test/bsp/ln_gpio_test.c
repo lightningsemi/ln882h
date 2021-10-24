@@ -25,7 +25,7 @@
 
 void ln_gpio_test()
 {
-    gpio_init_t gpio_init;
+    gpio_init_t_def gpio_init;
     memset(&gpio_init,0,sizeof(gpio_init));        //清零结构体
 
 //    /* 引脚输出测试 */
@@ -60,33 +60,33 @@ void ln_gpio_test()
     hal_gpio_init(GPIOB_BASE,&gpio_init);          //初始化GPIO
 
     /* 设置下降沿中断 */
-    hal_gpio_pin_int_type_set(GPIOB_BASE,GPIO_PIN_6,GPIO_INT_FALLING);
-    hal_gpio_pin_int_en(GPIOB_BASE,GPIO_PIN_6,HAL_ENABLE);    
+    hal_gpio_pin_it_cfg(GPIOB_BASE,GPIO_PIN_6,GPIO_INT_FALLING);
+    hal_gpio_pin_it_en(GPIOB_BASE,GPIO_PIN_6,HAL_ENABLE);    
 
-    hal_gpio_pin_int_type_set(GPIOB_BASE,GPIO_PIN_5,GPIO_INT_FALLING);
-    hal_gpio_pin_int_en(GPIOB_BASE,GPIO_PIN_5,HAL_ENABLE);         
+    hal_gpio_pin_it_cfg(GPIOB_BASE,GPIO_PIN_5,GPIO_INT_FALLING);
+    hal_gpio_pin_it_en(GPIOB_BASE,GPIO_PIN_5,HAL_ENABLE);         
     NVIC_SetPriority(GPIOB_IRQn,1);                //配置中断优先级
     NVIC_EnableIRQ(GPIOB_IRQn);  
 
     while(1)
     {
         ln_delay_ms(500);
-        //hal_gpio_toggle(GPIOB_BASE,GPIO_PIN_5);    //翻转引脚
+        //hal_gpio_pin_toggle(GPIOB_BASE,GPIO_PIN_5);    //翻转引脚
     }
 }
 
 
 void GPIOB_IRQHandler()
 {
-    if(hal_gpio_pin_int_status_get(GPIOB_BASE,GPIO_PIN_5) == HAL_SET)
+    if(hal_gpio_pin_get_it_flag(GPIOB_BASE,GPIO_PIN_5) == HAL_SET)
     {
-        hal_gpio_pin_int_status_clear(GPIOB_BASE,GPIO_PIN_5);
+        hal_gpio_pin_clr_it_flag(GPIOB_BASE,GPIO_PIN_5);
         LOG(LOG_LVL_INFO,"KEY_1 has pressed! \r\n");
     }
     
-    if(hal_gpio_pin_int_status_get(GPIOB_BASE,GPIO_PIN_6) == HAL_SET)
+    if(hal_gpio_pin_get_it_flag(GPIOB_BASE,GPIO_PIN_6) == HAL_SET)
     {
-        hal_gpio_pin_int_status_clear(GPIOB_BASE,GPIO_PIN_6);
+        hal_gpio_pin_clr_it_flag(GPIOB_BASE,GPIO_PIN_6);
         LOG(LOG_LVL_INFO,"KEY_2 has pressed! \r\n");
     }
 }

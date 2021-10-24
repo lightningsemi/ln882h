@@ -106,6 +106,7 @@ set(MCU_SRC
     ${MCU_LN882X_DIR}/driver_${CHIP_SERIAL}/hal/hal_misc.c
     ${MCU_LN882X_DIR}/driver_${CHIP_SERIAL}/hal/hal_ext.c
     ${MCU_LN882X_DIR}/driver_${CHIP_SERIAL}/hal/hal_timer.c
+    ${MCU_LN882X_DIR}/driver_${CHIP_SERIAL}/hal/hal_efuse.c
     ${MCU_LN882X_DIR}/${CHIP_SERIAL}/system_${CHIP_SERIAL}.c
 )
 

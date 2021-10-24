@@ -1,0 +1,35 @@
+
+stages:
+    - build
+
+
+job_build:
+    stage: build
+    script:
+        - echo "======== Build Start ========"
+        - whoami
+        - python --version
+        - python3 --version
+        - git --version
+        - cmake --version
+        - ninja --version
+        - arm-none-eabi-gcc --version
+        - make --version
+        - python ln_sdk_build_check.py > build.log
+        - echo "======== Build Finsh ========"
+    only:
+        - develop
+    tags: 
+        - robot-win
+
+job_when_error:
+    stage: build
+    script:
+        - echo "======== log start ========"
+        - cat build.log
+        - echo "======== log end   ========"
+    when: on_failure
+    only:
+        - develop
+    tags: 
+        - robot-win

@@ -14,6 +14,4 @@
 void ln_delay_us(volatile unsigned int time);
 void ln_delay_ms(unsigned int time);
 
-
-
 #endif

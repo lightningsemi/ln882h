@@ -17,9 +17,9 @@
 
 
  
-#include "ln_i2c_test.h"
+
 #include "ln_mpu9250_test.h"
-#include "hal/hal_common.h"
+
 #include "ln_test_common.h" 
 
 //初始化MPU9250
@@ -48,7 +48,11 @@ uint8_t ln_mpu_init(void)
         ln_mpu_write_byte(MPU9250_ADDR,MPU_PWR_MGMT1_REG,0X01);      //设置CLKSEL,PLL X轴为参考
         ln_mpu_write_byte(MPU9250_ADDR,MPU_PWR_MGMT2_REG,0X00);      //加速度与陀螺仪都工作
         ln_mpu_set_rate(50);                                         //设置采样率为50Hz   
-    }else return 1;
+    }
+    else 
+    {
+        return 0;
+    }
  
     res=ln_mpu_read_byte(AK8963_ADDR,MAG_WIA);                //读取AK8963 ID   
     if(res==AK8963_ID)
@@ -57,9 +61,12 @@ uint8_t ln_mpu_init(void)
         ln_delay_ms(50);
         ln_mpu_write_byte(AK8963_ADDR,MAG_CNTL1,0X11);        //设置AK8963为单次测量
         ln_delay_ms(50);
-    }else return 1;
-
-    return 0;
+    }
+    else 
+    {
+        return 0;
+    }
+    return 1;
 }
 
 //设置MPU9250陀螺仪传感器满量程范围
@@ -129,7 +136,7 @@ uint8_t ln_mpu_get_gyroscope(short *gx,short *gy,short *gz)
 {
     uint8_t buf[6],res; 
     res=ln_mpu_read_len(MPU9250_ADDR,MPU_GYRO_XOUTH_REG,6,buf);
-    if(res==0)
+    if(res==1)
     {
         *gx=((uint16_t)buf[0]<<8)|buf[1];  
         *gy=((uint16_t)buf[2]<<8)|buf[3];  
@@ -145,7 +152,7 @@ uint8_t ln_mpu_get_accelerometer(short *ax,short *ay,short *az)
 {
     uint8_t buf[6],res;  
     res=ln_mpu_read_len(MPU9250_ADDR,MPU_ACCEL_XOUTH_REG,6,buf);
-    if(res==0)
+    if(res==1)
     {
         *ax=((uint16_t)buf[0]<<8)|buf[1];  
         *ay=((uint16_t)buf[2]<<8)|buf[3];  
@@ -162,7 +169,7 @@ uint8_t ln_mpu_get_magnetometer(short *mx,short *my,short *mz)
 {
     uint8_t buf[6],res; 
     res=ln_mpu_read_len(AK8963_ADDR,MAG_XOUT_L,6,buf);
-    if(res==0)
+    if(res==1)
     {
         *mx=((uint16_t)buf[1]<<8)|buf[0];  
         *my=((uint16_t)buf[3]<<8)|buf[2];  
@@ -223,6 +230,5 @@ uint8_t ln_mpu_write_byte(uint8_t addr,uint8_t reg,uint8_t data)
 uint8_t ln_mpu_read_byte(uint8_t addr,uint8_t reg)
 {
     unsigned char res = 0;
-    hal_i2c_master_7bit_read_target_address(I2C_BASE,addr,&reg,1,&res,1);
-    return res;  
+    return hal_i2c_master_7bit_read_target_address(I2C_BASE,addr,&reg,1,&res,1); 
 }

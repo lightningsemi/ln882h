@@ -17,9 +17,9 @@
  extern "C" {
 #endif
 
-#include "ln882h.h"
+#include "hal/hal_common.h"
 #include "reg_sdio.h"
-#include "hal_common.h"
+
 
 typedef enum {
     SDIO_FUNC0 = 0,

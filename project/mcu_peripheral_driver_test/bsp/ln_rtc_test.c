@@ -47,7 +47,7 @@ void ln_rtc_test(void)
     
     //hal_misc_awo_get_i_rco32k_period_ns();    //32K的校准值
 
-    gpio_init_t gpio_init;
+    gpio_init_t_def gpio_init;
     memset(&gpio_init,0,sizeof(gpio_init));        //清零结构体
     gpio_init.dir = GPIO_OUTPUT;                   //配置GPIO方向，输入或者输出
     gpio_init.pin = GPIO_PIN_5;                    //配置GPIO引脚号
@@ -79,7 +79,7 @@ void ln_sleeptimer_test(void)
     //使用之前先做校准
     hal_misc_awo_set_o_cpu_sleep_counter_bp(0);
 
-    gpio_init_t gpio_init;
+    gpio_init_t_def gpio_init;
     memset(&gpio_init,0,sizeof(gpio_init));        //清零结构体
     gpio_init.dir = GPIO_OUTPUT;                   //配置GPIO方向，输入或者输出
     gpio_init.pin = GPIO_PIN_5;                    //配置GPIO引脚号
@@ -97,15 +97,15 @@ void ln_sleeptimer_test(void)
 void RFSLP_IRQHandler()
 {
     hal_misc_awo_set_o_cpu_sleep_inten(0);
-    hal_gpio_toggle(GPIOB_BASE,GPIO_PIN_5);
+    hal_gpio_pin_toggle(GPIOB_BASE,GPIO_PIN_5);
 }
 
 void RTC_IRQHandler()
 {
    if(hal_rtc_get_it_flag(RTC_BASE,RTC_IT_FLAG_ACTIVE) == 1)
    {
-       hal_gpio_toggle(GPIOB_BASE,GPIO_PIN_5);                  //翻转引脚
-       hal_rtc_clear_it_flag(RTC_BASE,RTC_IT_FLAG_ACTIVE);      //清除标志位
+       hal_gpio_pin_toggle(GPIOB_BASE,GPIO_PIN_5);                  //翻转引脚
+       hal_rtc_clr_it_flag(RTC_BASE,RTC_IT_FLAG_ACTIVE);      //清除标志位
    }
 }
 

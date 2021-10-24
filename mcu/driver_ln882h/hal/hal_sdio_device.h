@@ -10,15 +10,15 @@
  */
 
 
-#ifndef __HAL_SDIO_DEVICE_H__
-#define __HAL_SDIO_DEVICE_H__
+#ifndef __HAL_SDIO_DEVICE_H
+#define __HAL_SDIO_DEVICE_H
 
 #ifdef __cpluscplus
     extern "C" {
 #endif // __cpluscplus
 
-#include "ln882h.h"
-#include "hal_common.h"
+
+#include "hal/hal_common.h"
 #include "reg_sdio.h"
 
 
@@ -201,6 +201,7 @@ typedef struct {
 
 
 void      hal_sdio_device_init(sdio_init_t *sdio_init);
+void      hal_sdio_device_deinit(void);
 void      hal_sdio_device_clear_busy(void);
 void      hal_sdio_device_set_busy(void);
 uint32_t* hal_sdio_device_get_recv_buf_addr(void);
@@ -223,8 +224,8 @@ void      hal_sdio_device_it_clr_flag(sdio_dev_int_flag_t sdio_dev_int_flag);
 
 
 #ifdef __cpluscplus
-    }
+}
 #endif // __cpluscplus
 
-#endif // __HAL_SDIO_DEVICE_H__
+#endif // __HAL_SDIO_DEVICE_H
 

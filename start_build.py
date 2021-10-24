@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
+#
+# Copyright 2021 Shanghai Lightning Semiconductor Technology Co., LTD
 
-"""
-@date: 2021-09-07 09:37:03
-@author: shenglin.zhan@lightningsemi.com
-@description: build script for windows/linux platform.
-"""
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import sys
 import os
@@ -13,14 +21,36 @@ import shutil
 import argparse
 import subprocess
 
+# NOTE: first argument of this script.
+user_action     = "config"                  # default action.
+
+# NOTE: read from top CMakeLists.txt.
+user_project    = "wifi_mcu_basic_example"  # default user project.
+
+# NOTE: read from top CMakeListx.txt
+build_type      = "debug"
+
+# NOTE: set up cmake build directory, build-proj-debug.
+build_path      = "build"
+
+# NOTE: select generator.
+make_generator  = "Ninja"
+# make_generator  = "Unix Makefiles"
+
 def read_cmake_config():
     """
     Read configuration from top CMakeLists.txt.
     Return True on success, return False on failure.
     """
     FLAG_USER_PROJECT = "USER_PROJECT"
+    FLAG_BUILD_TYPE   = "CMAKE_BUILD_TYPE"
+
     global user_project
+    global build_type
     global build_path
+
+    found_user_project  = False
+    found_build_type    = False
 
     fObj = None
     if sys.version_info.major == 3:
@@ -32,17 +62,37 @@ def read_cmake_config():
         for line in fObj:
                 line = line.strip()
                 if line.startswith(("set", "SET")):
-                    index = line.find(FLAG_USER_PROJECT)
-                    if index >= 0:
-                        left_bracket = line.find("(")
-                        right_bracket = line.find(")")
-                        if (left_bracket > 0) and (right_bracket > 0):
-                            user_project = line[(left_bracket+1):right_bracket].split(" ")[-1]
-                            print("user_project = {_p}".format(_p=user_project))
-                            build_path = "-".join([build_path, user_project.replace('"', "")])
-                            print("build_path = {_b}".format(_b=build_path))
-                        return True
+                    if not found_user_project:
+                        index = line.find(FLAG_USER_PROJECT)
+                        if index >= 0:
+                            left_bracket = line.find("(")
+                            right_bracket = line.find(")")
+                            if (left_bracket > 0) and (right_bracket > 0):
+                                temp_array = [item for item in line[(left_bracket+1):right_bracket].split(" ") if len(item) > 1]
+                                user_project = temp_array[-1]
+                                print("user_project = {_p}".format(_p=user_project))
+
+                                found_user_project = True
+                    if not found_build_type:
+                        index = line.find(FLAG_BUILD_TYPE)
+                        if index >= 0:
+                            left_bracket = line.find("(")
+                            right_bracket = line.find(")")
+                            if (left_bracket > 0) and (right_bracket > 0):
+                                array_temp = [item for item in line[(left_bracket+1):right_bracket].strip().split(" ") if len(item) > 1]
+                                build_type = array_temp[1]
+                                print("build_type = {_bt}".format(_bt=build_type))
+                                found_build_type = True
+
+                    if found_user_project and found_build_type:
+                        break
         fObj.close()
+
+    if found_user_project and found_build_type:
+        build_path = "build-{_proj}-{_tp}".format(_tp=build_type.lower(), _proj=user_project)
+        print("build_path = {_b}".format(_b=build_path))
+        return True
+
     print("Warning: read configuration from top CMakeLists.txt!!!")
     print("     Please check if there are following lines in CMakeLists.txt:")
     print("")
@@ -119,20 +169,6 @@ def action_jflash():
     print("------  reset the chip and the code starts running...  ------")
 
 
-# NOTE: read from top CMakeLists.txt.
-user_project    = "wifi_mcu_basic_example"  # default user project.
-
-# NOTE: first argument of this script.
-user_action     = "config"                  # default action.
-
-# NOTE: set up cmake build directory.
-build_path      = "build"
-
-# NOTE: select generator.
-make_generator  = "Ninja"
-# make_generator  = "Unix Makefiles"
-
-
 def call_sdk_env_check():
     script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "python_scripts", "sdk_env_check.py")
     cmd = " ".join(["python", script_path])
@@ -140,6 +176,7 @@ def call_sdk_env_check():
     if retcode != 0:
         return False
     return True
+
 
 if __name__ == "__main__":
 

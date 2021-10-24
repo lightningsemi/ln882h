@@ -373,7 +373,7 @@ unsigned char ln_ds18b20_id_num = 0;
 
 void ln_ds18b20_init()
 {
-    gpio_init_t gpio_init;
+    gpio_init_t_def gpio_init;
 	memset(&gpio_init,0,sizeof(gpio_init));
     gpio_init.dir = GPIO_OUTPUT;
     gpio_init.pin = GPIO_PIN_7;

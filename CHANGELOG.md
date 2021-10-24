@@ -1,6 +1,6 @@
-| 日期                | 当前SDK版本 | 上游版本 | 摘要                                                         |
-| :------------------ | :---------- | :------- | :----------------------------------------------------------- |
-|                     |             |          |                                                              |
-| 2021-10-16 17:58:00 | V0.2        | eddb49be | 1. 正式发布ln882h wifi mac stack，完全解除与platform（soc、os、net...）的耦合，全面深度重构和优化，精简api。<br />2. 全新的cmake构建体系 。<br />3. 更新keil MDK(win平台)，gcc(win/linux平台)开发环境指导文档。<br />4. 增加LN882H分区地址辅助计算工具。<br />5. 全新的编译预处理、后处理脚本工具体系。<br />6. 新版AT命令组件。<br />7. 修复armcc5，gcc编译警告若干。<br />8. 更新peripher hal driver.<br />9. 更新Jflash烧录配置参数。 |
-| 2021-09-30 16:10:00 | V0.1        | 38a947c8 | LN882H SDK 初始版本                                          |
+| 日期                     | 当前SDK版本 | 上游版本 | 摘要                                                         |
+| :----------------------- | :---------- | :------- | :----------------------------------------------------------- |
+| 2021-10-24<br />18:19:00 | V1.0        | 3037bbcc | 1. 正式发布ln882h ble stack(Lib Ver 1.0.1), 完全解除与platform（soc、os）的耦合，部分重构和优化，精简api.<br/>2. 更新ln882h wifi mac stack(Lib Ver 1.0.3).<br/>  2.1. 优化温度补偿校准.<br/>  2.2. 修复隐藏连接隐藏AP的问题.<br/>  2.3. 优化改善WiFi BLE共存稳定性.<br/>  2.4. 修复暗室测试过程中非标速率集导致的死循环问题.<br/>  2.5. WiFi发射功率依据eFuse标定值.<br/>  2.6. 更新WiFi tx power VS time. <br/>  2.7. 优化 11b EVM.<br/>  2.8. 增加在不同速率集下使用不同的发射功率的功能.<br/>  2.9. 优化 ram/codesize.<br/>3. 实现WiFi BLE共存，优化改善共存稳定性。<br/>4. wifi/ble stack (gcc/armcc)lib 使用O1编译.<br/>5. 更新peripher hal driver.<br/>6. 更新peripher driver test.<br/>7. 修复部分编译警告.<br/>8. 新增keil MDK(win平台)，gcc(win/linux平台)编译自动化检查功能.<br/>9. 新增ble_mcu_data_trans, combo_mcu_basic_example示例工程，支持keil/gcc编译.<br/>10. 新增Tuya OS的GCC编译配置入口（已作为submodule适配到Tuya OS SDK）<br/>11. 更新部分示例工程的分区表配置.<br/>12. 部分代码使用Apache License V2.0<br/>13. 更新CMake list. |
+| 2021-10-16 17:58:00      | V0.2        | eddb49be | 1. 正式发布ln882h wifi mac stack，完全解除与platform（soc、os、net...）的耦合，全面深度重构和优化，精简api。<br />2. 全新的cmake构建体系 。<br />3. 更新keil MDK(win平台)，gcc(win/linux平台)开发环境指导文档。<br />4. 增加LN882H分区地址辅助计算工具。<br />5. 全新的编译预处理、后处理脚本工具体系。<br />6. 新版AT命令组件。<br />7. 修复armcc5，gcc编译警告若干。<br />8. 更新peripher hal driver.<br />9. 更新Jflash烧录配置参数。 |
+| 2021-09-30 16:10:00      | V0.1        | 38a947c8 | LN882H SDK 初始版本                                          |
 

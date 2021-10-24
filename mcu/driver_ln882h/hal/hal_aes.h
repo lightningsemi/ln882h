@@ -15,13 +15,8 @@
  extern "C" {
 #endif
 
-/* Includes ------------------------------------------------------------------*/
-
-#include "ln882h.h"
+#include "hal/hal_common.h"
 #include "reg_aes.h"
-#include "hal_common.h"
-
-
 
 #define IS_AES_ALL_PERIPH(PERIPH) (((PERIPH) == AES_BASE) ) 
 
@@ -103,7 +98,8 @@ typedef struct
 
 
             //AES init and config
-void        hal_aes_init(uint32_t aes_base,aes_init_t_def* aes_init_struct);              
+void        hal_aes_init(uint32_t aes_base,aes_init_t_def* aes_init);              
+void        hal_aes_deinit(void);
 void        hal_aes_start(uint32_t aes_base);
 
 void        hal_aes_set_plain_text(uint32_t aes_base,uint8_t *data,uint32_t data_len);
@@ -117,7 +113,7 @@ uint8_t     hal_aes_get_status_flag(uint32_t aes_base,aes_status_flag_t aes_stat
             //interrupt
 void        hal_aes_it_cfg(uint32_t aes_base,aes_it_flag_t aes_it_flag,hal_en_t en);
 uint8_t     hal_aes_get_it_flag(uint32_t aes_base,aes_it_flag_t aes_it_flag);
-void        hal_aes_clear_it_flag(uint32_t aes_base,aes_it_flag_t aes_it_flag);
+void        hal_aes_clr_it_flag(uint32_t aes_base,aes_it_flag_t aes_it_flag);
 
 
 

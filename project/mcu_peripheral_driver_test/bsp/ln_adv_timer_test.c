@@ -50,14 +50,14 @@ void ln_adv_timer_test(void)
     __enable_irq();
 
     /* pwm 引脚初始化 */
-    hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_8,ADV_TIMER_PWM0);
-    hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_9,ADV_TIMER_PWM1);
-    hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_7,ADV_TIMER_PWM2);
-    hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_8,HAL_ENABLE);
-    hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_9,HAL_ENABLE);  
-    hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_7,HAL_ENABLE);  
+    hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_8,ADV_TIMER_PWM0);
+    hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_9,ADV_TIMER_PWM1);
+    hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_7,ADV_TIMER_PWM2);
+    hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_8,HAL_ENABLE);
+    hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_9,HAL_ENABLE);  
+    hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_7,HAL_ENABLE);  
     
-    gpio_init_t gpio_init;
+    gpio_init_t_def gpio_init;
     memset(&gpio_init,0,sizeof(gpio_init));        //清零结构体
     gpio_init.dir = GPIO_OUTPUT;                   //配置GPIO方向，输入或者输出
     gpio_init.pin = GPIO_PIN_8;                    //配置GPIO引脚号
@@ -102,10 +102,10 @@ void ln_adv_timer_test(void)
     NVIC_SetPriority(ADV_TIMER_IRQn,     4);
     NVIC_EnableIRQ(ADV_TIMER_IRQn);
     
-    uint32_t cmp_a_value = 0;       //通道a的比较值
+    volatile uint32_t cmp_a_value = 0;       //通道a的比较值
     float    duty_value  = 0;       //占空比
     uint8_t  inc_dir     = 0;       //占空比递增/减方向
-    uint32_t pulse_cnt   = 0;       //脉冲计数
+    volatile uint32_t pulse_cnt   = 0;       //脉冲计数
     
     while(1)
     {
@@ -132,24 +132,24 @@ void ADV_TIMER_IRQHandler()
 {
     if(hal_adv_tim_get_it_flag(ADV_TIMER_0_BASE,ADV_TIMER_IT_FLAG_CMPB) == 1)
     {
-        hal_adv_tim_clear_it_flag(ADV_TIMER_0_BASE,ADV_TIMER_IT_FLAG_CMPB);
-        //hal_gpio_toggle(GPIOB_BASE,GPIO_PIN_7);
+        hal_adv_tim_clr_it_flag(ADV_TIMER_0_BASE,ADV_TIMER_IT_FLAG_CMPB);
+        //hal_gpio_pin_toggle(GPIOB_BASE,GPIO_PIN_7);
     }
     if(hal_adv_tim_get_it_flag(ADV_TIMER_0_BASE,ADV_TIMER_IT_FLAG_CMPA) == 1)
     {
-        hal_adv_tim_clear_it_flag(ADV_TIMER_0_BASE,ADV_TIMER_IT_FLAG_CMPA);
-        //hal_gpio_toggle(GPIOB_BASE,GPIO_PIN_8);
+        hal_adv_tim_clr_it_flag(ADV_TIMER_0_BASE,ADV_TIMER_IT_FLAG_CMPA);
+        //hal_gpio_pin_toggle(GPIOB_BASE,GPIO_PIN_8);
     }
     if(hal_adv_tim_get_it_flag(ADV_TIMER_0_BASE,ADV_TIMER_IT_FLAG_LOAD) == 1)
     {
-        hal_adv_tim_clear_it_flag(ADV_TIMER_0_BASE,ADV_TIMER_IT_FLAG_LOAD);
-        //hal_gpio_toggle(GPIOB_BASE,GPIO_PIN_7);
+        hal_adv_tim_clr_it_flag(ADV_TIMER_0_BASE,ADV_TIMER_IT_FLAG_LOAD);
+        //hal_gpio_pin_toggle(GPIOB_BASE,GPIO_PIN_7);
     }
     
     if(hal_adv_tim_get_it_flag(ADV_TIMER_1_BASE,ADV_TIMER_IT_FLAG_LOAD) == 1)
     {
-        hal_adv_tim_clear_it_flag(ADV_TIMER_1_BASE,ADV_TIMER_IT_FLAG_LOAD);
-        hal_gpio_toggle(GPIOB_BASE,GPIO_PIN_8);
+        hal_adv_tim_clr_it_flag(ADV_TIMER_1_BASE,ADV_TIMER_IT_FLAG_LOAD);
+        hal_gpio_pin_toggle(GPIOB_BASE,GPIO_PIN_8);
     }
 }
 

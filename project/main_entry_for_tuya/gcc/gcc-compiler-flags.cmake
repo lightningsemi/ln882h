@@ -63,7 +63,7 @@ set(CMAKE_ASM_FLAGS  "${ASFLAGS}  -x  assembler-with-cpp"
 
 set(LINKER_SCRIPT   "${CMAKE_CURRENT_SOURCE_DIR}/platforms/${CHIP_SERIAL}/${CHIP_SERIAL}-sdk/project/main_entry_for_tuya/gcc/${CHIP_SERIAL}.ld")
 
-set(EXTRA_LINK_FLAGS  "-Wl,-Map=${PROJECT_NAME}.map,--cref,--no-warn-mismatch \
+set(EXTRA_LINK_FLAGS  "-Wl,-Map=${USER_PROJECT}.map,--cref,--no-warn-mismatch \
     -Wl,--print-memory-usage  --specs=nano.specs  --specs=nosys.specs"
 )
 

@@ -1,6 +1,12 @@
 #ifndef  __LN_COMPILER_H__
 #define  __LN_COMPILER_H__
 
+#include "cmsis_compiler.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*------------------ RealView Compiler -----------------*/
 #if defined(__CC_ARM)
   #define ARMCC_V5
@@ -91,10 +97,6 @@
   #define __ASM__               __asm
 #endif
 
-#ifndef __ASM
-  #define __ASM                 __asm
-#endif
-
 #ifndef __VOLATILE__
   #define __VOLATILE__          volatile
 #endif
@@ -107,12 +109,8 @@
   #define __STATIC              static
 #endif
 
-#ifndef __INLINE
-  #define __INLINE              static inline
-#endif
-
 #ifndef __INLINE__
-  #define __INLINE__            static inline
+  #define __INLINE__            inline
 #endif
 
 #ifndef __STATIC_INLINE__
@@ -131,5 +129,8 @@
     #define __BLEIRQ
 #endif
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* __LN_COMPILER_H__ */
 

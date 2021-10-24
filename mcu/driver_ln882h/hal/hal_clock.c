@@ -10,8 +10,6 @@
  */
 
 #include "hal/hal_clock.h"
-#include "reg_sysc_awo.h"
-#include "reg_sysc_cmp.h"
 
 uint32_t hal_clock_src_clk = 0;
 uint32_t hal_clock_ahb_clk = 0;
@@ -87,7 +85,7 @@ void hal_clock_select_clk_src(clk_src_t clk_src)
     }
 }
 
-void hal_clock_set_pll_clk_div(clk_pllclk_mul_t clk_pllclk_mul)
+void hal_clock_set_pll_clk_mul(clk_pllclk_mul_t clk_pllclk_mul)
 {
     /* check the parameters */
     hal_assert(IS_CLK_PLL_CLK_MUL(clk_pllclk_mul));

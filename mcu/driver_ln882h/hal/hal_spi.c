@@ -10,25 +10,25 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "hal_spi.h"
+#include "hal/hal_spi.h"
 
 
-void hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init_struct)
+void hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init)
 {
 
     /* check the parameters */
     hal_assert(IS_SPI_ALL_PERIPH(spi_x_base));
 
     /* Check the SPI parameters */
-    hal_assert(IS_SPI_DIRECTION_MODE(spi_init_struct->spi_direction));
-    hal_assert(IS_SPI_MODE(spi_init_struct->spi_mode));
-    hal_assert(IS_SPI_DATASIZE(spi_init_struct->spi_data_size));
-    hal_assert(IS_SPI_CPOL(spi_init_struct->spi_cpol));
-    hal_assert(IS_SPI_CPHA(spi_init_struct->spi_cpha));
-    hal_assert(IS_SPI_NSS_MODEL(spi_init_struct->spi_nss_mode));
-    hal_assert(IS_SPI_BAUDRATE_PRESCALER(spi_init_struct->spi_baud_rate_prescaler));
-    hal_assert(IS_SPI_FIRST_BIT(spi_init_struct->spi_first_bit));
-    hal_assert(IS_SPI_CRC_POLYNOMIAL(spi_init_struct->spi_crc_polynomial));
+    hal_assert(IS_SPI_DIRECTION_MODE(spi_init->spi_direction));
+    hal_assert(IS_SPI_MODE(spi_init->spi_mode));
+    hal_assert(IS_SPI_DATASIZE(spi_init->spi_data_size));
+    hal_assert(IS_SPI_CPOL(spi_init->spi_cpol));
+    hal_assert(IS_SPI_CPHA(spi_init->spi_cpha));
+    hal_assert(IS_SPI_NSS_MODEL(spi_init->spi_nss_mode));
+    hal_assert(IS_SPI_BAUDRATE_PRESCALER(spi_init->spi_baud_rate_prescaler));
+    hal_assert(IS_SPI_FIRST_BIT(spi_init->spi_first_bit));
+    hal_assert(IS_SPI_CRC_POLYNOMIAL(spi_init->spi_crc_polynomial));
 
     /* Enable the spi clock */
     //awo_clk_sen_spi_setf();
@@ -37,7 +37,7 @@ void hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init_struct)
 
     /* Set BIDImode, BIDIOE and RxONLY bits according to SPI_Direction value */
     
-    switch (spi_init_struct->spi_direction)
+    switch (spi_init->spi_direction)
     {
         case SPI_DIRECTION_2LINES_FULLDUPLEX:
             spi_bidimode_setf(spi_x_base,0);
@@ -64,7 +64,7 @@ void hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init_struct)
     }
 
     /* Set SSM, SSI and MSTR bits according to SPI_Mode and SPI_NSS values */
-    switch (spi_init_struct->spi_nss_mode)
+    switch (spi_init->spi_nss_mode)
     {
         case SPI_NSS_HARD:
             spi_ssm_setf(spi_x_base,0);
@@ -76,7 +76,7 @@ void hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init_struct)
             break;
     }
 
-    switch (spi_init_struct->spi_mode)
+    switch (spi_init->spi_mode)
     {
         case SPI_MODE_SLAVE:
             spi_mstr_setf(spi_x_base,0);
@@ -89,7 +89,7 @@ void hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init_struct)
     }
 
     /* Set LSBFirst bit according to SPI_FirstBit value */
-    switch (spi_init_struct->spi_first_bit)
+    switch (spi_init->spi_first_bit)
     {
         case SPI_FIRST_BIT_MSB:
             spi_lsbfirst_setf(spi_x_base,0);
@@ -102,7 +102,7 @@ void hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init_struct)
     }
 
     /* Set BR bits according to SPI_BaudRatePrescaler value */
-    switch (spi_init_struct->spi_baud_rate_prescaler)
+    switch (spi_init->spi_baud_rate_prescaler)
     {
         case SPI_BAUDRATEPRESCALER_2:
             spi_br_setf(spi_x_base,0);
@@ -133,7 +133,7 @@ void hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init_struct)
     }
 
     /* Set CPOL bit according to SPI_CPOL value */
-    switch (spi_init_struct->spi_cpol)
+    switch (spi_init->spi_cpol)
     {
         case SPI_CPOL_LOW:
             spi_cpol_setf(spi_x_base,0);
@@ -146,7 +146,7 @@ void hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init_struct)
     }
 
     /* Set CPHA bit according to SPI_CPHA value */
-    switch (spi_init_struct->spi_cpha)
+    switch (spi_init->spi_cpha)
     {
         case SPI_CPHA_1EDGE:
             spi_cpol_setf(spi_x_base,0);
@@ -159,7 +159,7 @@ void hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init_struct)
     }
     
     /* Set data size */
-    switch (spi_init_struct->spi_data_size)
+    switch (spi_init->spi_data_size)
     {
         case SPI_DATASIZE_8B:
             spi_dff_setf(spi_x_base,0);
@@ -172,12 +172,16 @@ void hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init_struct)
     }
 }
 
-void hal_spi_deinit(uint32_t spi_x_base)
+void hal_spi_deinit(void)
 {   
-    //TODO
+    sysc_cmp_srstn_spi0_setf(0);
+    sysc_cmp_srstn_spi0_setf(1);
+
+    sysc_cmp_srstn_spi1_setf(0);
+    sysc_cmp_srstn_spi1_setf(1);
 }
 
-void hal_spi_nss_cfg(uint32_t spi_x_base,spi_nss_model_t software_config)
+void hal_spi_set_nss(uint32_t spi_x_base,spi_nss_model_t software_config)
 {
     /* Check the parameters */
     hal_assert(IS_SPI_ALL_PERIPH(spi_x_base));
@@ -282,7 +286,7 @@ void  hal_spi_it_cfg(uint32_t spi_x_base,spi_it_flag_t spi_it,hal_en_t en)
 }
 
 
-void hal_spi_data_size_cfg(uint32_t spi_x_base,spi_data_size_t data_size)
+void hal_spi_set_data_size(uint32_t spi_x_base,spi_data_size_t data_size)
 {
     /* Check the parameters */
     hal_assert(IS_SPI_ALL_PERIPH(spi_x_base));
@@ -301,7 +305,7 @@ void hal_spi_data_size_cfg(uint32_t spi_x_base,spi_data_size_t data_size)
 }
 
 
-void hal_spi_bidirectional_line_cfg(uint32_t spi_x_base,spi_direction_t spi_direction)
+void hal_spi_set_bidirectional_line(uint32_t spi_x_base,spi_direction_t spi_direction)
 {
     /* Check the parameters */
     hal_assert(IS_SPI_ALL_PERIPH(spi_x_base));
@@ -409,7 +413,7 @@ uint16_t hal_spi_recv_data(uint32_t spi_x_base)
     return spi_dr_get(spi_x_base);
 }
 
-hal_status_t hal_spi_wait_txe(uint32_t spi_x_base,uint32_t  timeout)
+uint8_t hal_spi_wait_txe(uint32_t spi_x_base,uint32_t  timeout)
 {
     /* Check the parameters */
     hal_assert(IS_SPI_ALL_PERIPH(spi_x_base));
@@ -419,12 +423,12 @@ hal_status_t hal_spi_wait_txe(uint32_t spi_x_base,uint32_t  timeout)
     {
         count++;
         if(count >= timeout)
-            return HAL_OK;
+            return HAL_RESET;
     }
-    return HAL_ERROR;
+    return HAL_SET;
 }
 
-hal_status_t hal_spi_wait_rxne(uint32_t spi_x_base,uint32_t  timeout)
+uint8_t hal_spi_wait_rxne(uint32_t spi_x_base,uint32_t  timeout)
 {
     /* Check the parameters */
     hal_assert(IS_SPI_ALL_PERIPH(spi_x_base));
@@ -434,12 +438,12 @@ hal_status_t hal_spi_wait_rxne(uint32_t spi_x_base,uint32_t  timeout)
     {
         count++;
         if(count >= timeout)
-            return HAL_OK;
+            return HAL_RESET;
     }
-    return HAL_ERROR;
+    return HAL_SET;
 }
 
-hal_status_t hal_spi_wait_bus_idle(uint32_t spi_x_base,uint32_t  timeout)
+uint8_t hal_spi_wait_bus_idle(uint32_t spi_x_base,uint32_t  timeout)
 {
     /* Check the parameters */
     hal_assert(IS_SPI_ALL_PERIPH(spi_x_base));
@@ -449,9 +453,9 @@ hal_status_t hal_spi_wait_bus_idle(uint32_t spi_x_base,uint32_t  timeout)
     {
         count++;
         if(count >= timeout)
-            return HAL_OK;
+            return HAL_RESET;
     }
-    return HAL_ERROR;
+    return HAL_SET;
 }
 
 void hal_spi_transmit_crc(uint32_t spi_x_base)
@@ -461,7 +465,7 @@ void hal_spi_transmit_crc(uint32_t spi_x_base)
     spi_crcnext_setf(spi_x_base,1);
 }
 
-void hal_calculate_crc_en(uint32_t spi_x_base,hal_en_t en)
+void hal_spi_calculate_crc_en(uint32_t spi_x_base,hal_en_t en)
 {
     /* Check the parameters */
     hal_assert(IS_SPI_ALL_PERIPH(spi_x_base));
@@ -549,7 +553,7 @@ uint8_t hal_spi_get_status_flag(uint32_t spi_x_base,spi_status_flag_t spi_status
     return status_flag;
 }
 
-void hal_spi_clear_status_flag(uint32_t spi_x_base,spi_status_flag_t spi_status_flag)
+void hal_spi_clr_status_flag(uint32_t spi_x_base,spi_status_flag_t spi_status_flag)
 {
     unsigned char status_flag = 0;
     /* Check the parameters */
@@ -601,7 +605,7 @@ uint8_t hal_spi_get_it_flag(uint32_t spi_x_base,spi_it_flag_t spi_it_flag)
     return it_flag;
 }
 
-void hal_spi_clear_it_flag(uint32_t spi_x_base,spi_it_flag_t spi_it_flag)
+void hal_spi_clr_it_flag(uint32_t spi_x_base,spi_it_flag_t spi_it_flag)
 {
     unsigned char it_flag = 0;
     /* Check the parameters */

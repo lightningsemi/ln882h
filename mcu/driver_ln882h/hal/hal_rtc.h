@@ -14,14 +14,13 @@
 #define __HAL_RTC_H
 
 #ifdef __cplusplus
- extern "C" {
+    extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 
-#include "ln882h.h"
+#include "hal/hal_common.h"
 #include "reg_rtc.h"
-#include "hal_common.h"
 
 #define IS_RTC_ALL_PERIPH(PERIPH) ((PERIPH) == RTC_BASE) 
 
@@ -58,16 +57,18 @@ typedef struct
                                                 This parameter can be a value of @ref RTC_Wrap_Enable_Status */
 }rtc_init_t_def;
 
-        //RTC init and config
-void    hal_rtc_init(uint32_t rtc_base,rtc_init_t_def* rtc_init_struct);
-void    hal_rtc_en(uint32_t rtc_base,hal_en_t en);
-void    hal_rtc_set_cnt_match(uint32_t rtc_base,uint32_t match_value);
-void    hal_rtc_set_cnt_load(uint32_t rtc_base,uint32_t load_value);
+            //RTC init and config
+void        hal_rtc_init(uint32_t rtc_base,rtc_init_t_def* rtc_init);
+void        hal_rtc_deinit(void);
+void        hal_rtc_en(uint32_t rtc_base,hal_en_t en);
+void        hal_rtc_set_cnt_match(uint32_t rtc_base,uint32_t match_value);
+void        hal_rtc_set_cnt_load(uint32_t rtc_base,uint32_t load_value);
+uint32_t    hal_rtc_get_cnt(uint32_t rtc_base);
 
-        //interrupt
-void    hal_rtc_it_cfg(uint32_t rtc_base,rtc_it_flag_t rtc_it_flag,hal_en_t en);
-uint8_t hal_rtc_get_it_flag(uint32_t rtc_base,rtc_it_flag_t rtc_it_flag);
-void    hal_rtc_clear_it_flag(uint32_t rtc_base,rtc_it_flag_t rtc_it_flag);
+            //interrupt
+void        hal_rtc_it_cfg(uint32_t rtc_base,rtc_it_flag_t rtc_it_flag,hal_en_t en);
+uint8_t     hal_rtc_get_it_flag(uint32_t rtc_base,rtc_it_flag_t rtc_it_flag);
+void        hal_rtc_clr_it_flag(uint32_t rtc_base,rtc_it_flag_t rtc_it_flag);
 
 
 #ifdef __cplusplus

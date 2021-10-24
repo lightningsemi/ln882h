@@ -9,8 +9,6 @@
  * 
  */
 
-
-#include "reg_sdio.h"
 #include "hal/hal_sdio_room.h"
 
 uint8_t *hal_sdio_cis_func_get(sdio_func_enum_t fn)

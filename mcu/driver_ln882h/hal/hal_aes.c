@@ -8,28 +8,28 @@
  * @copyright Copyright (c) 2021 Shanghai Lightning Semiconductor Technology Co. Ltd
  * 
  */
-#include "hal_aes.h"
+#include "hal/hal_aes.h"
 #include "string.h"
 
-void hal_aes_init(uint32_t aes_base,aes_init_t_def* aes_init_struct)
+void hal_aes_init(uint32_t aes_base,aes_init_t_def* aes_init)
 {
     /* check the parameters */
     hal_assert(IS_AES_ALL_PERIPH(aes_base));
 
-    hal_assert(IS_AES_CBC_MODE(aes_init_struct->aes_cbc_mod));
-    hal_assert(IS_AES_KEY_LEN(aes_init_struct->aes_key_len));
-    hal_assert(IS_AES_OPCODE(aes_init_struct->aes_opcode));
-    hal_assert(IS_AES_BIG_ENDIAN(aes_init_struct->aes_big_endian));
+    hal_assert(IS_AES_CBC_MODE(aes_init->aes_cbc_mod));
+    hal_assert(IS_AES_KEY_LEN(aes_init->aes_key_len));
+    hal_assert(IS_AES_OPCODE(aes_init->aes_opcode));
+    hal_assert(IS_AES_BIG_ENDIAN(aes_init->aes_big_endian));
 
 
-    if(aes_init_struct->aes_cbc_mod == AES_CBC_MOD_ECB_MOD){
+    if(aes_init->aes_cbc_mod == AES_CBC_MOD_ECB_MOD){
         aes_cbc_setf(aes_base,0);
     }
-    else if (aes_init_struct->aes_cbc_mod == AES_CBC_MOD_CBC_MOD){
+    else if (aes_init->aes_cbc_mod == AES_CBC_MOD_CBC_MOD){
         aes_cbc_setf(aes_base,1);
     }
 
-    switch (aes_init_struct->aes_key_len)
+    switch (aes_init->aes_key_len)
     {
         case AES_KEY_LEN_128_BIT:
             aes_keylen_setf(aes_base,0);
@@ -44,24 +44,29 @@ void hal_aes_init(uint32_t aes_base,aes_init_t_def* aes_init_struct)
             break;
     }
 
-    if(aes_init_struct->aes_opcode == AES_OPCODE_ENNCRYPT){
+    if(aes_init->aes_opcode == AES_OPCODE_ENNCRYPT){
         aes_opcode_setf(aes_base,0);
     }
-    else if (aes_init_struct->aes_opcode == AES_OPCODE_DECRYPT){
+    else if (aes_init->aes_opcode == AES_OPCODE_DECRYPT){
         aes_opcode_setf(aes_base,1);
     }
-    else if(aes_init_struct->aes_opcode == AES_OPCODE_KEYEXPAND){
+    else if(aes_init->aes_opcode == AES_OPCODE_KEYEXPAND){
         aes_opcode_setf(aes_base,2);
     }
     
-    if(aes_init_struct->aes_big_endian == AES_LITTLE_ENDIAN){
+    if(aes_init->aes_big_endian == AES_LITTLE_ENDIAN){
         aes_bigendian_setf(aes_base,0);
     }
-    else if (aes_init_struct->aes_big_endian == AES_BIG_ENDIAN){
+    else if (aes_init->aes_big_endian == AES_BIG_ENDIAN){
         aes_bigendian_setf(aes_base,1);
     }
 }
 
+void hal_aes_deinit(void)
+{
+    sysc_cmp_srstn_aes_setf(0);
+    sysc_cmp_srstn_aes_setf(1);
+}
 
 void hal_aes_start(uint32_t aes_base)
 {
@@ -215,7 +220,7 @@ uint8_t hal_aes_get_it_flag(uint32_t aes_base,aes_it_flag_t aes_it_flag)
 
     return it_flag;
 }
-void hal_aes_clear_it_flag(uint32_t aes_base,aes_it_flag_t aes_it_flag)
+void hal_aes_clr_it_flag(uint32_t aes_base,aes_it_flag_t aes_it_flag)
 {
     /* check the parameters */
     hal_assert(IS_AES_ALL_PERIPH(aes_base));

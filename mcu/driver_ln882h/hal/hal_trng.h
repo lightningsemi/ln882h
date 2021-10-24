@@ -17,14 +17,10 @@
     extern "C" {
 #endif /* __cplusplus */
 
-#include "ln882h.h"
+#include "hal/hal_common.h"
 #include "reg_trng.h"
-#include "hal_common.h"
-
-
 
 #define IS_TRNG_ALL_PERIPH(PERIPH) (((PERIPH) == TRNG_BASE))
-
 
 typedef enum
 {
@@ -33,7 +29,6 @@ typedef enum
 }trng_hal_en_t;
 
 #define IS_TRNG_EN_STATUS(EN)  (((EN) == TRNG_DIS)  || ((EN) == TRNG_EN)) 
-
 
 typedef enum
 {
@@ -68,19 +63,20 @@ typedef struct
 
 
             //trng init and config
-void        hal_trng_init(uint32_t trng,trng_init_t_def* trng_init_struct);
-void        hal_trng_en(uint32_t trng,hal_en_t en);
-uint8_t     hal_trng_get_en_status(uint32_t trng);
-void        hal_trng_set_gap(uint32_t trng,uint8_t gap);
-uint32_t    hal_trng_get_data_0_31(uint32_t trng);
-uint32_t    hal_trng_get_data_32_63(uint32_t trng);
-uint32_t    hal_trng_get_data_64_95(uint32_t trng);
-uint32_t    hal_trng_get_data_96_127(uint32_t trng);
+void        hal_trng_init(uint32_t trng_base,trng_init_t_def* trng_init);
+void        hal_trng_deinit(void);
+void        hal_trng_en(uint32_t trng_base,hal_en_t en);
+uint8_t     hal_trng_get_en_status(uint32_t trng_base);
+void        hal_trng_set_gap(uint32_t trng_base,uint8_t gap);
+uint32_t    hal_trng_get_data_0_31(uint32_t trng_base);
+uint32_t    hal_trng_get_data_32_63(uint32_t trng_base);
+uint32_t    hal_trng_get_data_64_95(uint32_t trng_base);
+uint32_t    hal_trng_get_data_96_127(uint32_t trng_base);
 
             //trng it config
-void        hal_trng_it_cfg(uint32_t trng,trng_it_flag_t trng_it_flag ,hal_en_t en);
-uint8_t     hal_trng_get_it_flag(uint32_t trng,trng_it_flag_t trng_it_flag);
-void        hal_trng_clr_it_flag(uint32_t trng,trng_it_flag_t trng_it_flag);
+void        hal_trng_it_cfg(uint32_t trng_base,trng_it_flag_t trng_it_flag ,hal_en_t en);
+uint8_t     hal_trng_get_it_flag(uint32_t trng_base,trng_it_flag_t trng_it_flag);
+void        hal_trng_clr_it_flag(uint32_t trng_base,trng_it_flag_t trng_it_flag);
 
 
 

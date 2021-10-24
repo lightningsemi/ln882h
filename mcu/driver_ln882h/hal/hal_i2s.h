@@ -19,9 +19,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 
-#include "ln882h.h"
+#include "hal/hal_common.h"
 #include "reg_i2s.h"
-#include "hal_common.h"
+
 
 #define IS_I2S_ALL_PERIPH(PERIPH) (((PERIPH) == I2S_BASE) ) 
 
@@ -89,19 +89,20 @@ typedef struct
 }i2s_init_t_def;
 
             //I2S init and config
-void        hal_i2s_init(uint32_t i2s_base,i2s_init_t_def* i2s_init_struct);   
+void        hal_i2s_init(uint32_t i2s_base,i2s_init_t_def* i2s_init);   
+void        hal_i2s_deinit(void);
 void        hal_i2s_rx_en(uint32_t i2s_base,hal_en_t en);           
 void        hal_i2s_tx_en(uint32_t i2s_base,hal_en_t en);           
 void        hal_i2s_en(uint32_t i2s_base,hal_en_t en);
 void        hal_i2s_tx_fifo_flush(uint32_t i2s_base);
 void        hal_i2s_rx_fifo_flush(uint32_t i2s_base);
 void        hal_i2s_send_data(uint32_t i2s_base,uint32_t left_data,uint32_t right_data);
-void        hal_i2s_rece_data(uint32_t i2s_base,uint32_t *left_data,uint32_t *right_data);
+void        hal_i2s_recv_data(uint32_t i2s_base,uint32_t *left_data,uint32_t *right_data);
 
             //interrupt
 void        hal_i2s_it_cfg(uint32_t i2s_base,i2s_it_flag_t i2s_it_flag,hal_en_t en);
 uint8_t     hal_i2s_get_it_flag(uint32_t i2s_base,i2s_it_flag_t i2s_it_flag);
-void        hal_i2s_clear_it_flag(uint32_t i2s_base,i2s_it_flag_t i2s_it_flag);
+void        hal_i2s_clr_it_flag(uint32_t i2s_base,i2s_it_flag_t i2s_it_flag);
 
 #ifdef __cplusplus
 }

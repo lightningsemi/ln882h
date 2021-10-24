@@ -26,7 +26,7 @@
 void ln_wdt_test(void)
 {
     /* 引脚初始化 */
-    gpio_init_t gpio_init;
+    gpio_init_t_def gpio_init;
 	memset(&gpio_init,0,sizeof(gpio_init));
     gpio_init.dir = GPIO_OUTPUT;
     gpio_init.pin = GPIO_PIN_5;
@@ -65,7 +65,7 @@ void WDT_IRQHandler()
 {
     //注：WDT的寄存器时钟使用的32K，而CPU时钟160M，远远大于32K，所以可能出现清完WDT中断标志位后再次进入WDT中断的情形（WDT 32k操作寄存器比较慢）。
     hal_wdt_cnt_restart(WDT_BASE);              //喂狗操作
-    hal_gpio_toggle(GPIOB_BASE,GPIO_PIN_5);     //测试引脚翻转
+    hal_gpio_pin_toggle(GPIOB_BASE,GPIO_PIN_5);     //测试引脚翻转
     LOG(LOG_LVL_INFO,"feed dog~! \r\n");        //LOG打印
 }
 

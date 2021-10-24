@@ -115,8 +115,8 @@ void ln_ws2811_send_data(unsigned char *send_data,unsigned int data_len)
 void ln_ws2811_init()
 {
     // 1. 配置WS2811引脚复用
-    hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_7,WS2811_OUT);
-    hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_7,HAL_ENABLE);
+    hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_7,WS2811_OUT);
+    hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_7,HAL_ENABLE);
     
     // 2. 初始化WS2811配置
     ws2811_init_t_def ws2811_init;

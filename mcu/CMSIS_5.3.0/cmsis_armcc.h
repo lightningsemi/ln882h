@@ -98,9 +98,6 @@
   #define __RESTRICT                             __restrict
 #endif
 
-#ifndef   __STATIC
-  #define __STATIC                        static
-#endif
 
 /* ###########################  Core Function Access  ########################### */
 /** \ingroup  CMSIS_Core_FunctionInterface

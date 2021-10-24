@@ -15,8 +15,6 @@ else()
     message(STATUS      "<SET> LN_SDK_ROOT = ${LN_SDK_ROOT}")
 endif()
 
-
-
 if(DEFINED CHIP_SERIAL)
     message(STATUS      "<GET> CHIP_SERIAL = ${CHIP_SERIAL}")
 else()
@@ -32,9 +30,27 @@ if(NOT DEFINED VENDOR_SDK_ADAPTED)
     ############################################################################
     #######################   NOTE: select user project here  ##################
     ############################################################################
-    set(USER_PROJECT  wifi_mcu_basic_example)
-    # set(USER_PROJECT  ble_mcu_data_trans)
-    # set(USER_PROJECT  mcu_peripheral_driver_test)
+    if(NOT DEFINED USER_PROJECT)
+        # set(USER_PROJECT  wifi_mcu_basic_example)
+        # set(USER_PROJECT  ble_mcu_data_trans)
+        set(USER_PROJECT  combo_mcu_basic_example)
+        # set(USER_PROJECT  mcu_peripheral_driver_test)
+        message(STATUS "<SET> USER_PROJECT = ${USER_PROJECT}")
+    else()
+        message(STATUS "<GET> USER_PROJECT= ${USER_PROJECT}")
+    endif()
+
+    ############################################################################
+    ############################  Debug/Release  ###############################
+    ############################################################################
+    set(CMAKE_BUILD_TYPE  Release CACHE  STRING  "build for release"    FORCE)
+    # set(CMAKE_BUILD_TYPE  Debug   CACHE  STRING  "build for debug"      FORCE)
+
+    set(allowableBuildTypes  Debug  Release)
+    if (NOT CMAKE_BUILD_TYPE IN_LIST  allowableBuildTypes)
+        set(CMAKE_BUILD_TYPE  Debug   CACHE  STRING  "build for debug"      FORCE)
+    endif()
+    message(STATUS  "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 
     ############################################################################
     #######################  set up cross compiler toolchain  ##################
@@ -51,20 +67,10 @@ if(NOT DEFINED VENDOR_SDK_ADAPTED)
     )
 
     ############################################################################
-    ############################  Debug/Release  ###############################
-    ############################################################################
-    set(CMAKE_BUILD_TYPE Release) # default value is Debug.
-
-    if(NOT  CMAKE_BUILD_TYPE)
-        set(CMAKE_BUILD_TYPE  Debug)
-    endif()
-    message(STATUS  "Build type: ${CMAKE_BUILD_TYPE}")
-
-    set(CMAKE_VERBOSE_MAKEFILE    ON)
-
-    ############################################################################
     ###########################   misc settings   ##############################
     ############################################################################
+
+    set(CMAKE_VERBOSE_MAKEFILE    ON)
 
     #-----------------------------   output path   -----------------------------
     set(EXECUTABLE_OUTPUT_PATH    ${CMAKE_BINARY_DIR}/bin)
@@ -110,7 +116,7 @@ if(DEFINED THIRD_PARTY_LWIP AND (THIRD_PARTY_LWIP))
     message(STATUS "LwIP: third-party provided.")
 else()
     message(STATUS "LwIP: LN SDK provided.")
-    set(COMP_LWIP_DIR               ${LN_SDK_ROOT}/components/net/lwip-2.0.3/src)
+    set(COMP_LWIP_DIR           ${LN_SDK_ROOT}/components/net/lwip-2.0.3/src)
 endif()
 
 ################################################################################

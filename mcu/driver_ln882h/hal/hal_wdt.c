@@ -1,7 +1,7 @@
 /**
  * @file     hal_wdt.c
  * @author   BSP Team
- * @brief
+ * @brief    This file provides WDT function.
  * @version  0.0.0.1
  * @date     2021-08-24
  *
@@ -11,24 +11,25 @@
 
 
 /* Includes ------------------------------------------------------------------*/
-#include "hal_wdt.h"
-#include "reg_sysc_awo.h"
-void hal_wdt_init(uint32_t wdt_base,wdt_init_t_def *wdt_init_struct)
+#include "hal/hal_wdt.h"
+
+
+void hal_wdt_init(uint32_t wdt_base,wdt_init_t_def *wdt_init)
 {
     hal_assert(IS_WDT_ALL_PERIPH(wdt_base));
-    hal_assert(IS_WDT_RPL(wdt_init_struct->wdt_rpl));
-    hal_assert(IS_WDT_RMOD(wdt_init_struct->wdt_rmod));
-    hal_assert(IS_WDT_TOP_VALUE(wdt_init_struct->top));
+    hal_assert(IS_WDT_RPL(wdt_init->wdt_rpl));
+    hal_assert(IS_WDT_RMOD(wdt_init->wdt_rmod));
+    hal_assert(IS_WDT_TOP_VALUE(wdt_init->top));
 
-    if (wdt_init_struct->wdt_rmod == WDT_RMOD_0) {
+    if (wdt_init->wdt_rmod == WDT_RMOD_0) {
         wdt_rmod_setf(wdt_base,0);
     }
-    else if (wdt_init_struct->wdt_rmod == WDT_RMOD_1)
+    else if (wdt_init->wdt_rmod == WDT_RMOD_1)
     {
         wdt_rmod_setf(wdt_base,1);
     }
 
-    switch (wdt_init_struct->wdt_rpl)
+    switch (wdt_init->wdt_rpl)
     {
         case WDT_RPL_2_PCLK:
             wdt_rpl_setf(wdt_base,0);
@@ -57,7 +58,13 @@ void hal_wdt_init(uint32_t wdt_base,wdt_init_t_def *wdt_init_struct)
         default:
             break;
     }
-    wdt_top_setf(wdt_base,wdt_init_struct->top);
+    wdt_top_setf(wdt_base,wdt_init->top);
+}
+
+void hal_wdt_deinit(void)
+{
+    sysc_cmp_srstn_wdt_setf(0);
+    sysc_cmp_srstn_wdt_setf(1);
 }
 
 void hal_wdt_en(uint32_t wdt_base,hal_en_t en)
@@ -83,11 +90,10 @@ void hal_wdt_cnt_restart(uint32_t wdt_base)
     wdt_wdt_crr_set(wdt_base,0x76);
 }
 
-// FIXME: value ???
-void hal_wdt_set_top_value(uint32_t wdt_base,uint8_t value)
+void hal_wdt_set_top_value(uint32_t wdt_base,wdt_top_value_t value)
 {
     hal_assert(IS_WDT_ALL_PERIPH(wdt_base));
-    hal_assert(IS_WDT_TOP_VALUE(wdt_base));
+    hal_assert(IS_WDT_TOP_VALUE(value));
     wdt_top_setf(wdt_base,10);
 }
 

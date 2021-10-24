@@ -71,7 +71,7 @@ void DMA_IRQHandler()
 {
     if(hal_dma_get_it_flag(DMA_CH_7,DMA_IT_FLAG_TRAN_COMP) == HAL_SET)  
     {
-        hal_dma_clear_it_flag(DMA_CH_7,DMA_IT_FLAG_TRAN_COMP);
+        hal_dma_clr_it_flag(DMA_CH_7,DMA_IT_FLAG_TRAN_COMP);
     }
 }
 

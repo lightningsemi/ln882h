@@ -1,11 +1,14 @@
-#ifndef __FLASH_H__
-#define __FLASH_H__
-
-#include "ln_types.h"
+#ifndef __HAL_FLASH_H
+#define __HAL_FLASH_H
 
 #ifdef __cplusplus
     extern "C" {
 #endif // __cplusplus
+
+#include "hal/hal_common.h"
+
+#include "hal/hal_cache.h"
+#include "hal/hal_qspi.h"
 
 /****************************  Data types and Macros  ************************/
 #define FLASH_QUAD_READ_DUMMY_CLOCKS    8
@@ -127,6 +130,6 @@ void     hal_flash_security_area_read(uint32_t offset, uint32_t len, uint8_t * b
 
 
 #ifdef __cplusplus
-    }
+}
 #endif // __cplusplus
-#endif // __FLASH_H__
+#endif // __HAL_FLASH_H

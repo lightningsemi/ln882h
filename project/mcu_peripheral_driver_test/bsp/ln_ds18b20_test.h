@@ -89,7 +89,4 @@ typedef struct
 extern ds18b20_data_str    ds18b20_data[1];
 void ln_ds18b20_test(void);
 
-
-
-
 #endif

@@ -13,7 +13,7 @@
 #define __HAL_I2C_H
 
 #ifdef __cplusplus
- extern "C" {
+    extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -188,7 +188,7 @@ typedef enum
 
 }i2c_status_flag_t;
 
-#define IS_I2C_STATUS_FLAG(FLAG)        (( FLAG >= 23 ))
+#define IS_I2C_STATUS_FLAG(FLAG)        (( FLAG <= 23 ))
 
 
 typedef enum
@@ -211,7 +211,7 @@ typedef enum
 
 }i2c_it_flag_t;
 
-#define IS_I2C_IT_FLAG(FLAG)        (( FLAG >= 13 ))
+#define IS_I2C_IT_FLAG(FLAG)        (( FLAG <= 13 ))
 
 
 
@@ -273,8 +273,10 @@ typedef struct
 
 
                 //I2C init and config
+
+void            hal_i2c_init(uint32_t i2c_x_base,i2c_init_t_def* i2c_init);              
+void            hal_i2c_deinit(void);
 void            hal_i2c_set_peripheral_clock_freq(uint32_t i2c_x_base, uint32_t peripheral_clock_freq);
-void            hal_i2c_init(uint32_t i2c_x_base,i2c_init_t_def* i2c_init_struct);              
 void            hal_i2c_en(uint32_t i2c_x_base,hal_en_t en);
 void            hal_i2c_dma_en(uint32_t i2c_x_base,hal_en_t en);
 void            hal_i2c_ack_en(uint32_t i2c_x_base,hal_en_t en);
@@ -282,37 +284,37 @@ void            hal_i2c_ack_en(uint32_t i2c_x_base,hal_en_t en);
 
                 //I2C master opetation
 void            hal_i2c_master_reset(uint32_t i2c_x_base);
-hal_status_t    hal_i2c_master_start(uint32_t i2c_x_base,uint32_t timeout);
+uint8_t         hal_i2c_master_start(uint32_t i2c_x_base,uint32_t timeout);
 void            hal_i2c_master_stop(uint32_t i2c_x_base);
 void            hal_i2c_master_send_data(uint32_t i2c_x_base,uint8_t data);
 uint8_t         hal_i2c_master_recv_data(uint32_t i2c_x_base);
 
-hal_status_t    hal_i2c_master_wait_addr(uint32_t i2c_x_base,uint32_t timeout);                          //Wait for an ack after sending the address
-hal_status_t    hal_i2c_master_wait_add10(uint32_t i2c_x_base,uint32_t timeout);                         //Wait for an ack after sending the address
+uint8_t         hal_i2c_master_wait_addr(uint32_t i2c_x_base,uint32_t timeout);                          
+uint8_t         hal_i2c_master_wait_add10(uint32_t i2c_x_base,uint32_t timeout);                        
 
 
                 //I2C slave opetation
 void            hal_i2c_slave_set_add_mode(uint32_t i2c_x_base,i2c_add_mode_t add_mode);
 void            hal_i2c_slave_set_add1(uint32_t i2c_x_base,uint16_t add);
 void            hal_i2c_slave_set_add2(uint32_t i2c_x_base,uint16_t add);
-hal_status_t    hal_i2c_slave_wait_addr(uint32_t i2c_x_base,uint32_t timeout);                           //Wait for address matched
+uint8_t         hal_i2c_slave_wait_addr(uint32_t i2c_x_base,uint32_t timeout);                           //Wait for address matched
 
 
                 //I2C universal opetation
-hal_status_t    hal_i2c_wait_txe(uint32_t i2c_x_base,uint32_t timeout);
-hal_status_t    hal_i2c_wait_rxne(uint32_t i2c_x_base,uint32_t timeout);
-hal_status_t    hal_i2c_wait_btf(uint32_t i2c_x_base,uint32_t timeout);
-hal_status_t    hal_i2c_wait_bus_idle(uint32_t i2c_x_base,uint32_t timeout);
+uint8_t         hal_i2c_wait_txe(uint32_t i2c_x_base,uint32_t timeout);
+uint8_t         hal_i2c_wait_rxne(uint32_t i2c_x_base,uint32_t timeout);
+uint8_t         hal_i2c_wait_btf(uint32_t i2c_x_base,uint32_t timeout);
+uint8_t         hal_i2c_wait_bus_idle(uint32_t i2c_x_base,uint32_t timeout);
 void            hal_i2c_clear_sr(uint32_t i2c_x_base);                                                   //Clear SR1 and SR2  
 
 
                 //interrupt
 void            hal_i2c_it_cfg(uint32_t i2c_x_base,i2c_it_flag_t i2c_it_flag,hal_en_t en);
 uint8_t         hal_i2c_get_it_flag(uint32_t i2c_x_base,i2c_it_flag_t i2c_it_flag);
-void            hal_i2c_clear_it_flag(uint32_t i2c_x_base,i2c_it_flag_t i2c_it_flag);
+void            hal_i2c_clr_it_flag(uint32_t i2c_x_base,i2c_it_flag_t i2c_it_flag);
 
 uint8_t         hal_i2c_get_status_flag(uint32_t i2c_x_base,i2c_status_flag_t i2c_status_flag);
-void            hal_i2c_clear_status_flag(uint32_t i2c_x_base,i2c_status_flag_t i2c_status_flag);
+void            hal_i2c_clr_status_flag(uint32_t i2c_x_base,i2c_status_flag_t i2c_status_flag);
 
 
 #ifdef __cplusplus

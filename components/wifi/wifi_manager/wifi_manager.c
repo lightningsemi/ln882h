@@ -204,8 +204,6 @@ static void sta_disconnected(void)
 
 static void sta_scan_complete(void)
 {
-    LOG(LOG_LVL_INFO, "STA scan complete!\r\n");
-
     if (event_cb[WIFI_MGR_EVENT_STA_SCAN_COMPLETE]) {
         event_cb[WIFI_MGR_EVENT_STA_SCAN_COMPLETE](NULL);
     }

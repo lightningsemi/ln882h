@@ -27,9 +27,9 @@
 #include "ln_adc_test.h"
 #include "ln_test_common.h"
 
-static int16_t adc_data[4096];
-static int16_t adc_data_buffer;
-static unsigned int cnt = 0;
+static volatile int16_t adc_data[4096];
+static volatile int16_t adc_data_buffer;
+static volatile uint32_t cnt = 0;
 
 void ln_adc_test(void)
 {
@@ -44,31 +44,36 @@ void ln_adc_test(void)
     hal_adc_init(ADC_BASE,&adc_init);                       //初始化ADC
     
     hal_gpio_pin_mode_set(GPIOB_BASE,GPIO_PIN_3,GPIO_MODE_ANALOG);      //配置PB3为模拟引脚
-    hal_adc_it_cfg(ADC_BASE,ADC_IT_FLAG_EOC_5,HAL_ENABLE);            
+//    hal_adc_it_cfg(ADC_BASE,ADC_IT_FLAG_EOC_5,HAL_ENABLE);            
     
-    
-    /* init the adc rx dma */
-    dma_init_t_def dma_init;
-    memset(&dma_init,0,sizeof(dma_init));
-    
-    dma_init.dma_mem_addr = (uint32_t)adc_data;        //设置DMA内存地址
-    dma_init.dma_data_num = 4096;                      //设置DMA传输次数
-    dma_init.dma_dir = DMA_READ_FORM_P;                //设置DMA方向
-    dma_init.dma_mem_inc_en = DMA_MEM_INC_EN;          //设置DMA内存是否增长
-    dma_init.dma_p_addr = ADC_DATA_REG_5;              //设置DMA外设地址
-    dma_init.dma_mem_size = DMA_MEM_SIZE_16_BIT;
-    dma_init.dma_p_size = DMA_P_SIZE_16_BIT;
-    hal_dma_init(DMA_CH_7,&dma_init);                  //初始化DMA
-   
-    hal_adc_dma_en(ADC_BASE,HAL_ENABLE);
+//    
+//    /* init the adc rx dma */
+//    dma_init_t_def dma_init;
+//    memset(&dma_init,0,sizeof(dma_init));
+//    
+//    dma_init.dma_mem_addr = (uint32_t)adc_data;        //设置DMA内存地址
+//    dma_init.dma_data_num = 4096;                      //设置DMA传输次数
+//    dma_init.dma_dir = DMA_READ_FORM_P;                //设置DMA方向
+//    dma_init.dma_mem_inc_en = DMA_MEM_INC_EN;          //设置DMA内存是否增长
+//    dma_init.dma_p_addr = ADC_DATA_REG_5;              //设置DMA外设地址
+//    dma_init.dma_mem_size = DMA_MEM_SIZE_16_BIT;
+//    dma_init.dma_p_size = DMA_P_SIZE_16_BIT;
+//    hal_dma_init(DMA_CH_7,&dma_init);                  //初始化DMA
+//   
+//    hal_adc_dma_en(ADC_BASE,HAL_ENABLE);
     hal_adc_en(ADC_BASE,HAL_ENABLE);
     hal_adc_start_conv(ADC_BASE);
-                                 
-    
-    hal_dma_en(DMA_CH_7,HAL_ENABLE);     
+//                                 
+//    
+//    hal_dma_en(DMA_CH_7,HAL_ENABLE);     
     while(1)
     {
-        while(hal_dma_get_data_num(DMA_CH_7) != 0){};
+        if(hal_adc_get_conv_status(ADC_BASE,ADC_CH5) == HAL_SET)
+        {
+            adc_data_buffer = hal_adc_get_data(ADC_BASE,ADC_CH5);  
+            LOG(LOG_LVL_INFO,"adc = %d \r\n",adc_data_buffer);
+        }
+//        while(hal_dma_get_data_num(DMA_CH_7) != 0){};
 //        if(hal_adc_get_it_flag(ADC_BASE,ADC_IT_FLAG_EOC_5))
 //        {
 //            adc_data_buffer = hal_adc_get_data(ADC_BASE,ADC_CH5);     
@@ -80,15 +85,15 @@ void ln_adc_test(void)
 //        }
 //        if(cnt >= 4096)
 //        {
-            for(int i = 0; i < 4096; i++)
-            {
-                LOG(LOG_LVL_INFO,"%d \r\n",adc_data[i]);
-            }
-            while(1);
+//            for(int i = 0; i < 4096; i++)
+//            {
+//                LOG(LOG_LVL_INFO,"%d \r\n",adc_data[i]);
+//            }
+//            while(1);
 //        }
 
         
-        //ln_delay_ms(100);
+        ln_delay_ms(100);
     }
     
 }

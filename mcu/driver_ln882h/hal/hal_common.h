@@ -17,9 +17,12 @@
 #endif // __cpluscplus
 
 #include "proj_config.h"
-#include "stdint.h"
-#include "string.h"
+#include "ln_types.h"
 #include "ln882h.h"
+
+
+#include "reg_sysc_awo.h"
+#include "reg_sysc_cmp.h"
 
         
 //---------------------HAL define------------------------------

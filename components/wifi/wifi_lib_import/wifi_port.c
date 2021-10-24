@@ -36,7 +36,7 @@ void wlib_hwtimer_init(void * timer_cb, uint32_t period_us)
     tim_init_t_def tim_init;
     memset(&tim_init,0,sizeof(tim_init));
 
-    tim_init.tim_cnt = ((hal_clock_get_apb0_clk() / 1000000) / 40) * period_us - 1;
+    tim_init.tim_load_value = ((hal_clock_get_apb0_clk() / 1000000) / 40) * period_us - 1;
     tim_init.tim_mode = TIM_USER_DEF_CNT_MODE;
     tim_init.tim_div = 39;
 

@@ -1,7 +1,9 @@
 #ifndef LN_MPU9250_TEST_H
 #define LN_MPU9250_TEST_H
 
-#include "stdint.h"
+
+#include "ln_i2c_test.h"
+
 //如果AD0脚(9脚)接地,IIC地址为0X68(不包含最低位).
 //如果接V3.3,则IIC地址为0X69(不包含最低位).
 #define MPU9250_ADDR               0Xd0      //MPU6500的器件IIC地址

@@ -1,7 +1,7 @@
 /**
  * @file     hal_uart.h
  * @author   BSP Team 
- * @brief 
+ * @brief    This file contains all of UART functions prototypes.
  * @version  0.0.0.1
  * @date     2021-08-16
  * 
@@ -17,6 +17,10 @@
 #endif /* __cplusplus */
 
 #include "hal/hal_common.h"
+#include "hal/hal_clock.h"
+
+#include "reg_ln_uart.h"
+
 
 typedef enum 
 {
@@ -126,30 +130,29 @@ typedef struct
     uint16_t  stop_bits;
     uint16_t  parity;
     uint16_t  over_sampl;
-} uart_init_t;
+} uart_init_t_def;
 
 
 /**==================================hal uart api=================================================**/
-void          hal_uart_init(uint32_t uart_base, uart_init_t* init);
-void          hal_uart_deinit(uint32_t uart_base);
+void          hal_uart_init(uint32_t uart_base, uart_init_t_def* uart_init);
+void          hal_uart_deinit(void);
 void          hal_uart_send_data(uint32_t uart_base, uint16_t data);
 uint16_t      hal_uart_recv_data(uint32_t uart_base);
 
-void          hal_uart_rx_mode_enable(uint32_t uart_base, hal_en_t en);
-void          hal_uart_tx_mode_enable(uint32_t uart_base, hal_en_t en);
-void          hal_uart_hardware_flow_rts_enable(uint32_t uart_base, hal_en_t en);
-void          hal_uart_hardware_flow_cts_enable(uint32_t uart_base, hal_en_t en);
-void          hal_uart_enable(uint32_t uart_base, hal_en_t en);
-void          hal_uart_dma_enable(uint32_t uart_base, uart_dma_req_enum dma_req, hal_en_t en);
+void          hal_uart_rx_mode_en(uint32_t uart_base, hal_en_t en);
+void          hal_uart_tx_mode_en(uint32_t uart_base, hal_en_t en);
+void          hal_uart_hardware_flow_rts_en(uint32_t uart_base, hal_en_t en);
+void          hal_uart_hardware_flow_cts_en(uint32_t uart_base, hal_en_t en);
+void          hal_uart_en(uint32_t uart_base, hal_en_t en);
+void          hal_uart_dma_en(uint32_t uart_base, uart_dma_req_enum dma_req, hal_en_t en);
 void          hal_uart_baudrate_set(uint32_t uart_base, uint32_t baudrate);
 
-void          hal_uart_it_enable(uint32_t uart_base, uart_it_en_enum it_en);
+void          hal_uart_it_en(uint32_t uart_base, uart_it_en_enum it_en);
 void          hal_uart_it_disable(uint32_t uart_base, uart_it_en_enum it_en);
 void          hal_uart_it_flag_clear(uint32_t uart_base, uart_it_flag_clear_enum it_flag_clear);
-unsigned char hal_uart_flag_get(uint32_t uart_base, uart_flag_enum flag);
-unsigned char hal_uart_it_flag_en_sta_get(uint32_t uart_base, uart_it_en_enum it_en);
+uint8_t       hal_uart_flag_get(uint32_t uart_base, uart_flag_enum flag);
 
-hal_en_t      hal_uart_it_en_status_get(uint32_t uart_base, uart_it_en_enum it_en);
+uint8_t       hal_uart_it_en_status_get(uint32_t uart_base, uart_it_en_enum it_en);
 void          hal_uart_clr_over_run_err(uint32_t uart_base);
 
 uint8_t       hal_uart_tx_fifo_level_get(uint32_t uart_base);

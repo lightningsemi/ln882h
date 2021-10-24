@@ -13,13 +13,13 @@
     I2S调试说明：
 
         1. 引脚     
-                    LN8620          STM32
+                    LN882H          STM32
                     A8(WS)          PB12             
                     A9(CLK)         PB13
                     A10(SDO)        PB15(SD)
                     A6(SDI)
                     
-            注：STM32的I2S的DR是接收发送一体的，所以只有一个SD寄存器,同时8620的I2S引脚是固定的，通过CMP里面的I2S_O_EN0来选择是否打开
+            注：STM32的I2S的DR是接收发送一体的，所以只有一个SD寄存器,同时LN882H的I2S引脚是固定的，通过CMP里面的I2S_O_EN0来选择是否打开
                 而我们是全双工的，A10输出数据，A6接收数据
         
         2. 从机接收数据的时候可能会缺少帧头和帧尾的数据，发送数据的时候不会有这个问题。
@@ -107,7 +107,7 @@ void I2S_IRQHandler(void)
     if(hal_i2s_get_it_flag(I2S_BASE,I2S_IT_FLAG_RXDA) == 1)
     {
         //接收数据，接收左声道和右声道数据
-        hal_i2s_rece_data(I2S_BASE,(uint32_t *)(rx_data_left + rx_data_index),(uint32_t *)(rx_data_right + rx_data_index));
+        hal_i2s_recv_data(I2S_BASE,(uint32_t *)(rx_data_left + rx_data_index),(uint32_t *)(rx_data_right + rx_data_index));
         
         rx_data_index++;
         if(rx_data_index >= 250)

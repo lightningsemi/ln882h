@@ -14,25 +14,21 @@
 #define __HAL_EXT_H
 
 #ifdef __cplusplus
- extern "C" {
+    extern "C" {
 #endif
 
-#include "ln882h.h"
-#include "reg_sysc_awo.h"
-#include "hal_common.h"
-
-
+#include "hal/hal_common.h"
 
 typedef enum
 {
-    EXT_INT_SENSE_0 = 0,
-    EXT_INT_SENSE_1 = 1,
-    EXT_INT_SENSE_2 = 2,
-    EXT_INT_SENSE_3 = 3,
-    EXT_INT_SENSE_4 = 4,
-    EXT_INT_SENSE_5 = 5,
-    EXT_INT_SENSE_6 = 6,
-    EXT_INT_SENSE_7 = 7, 
+    EXT_INT_SENSE_0 = 0,    //PA0
+    EXT_INT_SENSE_1 = 1,    //PA1
+    EXT_INT_SENSE_2 = 2,    //PA2
+    EXT_INT_SENSE_3 = 3,    //PA3
+    EXT_INT_SENSE_4 = 4,    //PA5
+    EXT_INT_SENSE_5 = 5,    //PA6
+    EXT_INT_SENSE_6 = 6,    //PA7
+    EXT_INT_SENSE_7 = 7,    //PB9
 
 }ext_int_sense_t;
 
@@ -40,7 +36,6 @@ typedef enum
                                   ((SENSE) == EXT_INT_SENSE_2)  || ((SENSE) == EXT_INT_SENSE_3) || \
                                   ((SENSE) == EXT_INT_SENSE_4)  || ((SENSE) == EXT_INT_SENSE_5) || \
                                   ((SENSE) == EXT_INT_SENSE_6)  || ((SENSE) == EXT_INT_SENSE_7) ) 
-
 
 
 typedef enum
@@ -95,7 +90,7 @@ void        hal_ext_init(ext_int_sense_t ext_int_sense,ext_trig_mode_t ext_trig_
 //          ext interrupt configuration
 uint8_t     hal_ext_get_it_flag(ext_it_flag_t ext_it_flag);
 uint8_t     hal_ext_get_raw_it_flag(ext_it_raw_flag_t ext_raw_it_flag);
-void        hal_ext_clear_it_flag(ext_it_flag_t ext_it_flag);
+void        hal_ext_clr_it_flag(ext_it_flag_t ext_it_flag);
 
 
 

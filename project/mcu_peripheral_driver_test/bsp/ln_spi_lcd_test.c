@@ -55,13 +55,13 @@ void ln_spi_lcd_spi_init()
     /*SPI INIT*/
 
     /* 1. 配置引脚*/
-    hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_5,SPI0_CLK);
-    hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_6,SPI0_MOSI);
-    hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_5,HAL_ENABLE);
-    hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_6,HAL_ENABLE);
+    hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_5,SPI0_CLK);
+    hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_6,SPI0_MOSI);
+    hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_5,HAL_ENABLE);
+    hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_6,HAL_ENABLE);
     
     //配置CS引脚
-    gpio_init_t gpio_init;
+    gpio_init_t_def gpio_init;
     memset(&gpio_init,0,sizeof(gpio_init));
     gpio_init.dir = GPIO_OUTPUT;
     gpio_init.pin = LN_SPI_LCD_TEST_CS_PIN;
@@ -262,7 +262,7 @@ void ln_spi_lcd_fill(uint16_t x1,uint16_t y1,uint16_t x2,uint16_t y2,uint16_t co
 {          
     ln_spi_lcd_set_addr(x1,y1,x2-1,y2-1);
 
-    hal_spi_data_size_cfg(SPI0_BASE,SPI_DATASIZE_16B);
+    hal_spi_set_data_size(SPI0_BASE,SPI_DATASIZE_16B);
     hal_dma_set_mem_size(DMA_CH_4,DMA_MEM_SIZE_16_BIT);
     hal_dma_set_p_size(DMA_CH_4,DMA_P_SIZE_16_BIT);
     
@@ -338,7 +338,7 @@ void ln_spi_lcd_fill(uint16_t x1,uint16_t y1,uint16_t x2,uint16_t y2,uint16_t co
     }
     
     hal_spi_dma_en(SPI0_BASE,SPI_DMA_TX_EN,HAL_DISABLE);   	
-    hal_spi_data_size_cfg(SPI0_BASE,SPI_DATASIZE_8B);    
+    hal_spi_set_data_size(SPI0_BASE,SPI_DATASIZE_8B);    
 }
 
 void ln_spi_lcd_draw_point(uint16_t x,uint16_t y,uint16_t color)
@@ -833,7 +833,7 @@ void ln_spi_lcd_show_picture(uint16_t x,uint16_t y,uint16_t length,uint16_t widt
 
     hal_dma_set_mem_size(DMA_CH_4,DMA_MEM_SIZE_8_BIT);
     hal_dma_set_p_size(DMA_CH_4,DMA_P_SIZE_8_BIT);
-    hal_spi_data_size_cfg(SPI0_BASE,SPI_DATASIZE_8B);    
+    hal_spi_set_data_size(SPI0_BASE,SPI_DATASIZE_8B);    
     hal_spi_dma_en(SPI0_BASE,SPI_DMA_TX_EN,HAL_ENABLE);  
     
     if( length * width * 2 > 65535)
@@ -968,7 +968,7 @@ void ln_spi_lcd_test()
     
     ln_spi_lcd_show_string(0,240,(const uint8_t *)"Lightning Semi",BLACK,WHITE,32,0);
     
-    ln_spi_lcd_show_string(0,280,(const uint8_t *)"LN8620 DEMO",BLACK,WHITE,32,0);
+    ln_spi_lcd_show_string(0,280,(const uint8_t *)"LN882H DEMO",BLACK,WHITE,32,0);
     
     while(1)
     {

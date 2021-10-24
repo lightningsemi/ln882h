@@ -10,24 +10,22 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "hal_i2s.h"
-#include "hal/hal_misc.h"
+#include "hal/hal_i2s.h"
 
-void hal_i2s_init(uint32_t i2s_base,i2s_init_t_def* i2s_init_struct)
+void hal_i2s_init(uint32_t i2s_base,i2s_init_t_def* i2s_init)
 {
     /* check the parameters */
     hal_assert(IS_I2S_ALL_PERIPH(i2s_base));
 
-    hal_assert(IS_I2S_REC_CONFIG(i2s_init_struct->i2s_rec_config));
-    hal_assert(IS_I2S_TRA_CONFIG(i2s_init_struct->i2s_tra_config));
-    hal_assert(IS_I2S_REC_FIFO_CONFIG(i2s_init_struct->rec_fifo_trig_lev));
-    hal_assert(IS_I2S_TRA_FIFO_CONFIG(i2s_init_struct->tra_fifo_trig_lev));
+    hal_assert(IS_I2S_REC_CONFIG(i2s_init->i2s_rec_config));
+    hal_assert(IS_I2S_TRA_CONFIG(i2s_init->i2s_tra_config));
+    hal_assert(IS_I2S_REC_FIFO_CONFIG(i2s_init->rec_fifo_trig_lev));
+    hal_assert(IS_I2S_TRA_FIFO_CONFIG(i2s_init->tra_fifo_trig_lev));
 
     /* enable the i2s on the system*/
+    sysc_cmp_i2s_io_en0_setf(1);
 
-    hal_misc_cmp_set_i2s_io_en0(1);
-
-    switch (i2s_init_struct->i2s_rec_config)
+    switch (i2s_init->i2s_rec_config)
     {
         case I2S_REC_CONFIG_IGNORE_LENGTH:
             i2s_ch0_rcr_setf(0);    
@@ -51,7 +49,7 @@ void hal_i2s_init(uint32_t i2s_base,i2s_init_t_def* i2s_init_struct)
             break;
     }
 
-    switch (i2s_init_struct->i2s_tra_config)
+    switch (i2s_init->i2s_tra_config)
     {
         case I2S_TRA_CONFIG_IGNORE_LENGTH:
             i2s_ch0_tcr_setf(0);    
@@ -74,8 +72,14 @@ void hal_i2s_init(uint32_t i2s_base,i2s_init_t_def* i2s_init_struct)
         default:
             break;
     }
-    i2s_ch0_rfcr_setf(i2s_init_struct->rec_fifo_trig_lev);
-    i2s_ch0_tfcr_setf(i2s_init_struct->tra_fifo_trig_lev);
+    i2s_ch0_rfcr_setf(i2s_init->rec_fifo_trig_lev);
+    i2s_ch0_tfcr_setf(i2s_init->tra_fifo_trig_lev);
+}
+
+void hal_i2s_deinit(void)
+{
+    sysc_cmp_srstn_i2s_setf(0);
+    sysc_cmp_srstn_i2s_setf(1);
 }
 
 void hal_i2s_rx_en(uint32_t i2s_base,hal_en_t en)     
@@ -142,7 +146,7 @@ void hal_i2s_send_data(uint32_t i2s_base,uint32_t left_data,uint32_t right_data)
     i2s_ch0_lrbr_setf(left_data);
     i2s_ch0_rrbr_setf(right_data);
 }
-void hal_i2s_rece_data(uint32_t i2s_base,uint32_t *left_data,uint32_t *right_data)
+void hal_i2s_recv_data(uint32_t i2s_base,uint32_t *left_data,uint32_t *right_data)
 {
     /* check the parameters */
     hal_assert(IS_I2S_ALL_PERIPH(i2s_base));
@@ -228,7 +232,7 @@ uint8_t hal_i2s_get_it_flag(uint32_t i2s_base,i2s_it_flag_t i2s_it_flag)
     return it_flag;
 }
 
-void hal_i2s_clear_it_flag(uint32_t i2s_base,i2s_it_flag_t i2s_it_flag)
+void hal_i2s_clr_it_flag(uint32_t i2s_base,i2s_it_flag_t i2s_it_flag)
 {
     /* check the parameters */
     hal_assert(IS_I2S_ALL_PERIPH(i2s_base));

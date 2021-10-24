@@ -9,17 +9,7 @@
  *
  */
 
-
-#include "proj_config.h"
-#include <stdint.h>
-
 #include "hal/hal_cache.h"
-#include "hal/hal_qspi.h"
-#include "hal/hal_common.h"
-
-#include "reg_cache.h"
-#include "reg_qspi.h"
-#include "reg_sysc_awo.h"
 
 
 #if defined(__CC_ARM)

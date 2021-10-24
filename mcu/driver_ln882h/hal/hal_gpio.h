@@ -9,17 +9,16 @@
  * 
  */
 
-#ifndef __HAL_GPIO_H__
-#define __HAL_GPIO_H__
+#ifndef __HAL_GPIO_H
+#define __HAL_GPIO_H
 
 #ifdef __cplusplus
     extern "C" {
 #endif /* __cplusplus */
 
 #include "hal/hal_common.h"
-
+#include "reg_gpio.h"
       
-        
 typedef enum
 {
     GPIO_PULL_UP               = 0,
@@ -138,39 +137,38 @@ typedef struct
     gpio_speed_t               speed;
     gpio_mode_t                mode;
     gpio_direction_t           dir;    
-} gpio_init_t;
+} gpio_init_t_def;
 
 
 /**=======================================hal gpio api============================================**/
 //              gpio init
-void            hal_gpio_init(uint32_t gpio_base, gpio_init_t *init);
+void            hal_gpio_init(uint32_t gpio_base, gpio_init_t_def *gpio_init);
+void            hal_gpio_deinit(void);
 void            hal_gpio_pin_pull_set(uint32_t gpio_base, gpio_pin_t pin, gpio_pull_t pull);
 void            hal_gpio_pin_speed_set(uint32_t gpio_base, gpio_pin_t pin, gpio_speed_t speed);
 void            hal_gpio_pin_mode_set(uint32_t gpio_base, gpio_pin_t pin, gpio_mode_t mode);
-void            hal_gpio_pin_debounce_en(uint32_t gpio_base, gpio_pin_t pin, hal_en_t en);
-void            hal_gpio_port_debounce_set(uint32_t gpio_base, gpio_pin_t pin, uint16_t debounce);
 void            hal_gpio_pin_direction_set(uint32_t gpio_base, gpio_pin_t pin, gpio_direction_t dir);
                 
 //              gpio read/write set/reset
 uint16_t        hal_gpio_port_input_read(uint32_t gpio_base);
 uint16_t        hal_gpio_port_output_read(uint32_t gpio_base);
-hal_flag_t      hal_gpio_pin_input_read(uint32_t gpio_base, gpio_pin_t pin);
-hal_flag_t      hal_gpio_pin_output_read(uint32_t gpio_base, gpio_pin_t pin);
-hal_flag_t      hal_gpio_pin_read(uint32_t gpio_base, gpio_pin_t pin);
+uint8_t         hal_gpio_pin_input_read(uint32_t gpio_base, gpio_pin_t pin);
+uint8_t         hal_gpio_pin_output_read(uint32_t gpio_base, gpio_pin_t pin);
+uint8_t         hal_gpio_pin_read(uint32_t gpio_base, gpio_pin_t pin);
 void            hal_gpio_port_output_write(uint32_t gpio_base, uint16_t port_val);
 void            hal_gpio_pin_set(uint32_t gpio_base, gpio_pin_t pin);
 void            hal_gpio_pin_reset(uint32_t gpio_base, gpio_pin_t pin);
-void            hal_gpio_toggle(uint32_t gpio_base, gpio_pin_t pin);
+void            hal_gpio_pin_toggle(uint32_t gpio_base, gpio_pin_t pin);
 
 //              gpio interrupt
-void            hal_gpio_pin_int_en(uint32_t gpio_base, gpio_pin_t pin, hal_en_t en);
-void            hal_gpio_pin_int_type_set(uint32_t gpio_base, gpio_pin_t pin, gpio_int_type_t type);
-hal_it_status_t hal_gpio_pin_int_status_get(uint32_t gpio_base, gpio_pin_t pin);
-void            hal_gpio_pin_int_status_clear(uint32_t gpio_base, gpio_pin_t pin);
+void            hal_gpio_pin_it_en(uint32_t gpio_base, gpio_pin_t pin, hal_en_t en);
+void            hal_gpio_pin_it_cfg(uint32_t gpio_base, gpio_pin_t pin, gpio_int_type_t type);
+uint8_t         hal_gpio_pin_get_it_flag(uint32_t gpio_base, gpio_pin_t pin);
+void            hal_gpio_pin_clr_it_flag(uint32_t gpio_base, gpio_pin_t pin);
                 
 //              alternate function
-void            hal_gpio_afio_select(uint32_t gpio_base, gpio_pin_t pin, afio_function_t fun);
-void            hal_gpio_afio_en(uint32_t gpio_base, gpio_pin_t pin, hal_en_t en);
+void            hal_gpio_pin_afio_select(uint32_t gpio_base, gpio_pin_t pin, afio_function_t fun);
+void            hal_gpio_pin_afio_en(uint32_t gpio_base, gpio_pin_t pin, hal_en_t en);
 
 
 
@@ -178,5 +176,5 @@ void            hal_gpio_afio_en(uint32_t gpio_base, gpio_pin_t pin, hal_en_t en
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* __HAL_GPIO_H__ */
+#endif /* __HAL_GPIO_H */
 

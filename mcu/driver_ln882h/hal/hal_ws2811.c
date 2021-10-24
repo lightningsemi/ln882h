@@ -11,8 +11,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 
-#include "hal_ws2811.h"
-#include "reg_ws2811.h"
+#include "hal/hal_ws2811.h"
 
 void  hal_ws2811_init(uint32_t ws2811_base, ws2811_init_t_def *ws2811_init)
 {
@@ -20,6 +19,12 @@ void  hal_ws2811_init(uint32_t ws2811_base, ws2811_init_t_def *ws2811_init)
     hal_assert(IS_WS2811_BR_VALUE(ws2811_init->br));
 
     ws2811_br_setf(ws2811_base,ws2811_init->br);
+}
+
+void hal_ws2811_deinit(void)
+{
+    sysc_cmp_srstn_ws2811_setf(0);
+    sysc_cmp_srstn_ws2811_setf(1);
 }
 
 void  hal_ws2811_en(uint32_t ws2811_base,hal_en_t en)

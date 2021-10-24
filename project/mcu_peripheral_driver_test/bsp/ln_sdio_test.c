@@ -14,7 +14,7 @@
     
                 1. 接线说明：
                 
-                           LN8620(从)       STM32F4阿波罗(主)
+                           LN882H(从)       STM32F4阿波罗(主)
                     CMD -> PA8      ->      PD2
                     CLK -> PA9      ->      PC12
                     SD0 -> PA10     ->      PC8

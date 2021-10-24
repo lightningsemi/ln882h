@@ -27,8 +27,8 @@ extern Serial_t serial_handles[SER_PORT_NUM];
 /* UART device*/
 typedef struct
 {
-    uint32_t     uart_base;
-    uart_init_t  init_cfg;
+    uint32_t         uart_base;
+    uart_init_t_def  init_cfg;
 } uart_dev_t;
 
 static uart_dev_t g_uart0;
@@ -49,21 +49,21 @@ static void uart_io_pin_request(struct Serial *serial)
 {
     if (serial->port_id == SER_PORT_UART0) {
 #if 0 // pin same as uart0 of ROM
-        hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_2,UART0_TX);
-        hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_3,UART0_RX);
-        hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_2,HAL_ENABLE);
-        hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_3,HAL_ENABLE);
+        hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_2,UART0_TX);
+        hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_3,UART0_RX);
+        hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_2,HAL_ENABLE);
+        hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_3,HAL_ENABLE);
 #else //pin same as uart0 of LN8825 EVK
-        hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_7,UART0_TX);
-        hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_6,UART0_RX);
-        hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_7,HAL_ENABLE);
-        hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_6,HAL_ENABLE);
+        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_7,UART0_TX);
+        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_6,UART0_RX);
+        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_7,HAL_ENABLE);
+        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_6,HAL_ENABLE);
 #endif
     } else if (serial->port_id == SER_PORT_UART1){
-        hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_9,UART1_TX);
-        hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_8,UART1_RX);
-        hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_9,HAL_ENABLE);
-        hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_8,HAL_ENABLE);
+        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_9,UART1_TX);
+        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_8,UART1_RX);
+        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_9,HAL_ENABLE);
+        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_8,HAL_ENABLE);
     } else if (serial->port_id == SER_PORT_UART2){
 
     }
@@ -86,11 +86,11 @@ static void hw_uart0_init(struct SerialHardware *_hw, struct Serial *serial, uin
 
     hal_uart_init(g_uart0.uart_base, &g_uart0.init_cfg);
 
-    hal_uart_rx_mode_enable(g_uart0.uart_base, HAL_ENABLE);
-    hal_uart_tx_mode_enable(g_uart0.uart_base, HAL_ENABLE);
-    hal_uart_enable(g_uart0.uart_base, HAL_ENABLE);
+    hal_uart_rx_mode_en(g_uart0.uart_base, HAL_ENABLE);
+    hal_uart_tx_mode_en(g_uart0.uart_base, HAL_ENABLE);
+    hal_uart_en(g_uart0.uart_base, HAL_ENABLE);
 
-    hal_uart_it_enable(g_uart0.uart_base, USART_IT_RXNE);
+    hal_uart_it_en(g_uart0.uart_base, USART_IT_RXNE);
     //uart_it_enable(g_uart0.uart_base, USART_IT_TXE);//uart_it_enable(g_uart0.uart_base, USART_IT_TXE);
 
     NVIC_EnableIRQ(UART0_IRQn);
@@ -116,11 +116,11 @@ static void hw_uart1_init(struct SerialHardware *_hw, struct Serial *serial, uin
 
     hal_uart_init(g_uart1.uart_base, &g_uart1.init_cfg);
 
-    hal_uart_rx_mode_enable(g_uart1.uart_base, HAL_ENABLE);
-    hal_uart_tx_mode_enable(g_uart1.uart_base, HAL_ENABLE);
-    hal_uart_enable(g_uart1.uart_base, HAL_ENABLE);
+    hal_uart_rx_mode_en(g_uart1.uart_base, HAL_ENABLE);
+    hal_uart_tx_mode_en(g_uart1.uart_base, HAL_ENABLE);
+    hal_uart_en(g_uart1.uart_base, HAL_ENABLE);
 
-    hal_uart_it_enable(g_uart1.uart_base, USART_IT_RXNE);
+    hal_uart_it_en(g_uart1.uart_base, USART_IT_RXNE);
     //uart_it_enable(g_uart1.uart_base, USART_IT_TXE);
     NVIC_EnableIRQ(UART1_IRQn);
 
@@ -145,11 +145,11 @@ static void hw_uart2_init(struct SerialHardware *_hw, struct Serial *serial, uin
 
     hal_uart_init(g_uart2.uart_base, &g_uart2.init_cfg);
 
-    hal_uart_rx_mode_enable(g_uart2.uart_base, HAL_ENABLE);
-    hal_uart_tx_mode_enable(g_uart2.uart_base, HAL_ENABLE);
-    hal_uart_enable(g_uart2.uart_base, HAL_ENABLE);
+    hal_uart_rx_mode_en(g_uart2.uart_base, HAL_ENABLE);
+    hal_uart_tx_mode_en(g_uart2.uart_base, HAL_ENABLE);
+    hal_uart_en(g_uart2.uart_base, HAL_ENABLE);
 
-    hal_uart_it_enable(g_uart2.uart_base, USART_IT_RXNE);
+    hal_uart_it_en(g_uart2.uart_base, USART_IT_RXNE);
     //uart_it_enable(g_uart2.uart_base, USART_IT_TXE);
     NVIC_EnableIRQ(UART2_IRQn);
 

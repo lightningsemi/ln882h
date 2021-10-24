@@ -11,17 +11,15 @@
 
 
 
-#ifndef __HAL_TIMER_H__
-#define __HAL_TIMER_H__
+#ifndef __HAL_TIMER_H
+#define __HAL_TIMER_H
 
 #ifdef __cplusplus
     extern "C" {
 #endif /* __cplusplus */
 
-#include "ln882h.h"
+#include "hal/hal_common.h"
 #include "reg_timer.h"
-#include "hal_common.h"
-
         
 /* TIMERx(x=0,1,2,3) definitions */
 
@@ -51,7 +49,7 @@ typedef enum
 
 #define IS_TIM_MODE(MODE)           (((MODE) == TIM_FREE_RUNNING_MODE) || ((MODE) == TIM_USER_DEF_CNT_MODE))
 
-#define IS_TIM_CNT_VALUE(VALUE)     (((VALUE) <= 0xFFFFFF))
+#define IS_TIM_LOAD_VALUE(VALUE)     (((VALUE) <= 0xFFFFFF))
 
 
 
@@ -73,10 +71,10 @@ typedef struct
     tim_mode_t              tim_mode;                       /*!< Specifies the timer mode.
                                                             This parameter can be a value of @ref tim_mode_t */
 
-    uint32_t                tim_cnt;                        /*!< Specifies the timer count.
+    uint32_t                tim_load_value;                        /*!< Specifies the timer count.
                                                             The range of parameters can be referred to @ref IS_WDT_TOP_VALUE */
                                                             
-    uint32_t                tim_cnt2;                        /*!< Specifies the timer count.
+    uint32_t                tim_load2_value;                        /*!< Specifies the timer count.
                                                             The range of parameters can be referred to @ref IS_WDT_TOP_VALUE */
 
     uint8_t                 tim_div;                        /*!< Specifies the timer clock div.
@@ -86,10 +84,11 @@ typedef struct
 }tim_init_t_def;
 
             //timer init
-void        hal_tim_init(uint32_t tim_x_base,tim_init_t_def* tim_init_struct);
+void        hal_tim_init(uint32_t tim_x_base,tim_init_t_def* tim_init);
+void        hal_tim_deinit(void);
 void        hal_tim_en(uint32_t tim_x_base,hal_en_t en);
-void        hal_tim_set_cnt_value(uint32_t tim_x_base,uint32_t value);
-void        hal_tim_set_cnt2_value(uint32_t tim_x_base,uint32_t value);
+void        hal_tim_set_load_value(uint32_t tim_x_base,uint32_t value);
+void        hal_tim_set_load2_value(uint32_t tim_x_base,uint32_t value);
 uint32_t    hal_tim_get_current_cnt_value(uint32_t tim_x_base);
 void        hal_tim_pwm_en(uint32_t tim_x_base,hal_en_t en);
 
@@ -104,5 +103,5 @@ void        hal_tim_clr_it_flag(uint32_t tim_x_base,tim_it_flag_t tim_it_flag);
 #ifdef __cplusplus
 }
 #endif // __cplusplus
-#endif // __HAL_TIMER_H__
+#endif // __HAL_TIMER_H
 

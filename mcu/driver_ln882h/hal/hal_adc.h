@@ -18,10 +18,8 @@
     extern "C" {
 #endif /* __cplusplus */
 
-#include "ln882h.h"
+#include "hal/hal_common.h"
 #include "reg_adc.h"
-#include "hal_common.h"
-
 
 #define IS_ADC_ALL_PERIPH(PERIPH) (((PERIPH) == ADC_BASE))
 
@@ -192,7 +190,7 @@ typedef enum
 
 typedef enum
 {
-    ADC_CH0     = 1 << 0,     
+    ADC_CH0     = 1 << 0,     //internal temperature resistance
     ADC_CH1     = 1 << 1,     
     ADC_CH2     = 1 << 2,     
     ADC_CH3     = 1 << 3,     
@@ -205,10 +203,13 @@ typedef enum
 
 
 #define ADC_CH_NUM               8
-#define IS_ADC_CH(CH)            (((((uint32_t)CH) & ~0xFF) == 0x00U))
+#define IS_ADC_CH(CH)          (((CH) == ADC_CH0)  || ((CH) == ADC_CH1)  || \
+                                ((CH) == ADC_CH2)  || ((CH) == ADC_CH3)  || \
+                                ((CH) == ADC_CH4)  || ((CH) == ADC_CH5)  || \
+                                ((CH) == ADC_CH6)  || ((CH) == ADC_CH7)) 
 
 
-#define IS_ADC_PRESCALE_VALUE(VALUE)     (((VALUE) >= 1 && (VALUE) < 0xFF))  
+#define IS_ADC_PRESCALE_VALUE(VALUE)     (((VALUE) >= 1 && (VALUE) <= 0xFF))  
 
 
 typedef enum
@@ -228,35 +229,35 @@ typedef enum
 
 typedef enum
 {
-    ADC_EOC_FLAG_7       = 3,     // [7] End of conversion flag. 
-    ADC_EOC_FLAG_6       = 4,     // [6] End of conversion flag. 
-    ADC_EOC_FLAG_5       = 5,     // [5] End of conversion flag. 
-    ADC_EOC_FLAG_4       = 6,     // [4] End of conversion flag. 
-    ADC_EOC_FLAG_3       = 7,     // [3] End of conversion flag. 
-    ADC_EOC_FLAG_2       = 8,     // [2] End of conversion flag. 
-    ADC_EOC_FLAG_1       = 9,     // [1] End of conversion flag. 
-    ADC_EOC_FLAG_0       = 10,    // [0] End of conversion flag. 
+    ADC_EOC_FLAG_7       = 0x0080,     // [7] End of conversion flag. 
+    ADC_EOC_FLAG_6       = 0x0040,     // [6] End of conversion flag. 
+    ADC_EOC_FLAG_5       = 0x0020,     // [5] End of conversion flag. 
+    ADC_EOC_FLAG_4       = 0x0010,     // [4] End of conversion flag. 
+    ADC_EOC_FLAG_3       = 0x0008,     // [3] End of conversion flag. 
+    ADC_EOC_FLAG_2       = 0x0004,     // [2] End of conversion flag. 
+    ADC_EOC_FLAG_1       = 0x0002,     // [1] End of conversion flag. 
+    ADC_EOC_FLAG_0       = 0x0001,     // [0] End of conversion flag. 
 }adc_eoc_flag_t;
 
-#define IS_ADC_EOC_FLAG_VALUE(VALUE)  (((VALUE) <= ADC_EOC_FLAG_0)) 
+#define IS_ADC_EOC_FLAG_VALUE(VALUE)  (((VALUE) <= ADC_EOC_FLAG_7)) 
 
 
 typedef enum
 {
-    ADC_IT_FLAG_AWD         = 0,     // [10] Analog watchdog flag. 
-    ADC_IT_FLAG_OVR         = 1,     // [9] ADC overrun.     
-    ADC_IT_FLAG_EOS         = 2,     // [8] End of sequence flag.   
-    ADC_IT_FLAG_EOC_7       = 3,     // [7] End of conversion flag. 
-    ADC_IT_FLAG_EOC_6       = 4,     // [6] End of conversion flag. 
-    ADC_IT_FLAG_EOC_5       = 5,     // [5] End of conversion flag. 
-    ADC_IT_FLAG_EOC_4       = 6,     // [4] End of conversion flag. 
-    ADC_IT_FLAG_EOC_3       = 7,     // [3] End of conversion flag. 
-    ADC_IT_FLAG_EOC_2       = 8,     // [2] End of conversion flag. 
-    ADC_IT_FLAG_EOC_1       = 9,     // [1] End of conversion flag. 
-    ADC_IT_FLAG_EOC_0       = 10,    // [0] End of conversion flag. 
+    ADC_IT_FLAG_AWD         = 0x0400,     // [10] Analog watchdog flag. 
+    ADC_IT_FLAG_OVR         = 0x0200,     // [9] ADC overrun.     
+    ADC_IT_FLAG_EOS         = 0x0100,     // [8] End of sequence flag.   
+    ADC_IT_FLAG_EOC_7       = 0x0080,     // [7] End of conversion flag. 
+    ADC_IT_FLAG_EOC_6       = 0x0040,     // [6] End of conversion flag. 
+    ADC_IT_FLAG_EOC_5       = 0x0020,     // [5] End of conversion flag. 
+    ADC_IT_FLAG_EOC_4       = 0x0010,     // [4] End of conversion flag. 
+    ADC_IT_FLAG_EOC_3       = 0x0008,     // [3] End of conversion flag. 
+    ADC_IT_FLAG_EOC_2       = 0x0004,     // [2] End of conversion flag. 
+    ADC_IT_FLAG_EOC_1       = 0x0002,     // [1] End of conversion flag. 
+    ADC_IT_FLAG_EOC_0       = 0x0001,     // [0] End of conversion flag. 
 }adc_it_flag_t;
 
-#define IS_ADC_IT_FLAG_VALUE(VALUE)  (((VALUE) <= ADC_IT_FLAG_EOC_0)) 
+#define IS_ADC_IT_FLAG_VALUE(VALUE)  (((VALUE) <= ADC_IT_FLAG_AWD)) 
 
 
 typedef struct
@@ -326,14 +327,16 @@ typedef struct
 
 
             //adc init and config
-void        hal_adc_init(uint32_t adc_base,adc_init_t_def* adc_init_struct);
+void        hal_adc_init(uint32_t adc_base,adc_init_t_def* adc_init);
+void        hal_adc_deinit(void);
 void        hal_adc_dma_en(uint32_t adc_base,hal_en_t en);
 void        hal_adc_awd_en(uint32_t adc_base,hal_en_t en);
 void        hal_adc_en(uint32_t adc_base,hal_en_t en);
 
 void        hal_adc_start_conv(uint32_t adc_base);
 void        hal_adc_stop_conv(uint32_t adc_base);
-uint8_t     hal_adc_get_eoc_flag(uint32_t adc_base,adc_eoc_flag_t adc_eoc_flag);
+uint8_t     hal_adc_get_conv_status(uint32_t adc_base, adc_ch_t ch);
+void        hal_adc_clr_conv_status(uint32_t adc_base, adc_ch_t ch);
 void        hal_adc_spe_sw_start(uint32_t adc_base);
 uint16_t    hal_adc_get_data(uint32_t adc_base,adc_ch_t ch);
 

@@ -12,7 +12,7 @@
 /*
         外部中断测试说明：
         
-            1. 外部中断的引脚是芯片规定的，对应的引脚请参考 ln8620_pinlist.
+            1. 外部中断的引脚是芯片规定的，对应的引脚请参考 LN882H_pinlist.
             
                 PA0  -> EXT_INT[0]
                 PA1  -> EXT_INT[1]
@@ -52,7 +52,7 @@ void EXT_IRQHandler()
 {
     if(hal_ext_get_it_flag(EXT_INT_SENSE_0_IT_FLAG) == HAL_SET)
     {
-        hal_ext_clear_it_flag(EXT_INT_SENSE_0_IT_FLAG);
+        hal_ext_clr_it_flag(EXT_INT_SENSE_0_IT_FLAG);
         
         LOG(LOG_LVL_INFO,"KEY_WAKEUP has pressed! \r\n");
     }

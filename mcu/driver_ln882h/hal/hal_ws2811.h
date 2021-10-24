@@ -17,10 +17,8 @@
     extern "C" {
 #endif /* __cplusplus */
 
-
-#include "ln882h.h"
 #include "reg_ws2811.h"
-#include "hal_common.h"
+#include "hal/hal_common.h"
 
 #define IS_WS2811_ALL_PERIPH(PERIPH) ((PERIPH) == WS2811_BASE)
 
@@ -50,6 +48,7 @@ typedef struct
 
             //WS2811 init and config
 void        hal_ws2811_init(uint32_t ws2811_base, ws2811_init_t_def *ws2811_init);
+void        hal_ws2811_deinit(void);
 void        hal_ws2811_en(uint32_t ws2811_base,hal_en_t en);
 void        hal_ws2811_set_data(uint32_t ws2811_base,uint8_t value);
 void        hal_ws2811_dma_en(uint32_t ws2811_base,hal_en_t en);

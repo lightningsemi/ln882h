@@ -8,12 +8,8 @@
  * @copyright Copyright (c) 2021 Shanghai Lightning Semiconductor Technology Co. Ltd
  * 
  */
-#include "hal/hal_common.h"
+
 #include "hal/hal_misc.h"
-
-#include "reg_sysc_awo.h"
-#include "reg_sysc_cmp.h"
-
 
 //AWO DIV_UPDATE
 void hal_misc_awo_set_pclk1_div_para_up(uint8_t value)
@@ -2217,8 +2213,8 @@ void hal_misc_reset_dbgh(void)
 
 void hal_misc_reset_timer(void)
 {
-    sysc_cmp_srstn_qspi_setf(0);
-    sysc_cmp_srstn_qspi_setf(1);
+    sysc_cmp_srstn_timer_setf(0);
+    sysc_cmp_srstn_timer_setf(1);
 }
 
 void hal_misc_reset_wdt(void)

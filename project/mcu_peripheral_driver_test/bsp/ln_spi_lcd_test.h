@@ -49,12 +49,6 @@
 #define LGRAYBLUE        0XA651 
 #define LBBLUE           0X2B12 
 
-
-
-void ln_spi_lcd_test();
-
-
-
-
+void ln_spi_lcd_test(void);
 
 #endif

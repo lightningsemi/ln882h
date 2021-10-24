@@ -13,7 +13,7 @@
         SPI从机调试说明：
         
                     1. 接线说明：
-                                LN8620(从机)    STM32(主机)
+                                LN882H(从机)    STM32(主机)
                                 PA10    ->      PA4     -> SPI_CS
                                 PA11    ->      PA5     -> SPI_SCK
                                 PA12    ->      PA6     -> SPI_MISO
@@ -23,7 +23,7 @@
                     2. CS引脚由SPI_CR1中的NSS和SSM控制，对应控制函数为：
                     
                                 SSOE -> hal_spi_ssoe_en();            
-                                SSM  -> hal_spi_nss_cfg(); 
+                                SSM  -> hal_spi_set_nss(); 
                                 
                        通过这两个函数可以设置CS引脚状态：
                         
@@ -36,7 +36,7 @@
                                         b.  CS输出失能（SSOE = 0），从模式下使用该模式，会在CS为低电平时选中该从器件，CS为高电平时，取消从器件的片选。     
                        
 
-                    3. 8620 SPI SLAVE + DMA  可能会出现中断进不了的问题，在中断中，使能DMA之前加个读SPI_DR的指令，可能会解决这个问题。（非必现）
+                    3. LN882H SPI SLAVE + DMA  可能会出现中断进不了的问题，在中断中，使能DMA之前加个读SPI_DR的指令，可能会解决这个问题。（非必现）
 
 
 
@@ -58,22 +58,22 @@ static unsigned char tx_data[100];
 static unsigned char rx_data_1[100];
 static unsigned char rx_data_2[100];
 
-static unsigned int         data_num = 100;     //DMA传输次数
+static volatile unsigned int         data_num = 100;     //DMA传输次数
 static unsigned char        data_sel = 0;       //双缓冲BUFFER选择
 static unsigned char        data_comp= 0;       //数据接收完成标志位
 
 void ln_spi_slave_init()
 {
     /* 配置GPIO引脚 */
-    hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_5,SPI0_CSN);
-    hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_6,SPI0_CLK);
-    hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_7,SPI0_MISO);
-    hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_8,SPI0_MOSI);
+    hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_5,SPI0_CSN);
+    hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_6,SPI0_CLK);
+    hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_7,SPI0_MISO);
+    hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_8,SPI0_MOSI);
     
-    hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_5,HAL_ENABLE);
-    hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_6,HAL_ENABLE);
-    hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_7,HAL_ENABLE);
-    hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_8,HAL_ENABLE);
+    hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_5,HAL_ENABLE);
+    hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_6,HAL_ENABLE);
+    hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_7,HAL_ENABLE);
+    hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_8,HAL_ENABLE);
 
     /* 配置SPI */
     spi_init_type_def spi_init;
@@ -87,7 +87,7 @@ void ln_spi_slave_init()
     hal_spi_init(SPI0_BASE,&spi_init);                          //初始化SPI
     
     hal_spi_ssoe_en(SPI0_BASE,HAL_DISABLE);                     //关闭CS引脚输出
-    hal_spi_nss_cfg(SPI0_BASE,SPI_NSS_HARD);                    //配置CS引脚为硬件模式
+    hal_spi_set_nss(SPI0_BASE,SPI_NSS_HARD);                    //配置CS引脚为硬件模式
     
     //hal_spi_it_cfg(SPI0_BASE,SPI_IT_FLAG_OVR,HAL_ENABLE);     //配置SPI中断
 }
@@ -182,8 +182,8 @@ void SPI0_IRQHandler()
         hal_spi_recv_data(SPI0_BASE);
     }
 }
-static unsigned int int_cnt_1 = 0;      //中断计数器，调试使用
-static unsigned int int_cnt_2 = 0;      //中断计数器，调试使用
+static volatile unsigned int int_cnt_1 = 0;      //中断计数器，调试使用
+static volatile unsigned int int_cnt_2 = 0;      //中断计数器，调试使用
 
 
 //void DMA_IRQHandler()
@@ -210,7 +210,7 @@ static unsigned int int_cnt_2 = 0;      //中断计数器，调试使用
 //            hal_dma_set_data_num(DMA_CH_3,100);                               //设置DMA数据长度
 //            hal_dma_en(DMA_CH_3,HAL_ENABLE);                                  //设置DMA使能
 //        }
-//        //hal_dma_clear_it_flag(DMA_CH_3,DMA_IT_FLAG_TRAN_COMP);
+//        //hal_dma_clr_it_flag(DMA_CH_3,DMA_IT_FLAG_TRAN_COMP);
 //        data_comp = 1; 
 //    }
 //    
@@ -221,6 +221,6 @@ static unsigned int int_cnt_2 = 0;      //中断计数器，调试使用
 ////        hal_dma_set_mem_addr(DMA_CH_4,(uint32_t)(tx_data));                   //重新设置DMA地址
 ////        hal_dma_set_data_num(DMA_CH_4,100);                                   //设置DMA数据长度
 ////        hal_dma_en(DMA_CH_4,HAL_ENABLE);                                      //设置DMA使能
-////        //hal_dma_clear_it_flag(DMA_CH_4,DMA_IT_FLAG_TRAN_COMP);        
+////        //hal_dma_clr_it_flag(DMA_CH_4,DMA_IT_FLAG_TRAN_COMP);        
 ////    }
 //}

@@ -9,8 +9,14 @@
  * 
  */
 
-#include "hal/hal_common.h"
+#ifndef __HAL_CLOCK_H
+#define __HAL_CLOCK_H
 
+#ifdef __cplusplus
+    extern "C" {
+#endif // __cplusplus
+
+#include "hal/hal_common.h"
 
 typedef enum
 {
@@ -106,7 +112,7 @@ typedef struct
                                                             This parameter can be a value of @ref clk_src_t */
 
     clk_pllclk_mul_t            clk_pllclk_mul;             /*!< Specifies the pll clock mul.
-                                                            This parameter can be a value of @ref clk_pllclk_div_t */
+                                                            This parameter can be a value of @ref clk_pllclk_mul_t */
 
     clk_pclk0_div_t             clk_pclk0_div;               /*!< Specifies the APB clock div.
                                                             The range of parameters can be referred to @ref clk_pclk_div_t */
@@ -119,10 +125,15 @@ typedef struct
 
 void        hal_clock_init(clock_init_t *clock_init);
 void        hal_clock_select_clk_src(clk_src_t clk_src);
-void        hal_clock_set_pll_clk_div(clk_pllclk_mul_t clk_pllclk_div);
+void        hal_clock_set_pll_clk_mul(clk_pllclk_mul_t clk_pllclk_mul);
 void        hal_clock_set_apb0_clk_div(clk_pclk0_div_t clk_pclk0_div);
 void        hal_clock_set_ahb_clk_div(clk_hclk_div_t clk_hclk_div);
 uint32_t    hal_clock_get_src_clk(void);
 uint32_t    hal_clock_get_apb0_clk(void);
 uint32_t    hal_clock_get_ahb_clk(void);
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __HAL_CLOCK_H */

@@ -49,30 +49,30 @@ static volatile unsigned char rx_data_2[100];       //uart接收buffer2
 
 static volatile unsigned int tx_data_cnt = 0;       //发送计数
 static volatile unsigned int rx_data_cnt = 0;       //接收计数
-static unsigned int int_cnt_1 = 0;                  //中断计数器，调试使用
-static unsigned int int_cnt_2 = 0;                  //中断计数器，调试使用
+static volatile unsigned int int_cnt_1 = 0;                  //中断计数器，调试使用
+static volatile unsigned int int_cnt_2 = 0;                  //中断计数器，调试使用
 
-static unsigned int         data_num = 100;         //DMA传输次数
-static unsigned char        data_sel = 0;           //双缓冲BUFFER选择
-static unsigned char        data_comp= 0;           //数据接收完成标志位
+static volatile unsigned int   data_num = 100;         //DMA传输次数
+static volatile unsigned char  data_sel = 0;           //双缓冲BUFFER选择
+static volatile unsigned char  data_comp= 0;           //数据接收完成标志位
 
 
 void ln_uart_init(void)
 {
     /* 1. 初始化UART0引脚 */
-    hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_11,UART0_TX);
-    hal_gpio_afio_select(GPIOA_BASE,GPIO_PIN_12,UART0_RX);
-    hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_3,UART0_RTS);
-    hal_gpio_afio_select(GPIOB_BASE,GPIO_PIN_4,UART0_CTS);
+    hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_11,UART0_TX);
+    hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_12,UART0_RX);
+    hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_3,UART0_RTS);
+    hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_4,UART0_CTS);
 
-    hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_11,HAL_ENABLE);
-    hal_gpio_afio_en(GPIOA_BASE,GPIO_PIN_12,HAL_ENABLE);
-    hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_3,HAL_ENABLE);
-    hal_gpio_afio_en(GPIOB_BASE,GPIO_PIN_4,HAL_ENABLE);
+    hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_11,HAL_ENABLE);
+    hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_12,HAL_ENABLE);
+    hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_3,HAL_ENABLE);
+    hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_4,HAL_ENABLE);
 
 
     /* 2. 初始化UART0配置 */
-    uart_init_t uart_init_struct;
+    uart_init_t_def uart_init_struct;
     memset(&uart_init_struct,0,sizeof(uart_init_struct));
     
     uart_init_struct.baudrate = 115200;                 //设置波特率
@@ -81,9 +81,9 @@ void ln_uart_init(void)
     uart_init_struct.word_len = UART_WORD_LEN_8;        //设置数据长度
     
     hal_uart_init(UART0_BASE,&uart_init_struct);        //初始化UART寄存器
-    hal_uart_rx_mode_enable(UART0_BASE,HAL_ENABLE);     //使能发送模式
-    hal_uart_tx_mode_enable(UART0_BASE,HAL_ENABLE);     //使能接收模式
-    hal_uart_enable(UART0_BASE,HAL_ENABLE);             //使能UART模块
+    hal_uart_rx_mode_en(UART0_BASE,HAL_ENABLE);     //使能发送模式
+    hal_uart_tx_mode_en(UART0_BASE,HAL_ENABLE);     //使能接收模式
+    hal_uart_en(UART0_BASE,HAL_ENABLE);             //使能UART模块
 
     //uart_hardware_flow_rts_enable(UART0_BASE,HAL_ENABLE);     //UART0 RTS配置
     //uart_hardware_flow_cts_enable(UART0_BASE,HAL_ENABLE);     //UART0 CTS配置
@@ -91,7 +91,7 @@ void ln_uart_init(void)
     /* 3. 初始化UART0中断 */
     NVIC_SetPriority(UART0_IRQn,     4);
     NVIC_EnableIRQ(UART0_IRQn);
-    hal_uart_it_enable(UART0_BASE,USART_IT_RXNE);       //使能接收中断
+    hal_uart_it_en(UART0_BASE,USART_IT_RXNE);       //使能接收中断
 }
 
 void ln_uart_dma_init()
@@ -109,7 +109,7 @@ void ln_uart_dma_init()
     dma_init.dma_p_addr = UART0_TX_DATA_REG;    //设置DMA物理地址
     hal_dma_init(DMA_CH_6,&dma_init);           //初始化DMA
 
-    hal_uart_dma_enable(UART0_BASE,USART_DMA_REQ_TX,HAL_ENABLE);        //设置UART 发送 DMA使能
+    hal_uart_dma_en(UART0_BASE,USART_DMA_REQ_TX,HAL_ENABLE);        //设置UART 发送 DMA使能
 #endif
     
 #if LN_UART_DMA_RECV_EN == 1
@@ -122,7 +122,7 @@ void ln_uart_dma_init()
     dma_init.dma_p_addr = UART0_RX_DATA_REG;    //设置DMA物理地址
     hal_dma_init(DMA_CH_5,&dma_init);           //初始化DMA
 
-    hal_uart_dma_enable(UART0_BASE,USART_DMA_REQ_RX,HAL_ENABLE);   //设置UART 接收 DMA使能
+    hal_uart_dma_en(UART0_BASE,USART_DMA_REQ_RX,HAL_ENABLE);   //设置UART 接收 DMA使能
     hal_dma_it_cfg(DMA_CH_5,DMA_IT_FLAG_TRAN_COMP,HAL_ENABLE);     //使能DMA传输完成中断
     NVIC_EnableIRQ(DMA_IRQn);                                      //使能DMA中断 
     

@@ -105,6 +105,12 @@ void hal_sdio_device_init(sdio_init_t *sdio_init)
     //sdio_device_cis_init();           //CIS needs to be self defined
 }
 
+void hal_sdio_device_deinit(void)
+{
+    sysc_cmp_srstn_sdio_setf(0);
+    sysc_cmp_srstn_sdio_setf(1);
+}
+
 void hal_sdio_device_clear_busy(void)
 {
     sdio_clr_busy_sd_setf(0);

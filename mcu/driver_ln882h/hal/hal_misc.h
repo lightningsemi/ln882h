@@ -12,12 +12,11 @@
 #ifndef __HAL_MISC_H
 #define __HAL_MISC_H
 
-
-#include "hal_common.h"
-
 #ifdef __cplusplus
     extern "C" {
 #endif // __cplusplus
+
+#include "hal/hal_common.h"
 
 void     hal_misc_awo_set_pclk1_div_para_up(uint8_t value);
 void     hal_misc_awo_set_hclk_div_para_up(uint8_t value);

@@ -94,7 +94,7 @@ void ln_aes_test()
     for(int i = 0; i < 16; i++)
         LOG(LOG_LVL_INFO,"%X ",output[i]);
     
-    hal_aes_clear_it_flag(AES_BASE,AES_DATA_INT_FLAG);
+    hal_aes_clr_it_flag(AES_BASE,AES_DATA_INT_FLAG);
         
     /* 7. 开始解密密文，首先初始化AES模块，配置为解密模式 */   
     memset(&aes_init,0,sizeof(aes_init));

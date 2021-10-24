@@ -137,7 +137,7 @@
 
 /* Software timer definitions. */
 #define configUSE_TIMERS				1
-#define configTIMER_TASK_PRIORITY		(7)
+#define configTIMER_TASK_PRIORITY		(configMAX_PRIORITIES - 1)
 #define configTIMER_QUEUE_LENGTH		10
 
 #if defined(BLE_MESH_SUPPORT) //mesh timer need more stack size

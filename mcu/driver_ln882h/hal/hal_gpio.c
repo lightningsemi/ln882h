@@ -11,17 +11,24 @@
 
 
 #include "hal/hal_gpio.h"
-#include "reg_sysc_cmp.h"
-#include "reg_gpio.h"
 
-void hal_gpio_init(uint32_t gpio_base, gpio_init_t *init)
+void hal_gpio_init(uint32_t gpio_base, gpio_init_t_def *gpio_init)
 {
-    gpio_pin_t pin = init->pin;
+    gpio_pin_t pin = gpio_init->pin;
     
-    hal_gpio_pin_pull_set(gpio_base, pin, init->pull);
-    hal_gpio_pin_speed_set(gpio_base, pin, init->speed);
-    hal_gpio_pin_mode_set(gpio_base, pin, init->mode);
-    hal_gpio_pin_direction_set(gpio_base, pin, init->dir);
+    hal_gpio_pin_pull_set(gpio_base, pin, gpio_init->pull);
+    hal_gpio_pin_speed_set(gpio_base, pin, gpio_init->speed);
+    hal_gpio_pin_mode_set(gpio_base, pin, gpio_init->mode);
+    hal_gpio_pin_direction_set(gpio_base, pin, gpio_init->dir);
+}
+
+void hal_gpio_deinit(void)
+{
+    sysc_cmp_srstn_gpioa_setf(0);
+    sysc_cmp_srstn_gpioa_setf(1);
+
+    sysc_cmp_srstn_gpiob_setf(0);
+    sysc_cmp_srstn_gpiob_setf(1);
 }
 
 void hal_gpio_pin_pull_set(uint32_t gpio_base, gpio_pin_t pin, gpio_pull_t pull)
@@ -122,19 +129,19 @@ uint16_t hal_gpio_port_output_read(uint32_t gpio_base)
     return gpio_odr_getf(gpio_base);
 }
 
-hal_flag_t hal_gpio_pin_input_read(uint32_t gpio_base, gpio_pin_t pin)
+uint8_t hal_gpio_pin_input_read(uint32_t gpio_base, gpio_pin_t pin)
 {
     uint16_t port_input = gpio_idr_getf(gpio_base);
     return (port_input & pin) ? HAL_SET : HAL_RESET;
 }
 
-hal_flag_t hal_gpio_pin_output_read(uint32_t gpio_base, gpio_pin_t pin)
+uint8_t hal_gpio_pin_output_read(uint32_t gpio_base, gpio_pin_t pin)
 {
     uint16_t port_output = gpio_odr_getf(gpio_base);
     return (port_output & pin) ? HAL_SET : HAL_RESET;
 }
 
-hal_flag_t hal_gpio_pin_read(uint32_t gpio_base, gpio_pin_t pin)
+uint8_t hal_gpio_pin_read(uint32_t gpio_base, gpio_pin_t pin)
 {
     uint16_t port_dir = gpio_ddr_getf(gpio_base);
     uint16_t port_value = 0;
@@ -164,7 +171,7 @@ void hal_gpio_pin_reset(uint32_t gpio_base, gpio_pin_t pin)
     uint32_t pin_reset = ((uint32_t)pin) << 16;
     gpio_bsrr_set(gpio_base, pin_reset);
 }
-void hal_gpio_toggle(uint32_t gpio_base, gpio_pin_t pin)
+void hal_gpio_pin_toggle(uint32_t gpio_base, gpio_pin_t pin)
 {
     if(hal_gpio_pin_output_read(gpio_base,pin) == 1)
     {
@@ -176,7 +183,7 @@ void hal_gpio_toggle(uint32_t gpio_base, gpio_pin_t pin)
     }
 }
 
-void hal_gpio_pin_int_en(uint32_t gpio_base, gpio_pin_t pin, hal_en_t en)
+void hal_gpio_pin_it_en(uint32_t gpio_base, gpio_pin_t pin, hal_en_t en)
 {
     uint16_t en_tmp = gpio_inten_getf(gpio_base);
     
@@ -194,7 +201,7 @@ void hal_gpio_pin_int_en(uint32_t gpio_base, gpio_pin_t pin, hal_en_t en)
     gpio_inten_setf(gpio_base, en_tmp);
 }
 
-void hal_gpio_pin_int_type_set(uint32_t gpio_base, gpio_pin_t pin, gpio_int_type_t type)
+void hal_gpio_pin_it_cfg(uint32_t gpio_base, gpio_pin_t pin, gpio_int_type_t type)
 {
     uint16_t rise_tmp = gpio_rise_getf(gpio_base);
     uint16_t fall_tmp = gpio_fall_getf(gpio_base);
@@ -220,20 +227,20 @@ void hal_gpio_pin_int_type_set(uint32_t gpio_base, gpio_pin_t pin, gpio_int_type
     gpio_fall_setf(gpio_base, fall_tmp);
 }
 
-hal_it_status_t hal_gpio_pin_int_status_get(uint32_t gpio_base, gpio_pin_t pin)
+uint8_t hal_gpio_pin_get_it_flag(uint32_t gpio_base, gpio_pin_t pin)
 {
     uint16_t st_tmp = gpio_int_st_getf(gpio_base);
     
     return ((st_tmp & pin) ? HAL_SET : HAL_RESET);
 }
 
-void hal_gpio_pin_int_status_clear(uint32_t gpio_base, gpio_pin_t pin)
+void hal_gpio_pin_clr_it_flag(uint32_t gpio_base, gpio_pin_t pin)
 {    
     gpio_int_st_setf(gpio_base, pin);
 }
 
 
-void hal_gpio_afio_select(uint32_t gpio_base, gpio_pin_t pin, afio_function_t fun)
+void hal_gpio_pin_afio_select(uint32_t gpio_base, gpio_pin_t pin, afio_function_t fun)
 {
     if(gpio_base == GPIOA_BASE)
     {
@@ -316,7 +323,7 @@ void hal_gpio_afio_select(uint32_t gpio_base, gpio_pin_t pin, afio_function_t fu
     }
 }
 
-void hal_gpio_afio_en(uint32_t gpio_base, gpio_pin_t pin, hal_en_t en)
+void hal_gpio_pin_afio_en(uint32_t gpio_base, gpio_pin_t pin, hal_en_t en)
 {
     uint32_t en_tmp = sysc_cmp_func_ien_getf();
 

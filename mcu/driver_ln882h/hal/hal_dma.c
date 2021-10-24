@@ -10,36 +10,34 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "hal_dma.h"
-
-
-           
-void hal_dma_init(uint32_t dma_x_base,dma_init_t_def* dma_init_struct)
+#include "hal/hal_dma.h"
+     
+void hal_dma_init(uint32_t dma_x_base,dma_init_t_def* dma_init)
 {
     /* check the parameters */
     hal_assert(IS_DMA_ALL_PERIPH(dma_x_base));
 
     /* Check the dma parameters */
-    hal_assert(IS_DMA_MEM_TO_MEM_EN(dma_init_struct->dma_mem_to_mem_en));
-    hal_assert(IS_DMA_PRI_LEV(dma_init_struct->dma_pri_lev));
-    hal_assert(IS_DMA_MEM_SIZE(dma_init_struct->dma_mem_size));
-    hal_assert(IS_DMA_P_SIZE(dma_init_struct->dma_p_size));
-    hal_assert(IS_DMA_MEM_INC_EN(dma_init_struct->dma_mem_inc_en));
-    hal_assert(IS_DMA_P_INC_EN(dma_init_struct->dma_p_inc_en));
-    hal_assert(IS_DMA_CIRC_MODE_EN(dma_init_struct->dma_circ_mode_en));
-    hal_assert(IS_DMA_DIR(dma_init_struct->dma_dir));
-    hal_assert(IS_DMA_NDT_VALUE(dma_init_struct->dma_data_num));
-    hal_assert(IS_DMA_MA_VALUE(dma_init_struct->dma_mem_addr));
-    hal_assert(IS_DMA_PA_VALUE(dma_init_struct->dma_p_addr));
+    hal_assert(IS_DMA_MEM_TO_MEM_EN(dma_init->dma_mem_to_mem_en));
+    hal_assert(IS_DMA_PRI_LEV(dma_init->dma_pri_lev));
+    hal_assert(IS_DMA_MEM_SIZE(dma_init->dma_mem_size));
+    hal_assert(IS_DMA_P_SIZE(dma_init->dma_p_size));
+    hal_assert(IS_DMA_MEM_INC_EN(dma_init->dma_mem_inc_en));
+    hal_assert(IS_DMA_P_INC_EN(dma_init->dma_p_inc_en));
+    hal_assert(IS_DMA_CIRC_MODE_EN(dma_init->dma_circ_mode_en));
+    hal_assert(IS_DMA_DIR(dma_init->dma_dir));
+    hal_assert(IS_DMA_NDT_VALUE(dma_init->dma_data_num));
+    hal_assert(IS_DMA_MA_VALUE(dma_init->dma_mem_addr));
+    hal_assert(IS_DMA_PA_VALUE(dma_init->dma_p_addr));
 
     //set the parameter
-    if (dma_init_struct->dma_mem_to_mem_en == DMA_MEM_TO_MEM_DIS) {
+    if (dma_init->dma_mem_to_mem_en == DMA_MEM_TO_MEM_DIS) {
         dma_mem2mem_setf(dma_x_base,0);
     }
-    else if(dma_init_struct->dma_mem_to_mem_en == DMA_MEM_TO_MEM_EN) {
+    else if(dma_init->dma_mem_to_mem_en == DMA_MEM_TO_MEM_EN) {
         dma_mem2mem_setf(dma_x_base,1);
     }
-    switch (dma_init_struct->dma_pri_lev)
+    switch (dma_init->dma_pri_lev)
     {
         case DMA_PRI_LEV_LOW:
             dma_pl_setf(dma_x_base,0);
@@ -53,7 +51,7 @@ void hal_dma_init(uint32_t dma_x_base,dma_init_t_def* dma_init_struct)
         default:
             break;
     }
-    switch (dma_init_struct->dma_mem_size)
+    switch (dma_init->dma_mem_size)
     {
         case DMA_MEM_SIZE_8_BIT:
             dma_msize_setf(dma_x_base,0);
@@ -67,7 +65,7 @@ void hal_dma_init(uint32_t dma_x_base,dma_init_t_def* dma_init_struct)
         default:
             break;
     }
-    switch (dma_init_struct->dma_p_size)
+    switch (dma_init->dma_p_size)
     {
         case DMA_P_SIZE_8_BIT:
             dma_psize_setf(dma_x_base,0);
@@ -81,36 +79,42 @@ void hal_dma_init(uint32_t dma_x_base,dma_init_t_def* dma_init_struct)
         default:
             break;
     }
-    if (dma_init_struct->dma_mem_inc_en == DMA_MEM_INC_DIS) {
+    if (dma_init->dma_mem_inc_en == DMA_MEM_INC_DIS) {
         dma_minc_setf(dma_x_base,0);
     }
-    else if (dma_init_struct->dma_mem_inc_en == DMA_MEM_INC_EN) {
+    else if (dma_init->dma_mem_inc_en == DMA_MEM_INC_EN) {
         dma_minc_setf(dma_x_base,1);
     }
 
-    if (dma_init_struct->dma_p_inc_en == DMA_P_INC_DIS) {
+    if (dma_init->dma_p_inc_en == DMA_P_INC_DIS) {
         dma_pinc_setf(dma_x_base,0);
     }
-    else if (dma_init_struct->dma_p_inc_en == DMA_P_INC_EN) {
+    else if (dma_init->dma_p_inc_en == DMA_P_INC_EN) {
         dma_pinc_setf(dma_x_base,1);
     }
 
-    if (dma_init_struct->dma_circ_mode_en == DMA_CIRC_MODE_DIS) {
+    if (dma_init->dma_circ_mode_en == DMA_CIRC_MODE_DIS) {
         dma_circ_setf(dma_x_base,0);
     }
-    else if (dma_init_struct->dma_circ_mode_en == DMA_CIRC_MODE_EN) {
+    else if (dma_init->dma_circ_mode_en == DMA_CIRC_MODE_EN) {
         dma_circ_setf(dma_x_base,1);
     }
 
-    if (dma_init_struct->dma_dir == DMA_READ_FORM_P) {
+    if (dma_init->dma_dir == DMA_READ_FORM_P) {
         dma_dir_setf(dma_x_base,0);
     }
-    else if (dma_init_struct->dma_dir == DMA_READ_FORM_MEM) {
+    else if (dma_init->dma_dir == DMA_READ_FORM_MEM) {
         dma_dir_setf(dma_x_base,1);
     }
-    dma_ndt_setf(dma_x_base,dma_init_struct->dma_data_num);
-    dma_pa_setf(dma_x_base,dma_init_struct->dma_p_addr);
-    dma_ma_setf(dma_x_base,dma_init_struct->dma_mem_addr);
+    dma_ndt_setf(dma_x_base,dma_init->dma_data_num);
+    dma_pa_setf(dma_x_base,dma_init->dma_p_addr);
+    dma_ma_setf(dma_x_base,dma_init->dma_mem_addr);
+}
+
+void hal_dma_deinit(void)
+{
+    sysc_cmp_srstn_dma_setf(0);
+    sysc_cmp_srstn_dma_setf(1);
 }
 
 void hal_dma_en(uint32_t dma_x_base,hal_en_t en)
@@ -468,7 +472,7 @@ uint8_t hal_dma_get_it_flag(uint32_t dma_x_base,dma_it_flag_t dma_it_flag)
     }
     return it_flag;
 }
-void hal_dma_clear_it_flag(uint32_t dma_x_base,dma_it_flag_t dma_it_flag)
+void hal_dma_clr_it_flag(uint32_t dma_x_base,dma_it_flag_t dma_it_flag)
 {
     /* check the parameters */
     hal_assert(IS_DMA_ALL_PERIPH(dma_x_base));
@@ -792,7 +796,7 @@ uint8_t hal_dma_get_status_flag(uint32_t dma_x_base,dma_status_flag_t dma_status
     return status_flag;
 }
 
-void hal_dma_clear_status_flag(uint32_t dma_x_base,dma_status_flag_t dma_status_flag)
+void hal_dma_clr_status_flag(uint32_t dma_x_base,dma_status_flag_t dma_status_flag)
 {
     /* check the parameters */
     hal_assert(IS_DMA_ALL_PERIPH(dma_x_base));

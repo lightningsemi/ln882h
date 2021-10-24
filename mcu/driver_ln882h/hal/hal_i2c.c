@@ -11,7 +11,7 @@
 
 
 /* Includes ------------------------------------------------------------------*/
-#include "hal_i2c.h"
+#include "hal/hal_i2c.h"
             
 void hal_i2c_init(uint32_t i2c_x_base,i2c_init_t_def* i2c_init)
 {   
@@ -136,6 +136,11 @@ void hal_i2c_init(uint32_t i2c_x_base,i2c_init_t_def* i2c_init)
 
 }
 
+void hal_i2c_deinit(void)
+{
+    sysc_cmp_srstn_i2c0_setf(0);
+    sysc_cmp_srstn_i2c0_setf(1);
+}
 
 void hal_i2c_set_peripheral_clock_freq(uint32_t i2c_x_base, uint32_t peripheral_clock_freq)
 {
@@ -198,7 +203,7 @@ void hal_i2c_master_reset(uint32_t i2c_x_base)
     i2c_swrst_setf(i2c_x_base, 0);
 }
 
-hal_status_t hal_i2c_master_start(uint32_t i2c_x_base,uint32_t timeout)
+uint8_t hal_i2c_master_start(uint32_t i2c_x_base,uint32_t timeout)
 {
     uint32_t count = 0;
     /* check the parameters */
@@ -209,9 +214,9 @@ hal_status_t hal_i2c_master_start(uint32_t i2c_x_base,uint32_t timeout)
     {
         count ++;
         if(count > timeout)
-            return HAL_OK;
+            return HAL_RESET;
     }   
-    return HAL_ERROR;
+    return HAL_SET;
 }
 
 void hal_i2c_master_stop(uint32_t i2c_x_base)
@@ -238,10 +243,8 @@ uint8_t hal_i2c_master_recv_data(uint32_t i2c_x_base)
     return i2c_dr_get(i2c_x_base);
 }
 
-/**
- * @brief   Wait for an ack after sending the address 
- */
-hal_status_t hal_i2c_master_wait_addr(uint32_t i2c_x_base,uint32_t timeout)
+
+uint8_t hal_i2c_master_wait_addr(uint32_t i2c_x_base,uint32_t timeout)
 {
     uint32_t count = 0;
     /* check the parameters */
@@ -251,12 +254,12 @@ hal_status_t hal_i2c_master_wait_addr(uint32_t i2c_x_base,uint32_t timeout)
     {
         count ++;
         if(count > timeout)
-            return HAL_OK;
+            return HAL_RESET;
     }   
-    return HAL_ERROR;
+    return HAL_SET;
 }             
 
-hal_status_t hal_i2c_master_wait_add10(uint32_t i2c_x_base,uint32_t timeout)
+uint8_t hal_i2c_master_wait_add10(uint32_t i2c_x_base,uint32_t timeout)
 {
     uint32_t count = 0;
     /* check the parameters */
@@ -266,9 +269,9 @@ hal_status_t hal_i2c_master_wait_add10(uint32_t i2c_x_base,uint32_t timeout)
     {
         count ++;
         if(count > timeout)
-            return HAL_OK;
+            return HAL_RESET;
     }   
-    return HAL_ERROR;
+    return HAL_SET;
 }
 
 /***********************************I2C slave opetation*************************************/
@@ -310,7 +313,7 @@ void hal_i2c_slave_set_add2(uint32_t i2c_x_base,uint16_t add)
 /**
  * @brief Wait for address matched
  */
-hal_status_t hal_i2c_slave_wait_addr(uint32_t i2c_x_base,uint32_t timeout)                        
+uint8_t hal_i2c_slave_wait_addr(uint32_t i2c_x_base,uint32_t timeout)                        
 {
     uint32_t count = 0;
     /* check the parameters */
@@ -320,9 +323,9 @@ hal_status_t hal_i2c_slave_wait_addr(uint32_t i2c_x_base,uint32_t timeout)
     {
         count ++;
         if(count > timeout)
-            return HAL_OK;
+            return HAL_RESET;
     }   
-    return HAL_ERROR;
+    return HAL_SET;
 }
 
 /***********************************I2C universal opetation*************************************/
@@ -337,9 +340,9 @@ uint8_t hal_i2c_wait_txe(uint32_t i2c_x_base,uint32_t timeout)
     {
         count ++;
         if(count > timeout)
-            return HAL_OK;
+            return HAL_RESET;
     }   
-    return HAL_ERROR;
+    return HAL_SET;
 }
 
 uint8_t hal_i2c_wait_rxne(uint32_t i2c_x_base,uint32_t timeout)
@@ -352,9 +355,9 @@ uint8_t hal_i2c_wait_rxne(uint32_t i2c_x_base,uint32_t timeout)
     {
         count ++;
         if(count > timeout)
-            return HAL_OK;
+            return HAL_RESET;
     }   
-    return HAL_ERROR;
+    return HAL_SET;
 }
 
 uint8_t hal_i2c_wait_btf(uint32_t i2c_x_base,uint32_t timeout)
@@ -367,9 +370,9 @@ uint8_t hal_i2c_wait_btf(uint32_t i2c_x_base,uint32_t timeout)
     {
         count ++;
         if(count > timeout)
-            return HAL_OK;
+            return HAL_RESET;
     }   
-    return HAL_ERROR;
+    return HAL_SET;
 }
 
 uint8_t hal_i2c_wait_bus_idle(uint32_t i2c_x_base,uint32_t timeout)
@@ -382,9 +385,9 @@ uint8_t hal_i2c_wait_bus_idle(uint32_t i2c_x_base,uint32_t timeout)
     {
         count ++;
         if(count > timeout)
-            return HAL_OK;
+            return HAL_RESET;
     }   
-    return HAL_ERROR;
+    return HAL_SET;
 }
 
 /**
@@ -394,6 +397,7 @@ void hal_i2c_clear_sr(uint32_t i2c_x_base)
 {
     /* check the parameters */
     hal_assert(IS_I2C_ALL_PERIPH(i2c_x_base));
+    i2c_sr1_set(i2c_x_base,0);
     i2c_sr1_get(i2c_x_base);
     i2c_sr2_get(i2c_x_base);
 }
@@ -523,7 +527,7 @@ uint8_t hal_i2c_get_it_flag(uint32_t i2c_x_base,i2c_it_flag_t i2c_it_flag)
     return it_flag;
 }
 
-void hal_i2c_clear_it_flag(uint32_t i2c_x_base,i2c_it_flag_t i2c_it_flag)
+void hal_i2c_clr_it_flag(uint32_t i2c_x_base,i2c_it_flag_t i2c_it_flag)
 {
     /* check the parameters */
     hal_assert(IS_I2C_ALL_PERIPH(i2c_x_base));
@@ -669,7 +673,7 @@ uint8_t hal_i2c_get_status_flag(uint32_t i2c_x_base,i2c_status_flag_t i2c_status
     return status_flag;
 }
 
-void hal_i2c_clear_status_flag(uint32_t i2c_x_base,i2c_status_flag_t i2c_status_flag)
+void hal_i2c_clr_status_flag(uint32_t i2c_x_base,i2c_status_flag_t i2c_status_flag)
 {
     /* check the parameters */
     hal_assert(IS_I2C_ALL_PERIPH(i2c_x_base));

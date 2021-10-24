@@ -10,43 +10,43 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "hal_timer.h"
-#include "reg_sysc_cmp.h"
+#include "hal/hal_timer.h"
 
-void hal_tim_init(uint32_t tim_x_base,tim_init_t_def *tim_init_struct)
+
+void hal_tim_init(uint32_t tim_x_base,tim_init_t_def *tim_init)
 {
     /* check the parameters */
     hal_assert(IS_TIMER_ALL_PERIPH(tim_x_base));
 
-    hal_assert(IS_TIM_MODE(tim_init_struct->tim_mode));
-    hal_assert(IS_TIM_CNT_VALUE(tim_init_struct->tim_cnt));
-    hal_assert(IS_TIM_CNT_VALUE(tim_init_struct->tim_cnt2));
-    hal_assert(IS_TIM_DIV_VALUE(tim_init_struct->tim_div));
+    hal_assert(IS_TIM_MODE(tim_init->tim_mode));
+    hal_assert(IS_TIM_LOAD_VALUE(tim_init->tim_load_value));
+    hal_assert(IS_TIM_LOAD_VALUE(tim_init->tim_load2_value));
+    hal_assert(IS_TIM_DIV_VALUE(tim_init->tim_div));
 
 
-    if(tim_init_struct->tim_mode == TIM_FREE_RUNNING_MODE) {
+    if(tim_init->tim_mode == TIM_FREE_RUNNING_MODE) {
         timer_timermode_setf(tim_x_base,0);
     }
-    else if(tim_init_struct->tim_mode == TIM_USER_DEF_CNT_MODE) {
+    else if(tim_init->tim_mode == TIM_USER_DEF_CNT_MODE) {
         timer_timermode_setf(tim_x_base,1);
     }
 
     switch (tim_x_base)
     {
         case TIMER0_BASE:
-            sysc_cmp_timer1_div_para_m1_setf(tim_init_struct->tim_div);
+            sysc_cmp_timer1_div_para_m1_setf(tim_init->tim_div);
             sysc_cmp_timer1_div_para_up_setf(1);
             break;
         case TIMER1_BASE:
-            sysc_cmp_timer2_div_para_m1_setf(tim_init_struct->tim_div);
+            sysc_cmp_timer2_div_para_m1_setf(tim_init->tim_div);
             sysc_cmp_timer2_div_para_up_setf(1);
             break;
         case TIMER2_BASE:
-            sysc_cmp_timer3_div_para_m1_setf(tim_init_struct->tim_div);
+            sysc_cmp_timer3_div_para_m1_setf(tim_init->tim_div);
             sysc_cmp_timer3_div_para_up_setf(1);
             break;
         case TIMER3_BASE:
-            sysc_cmp_timer4_div_para_m1_setf(tim_init_struct->tim_div);
+            sysc_cmp_timer4_div_para_m1_setf(tim_init->tim_div);
             sysc_cmp_timer4_div_para_up_setf(1);
             break;
         default:
@@ -54,8 +54,14 @@ void hal_tim_init(uint32_t tim_x_base,tim_init_t_def *tim_init_struct)
     }
 
 
-    timer_timerloadcountregister_setf(tim_x_base,tim_init_struct->tim_cnt);
-    timer_timerloadcount2register_setf(tim_x_base,tim_init_struct->tim_cnt2);
+    timer_timerloadcountregister_setf(tim_x_base,tim_init->tim_load_value);
+    timer_timerloadcount2register_setf(tim_x_base,tim_init->tim_load2_value);
+}
+
+void hal_tim_deinit(void)
+{
+    sysc_cmp_srstn_timer_setf(0);
+    sysc_cmp_srstn_timer_setf(1);
 }
 
 void hal_tim_en(uint32_t tim_x_base,hal_en_t en)
@@ -84,20 +90,20 @@ void hal_tim_pwm_en(uint32_t tim_x_base,hal_en_t en)
     }
 }
 
-void hal_tim_set_cnt_value(uint32_t tim_x_base,uint32_t value)
+void hal_tim_set_load_value(uint32_t tim_x_base,uint32_t value)
 {
     /* check the parameters */
     hal_assert(IS_TIMER_ALL_PERIPH(tim_x_base));
-    hal_assert(IS_TIM_CNT_VALUE(value));
+    hal_assert(IS_TIM_LOAD_VALUE(value));
 
     timer_timerloadcountregister_setf(tim_x_base,value);
 }
 
-void hal_tim_set_cnt2_value(uint32_t tim_x_base,uint32_t value)
+void hal_tim_set_load2_value(uint32_t tim_x_base,uint32_t value)
 {
     /* check the parameters */
     hal_assert(IS_TIMER_ALL_PERIPH(tim_x_base));
-    hal_assert(IS_TIM_CNT_VALUE(value));
+    hal_assert(IS_TIM_LOAD_VALUE(value));
 
     timer_timerloadcount2register_setf(tim_x_base,value);
 }
