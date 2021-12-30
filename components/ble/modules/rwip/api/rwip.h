@@ -151,16 +151,6 @@ enum rwip_rf_mod
     MOD_8DPSK = 0x03,
 };
 
-#if RW_DEBUG
-/// Assert type
-/*@TRACE*/
-enum assert_type
-{
-    ASSERT_TYPE_WARNING = 0,
-    ASSERT_TYPE_ERROR   = 1,
-};
-#endif //RW_DEBUG
-
 /// Types of initialization of the IP
 enum rwip_init_type
 {

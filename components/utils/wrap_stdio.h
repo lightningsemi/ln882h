@@ -10,6 +10,7 @@ extern "C" {
 typedef int (*stdio_write_fn)(const char *buf, int len);
 
 void __wrap_sprintf(stdio_write_fn write, const char *format, ...);
+void __wrap_stdio_raw_data_flush(const char *buff, stdio_write_fn write, size_t size);
 void __sprintf(const char *tag, stdio_write_fn write, const char *format, va_list args);
 
 #ifdef __cplusplus

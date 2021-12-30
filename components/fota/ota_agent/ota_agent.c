@@ -220,20 +220,30 @@ int ota_boot_upgrade_agent(jump_to_app_t jump_to_app)
     ota_port_ctx_t * port = ota_get_port_ctx();
     upg_state_t  upgrade_state = (upg_state_t)((uint32_t)-1);
     int err = OTA_ERR_NONE;
+    int ret = 0;
 
-    int ret = port->upg_state_get(&upgrade_state);
+    if (LN_TRUE != ln_fetch_partition_info(PARTITION_TYPE_APP, &partition_info_app)) {
+        return OTA_ERR_PARTITION_TAB;
+    }
+
+    ret = port->upg_state_get(&upgrade_state);
     if ((ret != LN_TRUE) || (upgrade_state == (upg_state_t)((uint32_t)-1)))
     {
         /* upg state parameter stored in the NVDS, if we have never set upgrade_state, 
            its original value is 0xFFFFFFFF((uint32_t)-1).  
            if reach here, may be first startup or NVDS damaged */
 
-        //LOG("upgrade_state = 0x%x", upgrade_state);
-        if (OTA_ERR_NONE != (err = verify_total_img_partition(PARTITION_TYPE_APP, \
-                                                      &partition_info_app, &app_header))) {
-            //TODO:HOOK
-            return err;
-        }
+        /**
+         * This part of the code is reserved for debug
+        */
+        // debug code start
+        // LOG("upgrade_state = 0x%x", upgrade_state);
+        // if (OTA_ERR_NONE != (err = verify_total_img_partition(PARTITION_TYPE_APP, \
+        //                                               &partition_info_app, &app_header))) {
+        //     //TODO:HOOK
+        //     return err;
+        // }
+        // debug code end
 
         jump_to_app(partition_info_app.start_addr + sizeof(image_hdr_t));
         return OTA_ERR_NONE;
@@ -241,11 +251,16 @@ int ota_boot_upgrade_agent(jump_to_app_t jump_to_app)
 
     if (UPG_STATE_DOWNLOAD_OK != upgrade_state)
     {
-        if (OTA_ERR_NONE != (err = verify_total_img_partition(PARTITION_TYPE_APP, \
-                                                      &partition_info_app, &app_header))) {
-            //TODO:HOOK
-            return err;
-        }
+        /**
+         * This part of the code is reserved for debug
+        */
+       // debug code start
+        // if (OTA_ERR_NONE != (err = verify_total_img_partition(PARTITION_TYPE_APP, \
+        //                                               &partition_info_app, &app_header))) {
+        //     //TODO:HOOK
+        //     return err;
+        // }
+        // debug code end
 
         jump_to_app(partition_info_app.start_addr + sizeof(image_hdr_t));
         return OTA_ERR_NONE;
@@ -278,15 +293,15 @@ int ota_boot_upgrade_agent(jump_to_app_t jump_to_app)
                 return err;//ota image err but wo also jump to app
             }
 
-            //version compare
-            if (((ota_header.ver.ver_major << 8) + ota_header.ver.ver_minor) > \
+            // version compare
+            // 如果 APP 分区和 OTA 分区版本不一样，则升级
+            // 如果 APP 分区和 OTA 分区版本一样：
+            //   1. OTA 分区下载的固件是同一个固件，不升级。
+            //   2. OTA 状态未更新的时候发生掉电，此时 ota img hdr 已经拷贝到 app 分区，这个时候需要校验 img crc
+            //      如果 OTA 分区的 img crc 和 app 里面的 img crc 相同，则 ota 固件已经拷贝到 app 分区，只需要更新 ota 状态。
+            //      如果 OTA 分区的 img crc 和 app 里面的 img crc 不同，则 ota 固件尚未完整拷贝到 app 分区，需要重新拷贝！！！
+            if (((ota_header.ver.ver_major << 8) + ota_header.ver.ver_minor) == \
                 ((app_header.ver.ver_major << 8) + app_header.ver.ver_minor))
-            {
-                port->flash_drv.erase(partition_info_app.start_addr, partition_info_app.size);
-                return restore_image(jump_to_app);
-            }
-            else if (((ota_header.ver.ver_major << 8) + ota_header.ver.ver_minor) == \
-                     ((app_header.ver.ver_major << 8) + app_header.ver.ver_minor))
             {
                 /* a power loss may have occurred after the last restore before the UPG STATE update. */
                 if ((app_header.img_size_orig == ota_header.img_size_orig) && \
@@ -303,20 +318,17 @@ int ota_boot_upgrade_agent(jump_to_app_t jump_to_app)
                     jump_to_app(partition_info_app.start_addr + sizeof(image_hdr_t));
                     return OTA_ERR_NONE;
                 }
-                /* why? it's impossible to go into this branch */
+                /* same version, but new image! Normally this situation should not exist. */
                 else
                 {
-                    //TODO:HOOK
-                    //ota image ver is too low,but wo also jump to app.
-                    jump_to_app(partition_info_app.start_addr + sizeof(image_hdr_t));
+                    port->flash_drv.erase(partition_info_app.start_addr, partition_info_app.size);
+                    return restore_image(jump_to_app);
                 }
             }
-            /* why? it's impossible to go into this branch */
             else
             {
-                //TODO:HOOK
-                //ota image ver is too low,but wo also jump to app.
-                jump_to_app(partition_info_app.start_addr + sizeof(image_hdr_t));
+                port->flash_drv.erase(partition_info_app.start_addr, partition_info_app.size);
+                return restore_image(jump_to_app);
             }
         }
     }

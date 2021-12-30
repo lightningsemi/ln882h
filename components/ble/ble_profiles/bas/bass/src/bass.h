@@ -28,12 +28,12 @@
  ****************************************************************************************
  */
 #include "rwip_config.h"
-
+#include "rwprf_config.h"
 #if (BLE_BATT_SERVER)
 
 #include "bass_task.h"
 #include "prf_types.h"
-#include "prf.h"
+#include "prf_ble.h"
 
 /*
  * DEFINES

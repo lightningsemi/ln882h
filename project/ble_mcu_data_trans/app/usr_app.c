@@ -10,7 +10,8 @@
 #include "ln_app_gatt.h"
 #include "ln_app_callback.h"
 #include "osal/osal.h"
-#include "ln_def.h"
+
+#include "usr_ble_app.h"
 #include "usr_send_data.h"
 
 
@@ -58,20 +59,15 @@ void app_set_adv_data(void)
 {
     //adv data: adv length--adv type--adv string ASCII
     uint8_t adv_data[ADV_DATA_MAX_LENGTH] = {0};
-    
     adv_data[0] = DEVICE_NAME_LEN + 1;
     adv_data[1] = 0x09;  //adv type :local name
     memcpy(&adv_data[2],DEVICE_NAME,DEVICE_NAME_LEN);
-    struct ln_gapm_set_adv_data_cmd *adv_data_param = blib_malloc(sizeof(struct ln_gapm_set_adv_data_cmd) + sizeof(adv_data) );
-    LN_MALLOC_CHECK(adv_data_param != NULL);
-    if(adv_data_param != NULL)
-    {
-        adv_data_param->actv_idx = adv_actv_idx;
-        adv_data_param->length = sizeof(adv_data);
-        memcpy(adv_data_param->data,adv_data,adv_data_param->length);
-        ln_app_set_adv_data(adv_data_param);
-        blib_free(adv_data_param);
-    }
+    struct ln_gapm_set_adv_data_cmd adv_data_param;
+    adv_data_param.actv_idx = adv_actv_idx;
+    adv_data_param.length = sizeof(adv_data);
+    adv_data_param.data = adv_data;
+    ln_app_set_adv_data(&adv_data_param);
+    
 }
 
 void app_start_advertising(void)
@@ -90,7 +86,7 @@ void app_restart_adv(void)
 
 void app_create_init(void)
 {
-    struct ln_gapm_activity_create_adv_cmd init_creat_param;
+    struct ln_gapm_activity_create_cmd init_creat_param;
     init_creat_param.own_addr_type = GAPM_STATIC_ADDR;
     ln_app_init_creat(&init_creat_param);
 }
@@ -137,11 +133,40 @@ void start_init(void)
     app_start_init();
 }
 
+static OS_Queue_t ble_usr_queue;
+//static OS_Semaphore_t usr_semaphore;
 
-     
+void usr_creat_queue(void)
+{
+    if(OS_OK != OS_QueueCreate(&ble_usr_queue, BLE_USR_MSG_QUEUE_SIZE, sizeof(ble_usr_msg_t)))
+    {
+        BLIB_LOG(BLIB_LOG_LVL_E, "usr QueueCreate rw_queue failed!!!\r\n");
+    }
+}
+
+void usr_queue_msg_send(uint16_t id, uint16_t length, void *msg)
+{
+    ble_usr_msg_t usr_msg;
+    usr_msg.id = id;
+    usr_msg.len = length;
+    usr_msg.msg = msg;
+    OS_QueueSend(&ble_usr_queue, &usr_msg, OS_WAIT_FOREVER);
+}
+
+int usr_queue_msg_recv(void *msg, uint32_t timeout)
+{
+    return OS_QueueReceive(&ble_usr_queue, msg, timeout);
+}
+
+
 void ble_app_task_entry(void *params)
 {
-    rw_queue_msg_t usr_msg;
+    ble_usr_msg_t usr_msg;
+
+    usr_creat_queue();
+
+    extern void ble_app_init(void);
+    ble_app_init();
 #if (SLAVE)
     start_adv();
 #endif
@@ -162,17 +187,12 @@ void ble_app_task_entry(void *params)
                 case BLE_MSG_WRITE_DATA:
                 {
                     struct ln_attc_write_req_ind *p_param = (struct ln_attc_write_req_ind *)usr_msg.msg;
-                    struct ln_gattc_send_evt_cmd *send_data = (struct ln_gattc_send_evt_cmd *)blib_malloc(sizeof(struct ln_gattc_send_evt_cmd)+p_param->length);
-                    LN_MALLOC_CHECK(send_data != NULL);
+                    struct ln_gattc_send_evt_cmd send_data;
                     hexdump(LOG_LVL_INFO, "[recv data]", (void *)p_param->value, p_param->length);
-                    if(send_data != NULL)
-                    {
-                        send_data->handle = p_param->handle + 2;
-                        send_data->length = p_param->length;
-                        memcpy(send_data->value,p_param->value,p_param->length);
-                        ln_app_gatt_send_ntf(p_param->conidx,send_data);
-                        blib_free(send_data);
-                    }   
+                    send_data.handle = p_param->handle + 2;
+                    send_data.length = p_param->length;
+                    send_data.value = p_param->value;
+                    ln_app_gatt_send_ntf(p_param->conidx,&send_data);
                 }
                 break;
 
@@ -180,25 +200,26 @@ void ble_app_task_entry(void *params)
                 {
                     struct ln_gapc_connection_req_info *p_param=(struct ln_gapc_connection_req_info *)usr_msg.msg;
 #if (CLIENT)
-                    struct ln_gattc_disc_cmd *param_ds = (struct ln_gattc_disc_cmd *)blib_malloc(sizeof(struct ln_gattc_disc_cmd)  + sizeof(svc_uuid));
-                    LN_MALLOC_CHECK(param_ds != NULL);
-                    if(param_ds != NULL)
-                    {
-                        param_ds->operation = GATTC_DISC_BY_UUID_SVC;
-                        param_ds->start_hdl = 1;
-                        param_ds->end_hdl   = 0xFFFF;
-                        param_ds->uuid_len  =sizeof(svc_uuid);
-                        memcpy(param_ds->uuid,svc_uuid,sizeof(svc_uuid));
-                        ln_app_gatt_discovery(p_param->conidx, param_ds);
-                        blib_free(param_ds);
-                    }
-
+                    struct ln_gattc_disc_cmd param_ds;
+                    param_ds.operation = GATTC_DISC_BY_UUID_SVC;
+                    param_ds.start_hdl = 1;
+                    param_ds.end_hdl   = 0xFFFF;
+                    param_ds.uuid_len  =sizeof(svc_uuid);
+                    param_ds.uuid = svc_uuid;
+                    ln_app_gatt_discovery(p_param->conidx, &param_ds);
 #endif
                     ln_app_gatt_exc_mtu(p_param->conidx);
-                    struct gapc_set_le_pkt_size_cmd pkt_size;
+                    struct ln_gapc_set_le_pkt_size_cmd pkt_size;
                     pkt_size.tx_octets = 251;
                     pkt_size.tx_time   = 2120;
                     ln_app_param_set_pkt_size(p_param->conidx,  &pkt_size);
+                     OS_MsDelay(1000);
+                    struct ln_gapc_conn_param conn_param;
+                    conn_param.intv_min = 80;    // 10x1.25ms  (7.5ms--4s)
+                    conn_param.intv_max = 90;    // 10x1.25ms  (7.5ms--4s)
+                    conn_param.latency  = 10;
+                    conn_param.time_out = 3000;  //10ms*n
+                    ln_app_update_param(p_param->conidx, &conn_param);
                 }
                 break;
 
@@ -207,27 +228,15 @@ void ble_app_task_entry(void *params)
                     struct ln_gattc_disc_svc *p_param = (struct ln_gattc_disc_svc *)usr_msg.msg;
 #if (CLIENT)
                     uint8_t data[] = {0x12,0x78,0x85};
-                    struct ln_gattc_write_cmd *param_wr = (struct ln_gattc_write_cmd *)blib_malloc(sizeof(struct ln_gattc_write_cmd) + sizeof(data));
-                    LN_MALLOC_CHECK(param_wr != NULL);
-                    if(param_wr != NULL)
-                    {
-                        param_wr->operation    = GATTC_WRITE;
-                        param_wr->auto_execute = true;
-                        param_wr->handle       = p_param->start_hdl + 2;
-                        param_wr->length       = sizeof(data);
-                        memcpy(&(param_wr->value[0]),&data,param_wr->length);
-                        param_wr->offset = 0;
-                        ln_app_gatt_write(p_param->conidx,param_wr);
-                        blib_free(param_wr);
-                    }
+                    struct ln_gattc_write_cmd param_wr;
+                    param_wr.operation    = GATTC_WRITE;
+                    param_wr.auto_execute = true;
+                    param_wr.handle       = p_param->start_hdl + 2;
+                    param_wr.length       = sizeof(data);
+                    param_wr.offset = 0;
+                    param_wr.value = data;
+                    ln_app_gatt_write(p_param->conidx,&param_wr);
 #endif
-                    ln_app_gatt_exc_mtu(p_param->conidx);
-                    struct gapc_set_le_pkt_size_cmd pkt_size;
-                    pkt_size.tx_octets = 251;
-                    pkt_size.tx_time   = 2120;
-                    OS_MsDelay(1000);
-                    ln_app_param_set_pkt_size(p_param->conidx,  &pkt_size);
-
                     struct ln_gapc_conn_param conn_param;
                     conn_param.intv_min = 80;    // 10x1.25ms  (7.5ms--4s)
                     conn_param.intv_max = 90;    // 10x1.25ms  (7.5ms--4s)

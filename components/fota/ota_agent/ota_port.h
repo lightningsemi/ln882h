@@ -13,7 +13,6 @@ typedef int   (*ota_flash_read_t)(uint32_t addr, void *buf, uint32_t len);
 typedef int   (*ota_flash_erase_t)(uint32_t addr, uint32_t len);
 typedef int   (*ota_upg_state_set_t)(upg_state_t state);
 typedef int   (*ota_upg_state_get_t)(upg_state_t *state);
-typedef void  (*chip_reboot_t)(void);
 
 typedef struct {
     ota_flash_write_t    write;
@@ -25,7 +24,6 @@ typedef struct {
     ota_flash_drv_t      flash_drv;
     ota_upg_state_set_t  upg_state_set;
     ota_upg_state_get_t  upg_state_get;
-    chip_reboot_t        chip_reboot;
 } ota_port_ctx_t;
 
 

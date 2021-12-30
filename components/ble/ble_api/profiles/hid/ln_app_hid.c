@@ -31,7 +31,6 @@
 #include <string.h>
 #include "ke_msg.h"
 #include "gapm_task.h"
-#include "ln_def.h"
 #include "prf_types.h"               // Profile Common Types Definitions
 #include "ke_task.h"                 // Kernel
 #include "ln_app_hid.h"

@@ -4,7 +4,7 @@
 #define DISABLE                                 (0)
 #define ENABLE                                  (1)
 
-#define __CONFIG_OS_KERNEL                      RTOS_FREERTOS
+#define __CONFIG_OS_KERNEL
 
 /*
  * Clock settings section
@@ -54,16 +54,15 @@
 #define FLASH_IMAGE_VER_MINOR       1
 #define SOC_CRP_FLAG                0
 
-
 /*
  * Hardware config
  */
-#define CFG_UART0_TX_BUF_SIZE      256
-#define CFG_UART0_RX_BUF_SIZE      256
+#define CFG_UART0_TX_BUF_SIZE      128
+#define CFG_UART0_RX_BUF_SIZE      128
 #define CFG_UART1_TX_BUF_SIZE      128
-#define CFG_UART1_RX_BUF_SIZE      256
+#define CFG_UART1_RX_BUF_SIZE      128
 #define CFG_UART2_TX_BUF_SIZE      128
-#define CFG_UART2_RX_BUF_SIZE      256
+#define CFG_UART2_RX_BUF_SIZE      128
 
 #define CFG_UART_BAUDRATE_LOG      921600
 #define CFG_UART_BAUDRATE_CONSOLE  115200

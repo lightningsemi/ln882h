@@ -6,6 +6,8 @@
 #include <sys/time.h>
 #include <sys/unistd.h>
 
+#include "utils/debug/log.h"
+
 int _execve_r(struct _reent *ptr, const char *name, char *const *argv, char *const *env)
 {
     LN_UNUSED(name);
@@ -120,7 +122,8 @@ _ssize_t _write_r(struct _reent *ptr, int fd, const void *buf, size_t nbytes)
     LN_UNUSED(ptr);
     LN_UNUSED(fd);
 
-    log_stdio_write((char *)buf, nbytes);
+    // log_stdio_write((char *)buf, nbytes);
+    log_raw_data_flush(buf, nbytes);
     return nbytes;
 }
 
@@ -196,20 +199,39 @@ void *_malloc_r(struct _reent *ptr, size_t size)
 
 void *_realloc_r(struct _reent *ptr, void *old, size_t newlen)
 {
-    LN_UNUSED(ptr);
-    LN_UNUSED(old);
-    LN_UNUSED(newlen);
+    void *res = NULL;
+    if (newlen == 0) {
+        OS_Free(old);
+        return NULL;
+    }
 
-    return NULL;
+    res = (void *)OS_Malloc(newlen);
+
+    if (old == NULL) {
+        return res;
+    }
+
+    if (res != NULL) {
+        memcpy(res, old, newlen);
+        OS_Free(old);
+    } else {
+        ptr->_errno = ENOMEM;
+    }
+
+    return res;
 }
 
 void *_calloc_r(struct _reent *ptr, size_t size, size_t len)
 {
-    LN_UNUSED(ptr);
-    LN_UNUSED(size);
-    LN_UNUSED(len);
+    void *res = NULL;
+    res = (void *)OS_Malloc(size *len);
+    if (res == NULL) {
+        ptr->_errno = ENOMEM;
+    } else {
+        memset(res, 0x0, size * len);
+    }
 
-    return NULL;
+    return res;
 }
 
 void _free_r(struct _reent *ptr, void *addr)
@@ -226,10 +248,13 @@ void _exit(int status)
 {
     LN_UNUSED(status);
 
+    // thread:%s exit with status %d
     while (1);
 }
 
 void abort(void)
 {
+    // abort at thread:%s
+    // re-schedule
     while (1);
 }

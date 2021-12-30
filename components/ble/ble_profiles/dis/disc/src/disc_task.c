@@ -23,7 +23,7 @@
  ****************************************************************************************
  */
 #include "rwip_config.h"
-
+#include "rwprf_config.h"
 #if (BLE_DIS_CLIENT)
 #include "co_utils.h"
 #include "gap.h"

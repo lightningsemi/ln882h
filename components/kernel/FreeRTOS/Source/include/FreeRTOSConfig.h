@@ -106,7 +106,7 @@
 #define configUSE_APPLICATION_TASK_TAG	0
 #define configUSE_COUNTING_SEMAPHORES	1
 #define configGENERATE_RUN_TIME_STATS	( TASK_RUN_MONITOR )
-#define configUSE_TICKLESS_IDLE         0//1
+#define configUSE_TICKLESS_IDLE         1//1
 #define configUSE_STATS_FORMATTING_FUNCTIONS ( TASK_RUN_MONITOR )
 #define configUSE_CPU_USAGE             0
 
@@ -129,7 +129,7 @@
     #define portGET_OS_TICK_COMPENSATE_VAL(x)    ln_get_os_tick_comp_val(x)
 #endif
 
-#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP                   (3)
+#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP                   8//(3)
 
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES 		0
@@ -140,11 +140,7 @@
 #define configTIMER_TASK_PRIORITY		(configMAX_PRIORITIES - 1)
 #define configTIMER_QUEUE_LENGTH		10
 
-#if defined(BLE_MESH_SUPPORT) //mesh timer need more stack size
-#define configTIMER_TASK_STACK_DEPTH	( configMINIMAL_STACK_SIZE * 2*2 )
-#else
 #define configTIMER_TASK_STACK_DEPTH	( configMINIMAL_STACK_SIZE * 2 )
-#endif
 
 /* Set the following definitions to 1 to include the API function, or zero
 to exclude the API function. */
@@ -192,13 +188,13 @@ standard names. */
 #define xPortSysTickHandler SysTick_Handler
 
 #if defined(__ICCARM__) || defined(__CC_ARM) || defined(__GNUC__)
-extern void hal_pre_sleep_processing(uint32_t *ulExpectedIdleTime);
-extern int hal_post_sleep_processing(uint32_t *ulExpectedIdleTime);
+extern void ln_pm_rtos_pre_sleep_proc(uint32_t *expect_ms);
+extern int ln_pm_rtos_post_sleep_proc(uint32_t *expect_ms);
 #endif /* defined(__ICCARM__) || defined(__CC_ARM) || defined(__GNUC__) */
 
 #if configUSE_TICKLESS_IDLE == 1
-#define configPRE_SLEEP_PROCESSING(xExpectedIdleTime)               hal_pre_sleep_processing(&xExpectedIdleTime)
-#define configPOST_SLEEP_PROCESSING(xExpectedIdleTime)              hal_post_sleep_processing(&xExpectedIdleTime)
+#define configPRE_SLEEP_PROCESSING(xExpectedIdleTime)        ln_pm_rtos_pre_sleep_proc(&xExpectedIdleTime)
+#define configPOST_SLEEP_PROCESSING(xExpectedIdleTime)       ln_pm_rtos_post_sleep_proc(&xExpectedIdleTime)
 #endif /* configUSE_TICKLESS_IDLE == 1 */
 
 #if (configUSE_CPU_USAGE == 1)

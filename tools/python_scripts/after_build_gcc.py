@@ -115,14 +115,13 @@ class AfterBuildGCC(AfterBuildBase):
             TOOL_SUFFIX = ".exe"
         CROSS_COMPILE_PREFIX = os.environ["CROSS_TOOLCHAIN_ROOT"] + "/bin/arm-none-eabi-"
         objcopy_tool = CROSS_COMPILE_PREFIX + "objcopy" + TOOL_SUFFIX
-        size_tool    = CROSS_COMPILE_PREFIX + "size" + TOOL_SUFFIX
-
-        cmd = " ".join([objcopy_tool, "-O binary", axf_filepath, app_filepath])
         try:
-            retval = subprocess.check_call(cmd, stdout=subprocess.DEVNULL, shell=True)
+            retval = subprocess.check_call("{_t} -O binary {_axf} {_app}".format(_t=objcopy_tool, _axf=axf_filepath, _app=app_filepath), shell=True)
         except subprocess.CalledProcessError as err:
-            print(str(err))
             retval = err.returncode
+            print("returncode: {}".format(err.returncode))
+            print("cmd: {}".format(err.cmd))
+            print("output: {}".format(err.output))
 
         if retval != 0:
             print("Error: produce {} failed!!!".format(os.path.basename(app_filepath)))

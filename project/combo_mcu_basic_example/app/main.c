@@ -8,19 +8,18 @@
 #include "utils/reboot_trace/reboot_trace.h"
 #include "utils/runtime/runtime.h"
 #include "hal/hal_interrupt.h"
+#include "ln_utils.h"
+#include "ln_misc.h"
 #include "ln_nvds.h"
 #include "ln_kv_api.h"
 #include "ln_at.h"
-#include "ln_utils.h"
 #include "flash_partition_table.h"
-#include "arch.h"
+
 
 int main (int argc, char* argv[])
 {
     LN_UNUSED(argc);
     LN_UNUSED(argv);
-
-//    *(uint32_t *)(0x40100098) = 0x13141517;
 
     //0. check reboot cause
     ln_chip_get_reboot_cause();
@@ -65,11 +64,17 @@ int main (int argc, char* argv[])
     //Init lwip stack.
     lwip_tcpip_init();
 
+    {
+        uint8_t mac[6] ={0};
+        ln_generate_random_mac(mac);
+        mac[5] |= 0xC0; // This address is random generated, so assign 0x11 => Static Random Address
+
+        extern void rw_init(uint8_t mac[6]);
+        rw_init(mac);
+    }
+
     //Creat usr app task.
     creat_usr_app_task();
-
-    //Init ble full stack.
-    rw_init();
 
     OS_ThreadStartScheduler();
 

@@ -57,6 +57,8 @@ typedef union {
     uint32_t l[16];
 } CHAR64LONG16;
 
+#if (!(LN_SW_SHA1_USING_ROM_CODE))
+
 /* Hash a single 512-bit block. This is the core of the algorithm. */
 void ln_sha1_transform(uint32_t state[5], const uint8_t buffer[64])
 {
@@ -321,6 +323,50 @@ void ln_hmac_sha1(uint8_t *k,  /* secret key */
     ln_sha1_final(osha, &octx);
     memcpy(out, osha, SHA_DIGEST_LENGTH);
 }
+#else
+#include "ln882h_rom_fun.h"
+
+typedef void (*rom_func_sha1_init)(ln_sha1_ctx_t *);
+typedef void (*rom_func_sha1_update)(ln_sha1_ctx_t *, const void *, size_t);
+typedef void (*rom_func_sha1_transform)(uint32_t *, const uint8_t *);
+typedef void (*rom_func_sha1_final)(uint8_t *, ln_sha1_ctx_t *);
+typedef void (*rom_func_hmac_sha1)(uint8_t *, size_t, uint8_t *, size_t, uint8_t *);
+
+void ln_sha1_init(ln_sha1_ctx_t *context)
+{
+    rom_func_sha1_init sha1_init = (rom_func_sha1_init)ROM_FUN_SHA1_INIT;
+    sha1_init(context);
+}
+
+void ln_sha1_update(ln_sha1_ctx_t *context, const void *p, size_t len)
+{
+    rom_func_sha1_update sha1_update = (rom_func_sha1_update)ROM_FUN_SHA1_UPDATE;
+    sha1_update(context, p, len);
+}
+
+void ln_sha1_transform(uint32_t state[5], const uint8_t buffer[64])
+{
+    rom_func_sha1_transform sha1_transform = (rom_func_sha1_transform)ROM_FUN_SHA1_TRANSFORM;
+    sha1_transform(state, buffer);
+}
+
+void ln_sha1_final(uint8_t digest[LN_SHA1_DIGEST_SIZE], ln_sha1_ctx_t *context)
+{
+    rom_func_sha1_final sha1_final = (rom_func_sha1_final)ROM_FUN_SHA1_FINAL;
+    sha1_final(digest, context);
+}
+
+void ln_hmac_sha1(uint8_t  * k,    /* secret key */
+                  size_t     lk,   /* length of the key in bytes */
+                  uint8_t  * d,    /* data */
+                  size_t     ld,   /* length of data in bytes */
+                  uint8_t  * out   /* output buffer, at least "t" bytes */
+                  )
+{
+    rom_func_hmac_sha1 hmac_sha1 = (rom_func_hmac_sha1)ROM_FUN_HMAC_SHA1;
+    hmac_sha1(k, lk, d, ld, out);
+}
+#endif /* !(LN_SW_SHA1_USING_ROM_CODE) */
 
 #if defined (__CC_ARM)
 #pragma pop

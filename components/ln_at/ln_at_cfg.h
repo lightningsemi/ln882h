@@ -24,7 +24,7 @@
 #endif
 
 #ifndef LN_AT_TRANSFER_TASK_PRI
-#define LN_AT_TRANSFER_TASK_PRI (3) /* OS_PRIORITY_REAL_TIME */
+#define LN_AT_TRANSFER_TASK_PRI (3) /* OS_PRIORITY_NORMAL */
 #endif
 
 #define LN_AT_WAIT_FOREVER      (0xffffffffU)

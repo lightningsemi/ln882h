@@ -44,7 +44,7 @@ void hal_aes_init(uint32_t aes_base,aes_init_t_def* aes_init)
             break;
     }
 
-    if(aes_init->aes_opcode == AES_OPCODE_ENNCRYPT){
+    if(aes_init->aes_opcode == AES_OPCODE_ENCRYPT){
         aes_opcode_setf(aes_base,0);
     }
     else if (aes_init->aes_opcode == AES_OPCODE_DECRYPT){
@@ -82,7 +82,7 @@ void hal_aes_set_plain_text(uint32_t aes_base,uint8_t *data,uint32_t data_len)
     /* check the parameters */
     hal_assert(IS_AES_ALL_PERIPH(aes_base));
 
-    memcpy(data_buf,data,16);
+    memcpy(data_buf,data,data_len);
 
     aes_ptr0_setf(aes_base,data_buf[0]);
     aes_ptr1_setf(aes_base,data_buf[1]);
@@ -98,7 +98,7 @@ void hal_aes_set_key(uint32_t aes_base,uint8_t *data,uint32_t data_len)
     /* check the parameters */
     hal_assert(IS_AES_ALL_PERIPH(aes_base));
 
-    memcpy(data_buf,data,32);
+    memcpy(data_buf,data,data_len);
 
     aes_ikr0_setf(aes_base,data_buf[0]);
     aes_ikr1_setf(aes_base,data_buf[1]);

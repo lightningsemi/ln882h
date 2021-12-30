@@ -7,6 +7,8 @@
 #include "hal/hal_gpio.h"
 #include "hal/hal_misc.h"
 
+#include "reg_sysc_cmp.h"//gpio fullmux
+
 #define UART0_TX_BUF_SIZE  CFG_UART0_TX_BUF_SIZE
 #define UART0_RX_BUF_SIZE  CFG_UART0_RX_BUF_SIZE
 #define UART1_TX_BUF_SIZE  CFG_UART1_TX_BUF_SIZE
@@ -44,29 +46,33 @@ typedef struct
 } ln_serial_t;
 ln_serial_t uart_serial[SER_PORT_NUM];
 
-
-#include "reg_sysc_cmp.h"//gpio fullmux
 static void uart_io_pin_request(struct Serial *serial)
 {
+    if (serial->port_id == SER_PORT_UART0) {                                    // For log output
+        hal_gpio_pin_afio_select(GPIOB_BASE, GPIO_PIN_9, UART0_TX);
+        // hal_gpio_pin_afio_select(GPIOB_BASE, GPIO_PIN_8, UART0_RX);          // Don't init, only use tx pin
+        hal_gpio_pin_afio_en(GPIOB_BASE, GPIO_PIN_9, HAL_ENABLE);
+        // hal_gpio_pin_afio_en(GPIOB_BASE, GPIO_PIN_8, HAL_ENABLE);            // Don't init, only use tx pin
+    } else if (serial->port_id == SER_PORT_UART1) {                             // For ShaoLu, ShouQuan, RF Test
+        hal_gpio_pin_afio_select(GPIOA_BASE, GPIO_PIN_2, UART1_TX);
+        hal_gpio_pin_afio_select(GPIOA_BASE, GPIO_PIN_3, UART1_RX);
+        hal_gpio_pin_afio_en(GPIOA_BASE, GPIO_PIN_2, HAL_ENABLE);
+        hal_gpio_pin_afio_en(GPIOA_BASE, GPIO_PIN_3, HAL_ENABLE);
+    } else if (serial->port_id == SER_PORT_UART2) {
+    }
+}
+
+static void uart_io_pin_release(struct Serial *serial)
+{
+    if (serial == NULL) return;
+
     if (serial->port_id == SER_PORT_UART0) {
-#if 0 // pin same as uart0 of ROM
-        hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_2,UART0_TX);
-        hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_3,UART0_RX);
-        hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_2,HAL_ENABLE);
-        hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_3,HAL_ENABLE);
-#else //pin same as uart0 of LN8825 EVK
-        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_7,UART0_TX);
-        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_6,UART0_RX);
-        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_7,HAL_ENABLE);
-        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_6,HAL_ENABLE);
-#endif
-    } else if (serial->port_id == SER_PORT_UART1){
-        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_9,UART1_TX);
-        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_8,UART1_RX);
-        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_9,HAL_ENABLE);
-        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_8,HAL_ENABLE);
-    } else if (serial->port_id == SER_PORT_UART2){
-        
+        hal_gpio_pin_afio_en(GPIOB_BASE, GPIO_PIN_9, HAL_DISABLE);
+        // hal_gpio_pin_afio_en(GPIOB_BASE, GPIO_PIN_8, HAL_DISABLE);           // Don't deinit, only use tx pin
+    } else if (serial->port_id == SER_PORT_UART1) {
+        hal_gpio_pin_afio_en(GPIOA_BASE, GPIO_PIN_2, HAL_DISABLE);
+        hal_gpio_pin_afio_en(GPIOA_BASE, GPIO_PIN_3, HAL_DISABLE);
+    } else if (serial->port_id == SER_PORT_UART2) {
     }
 }
 
@@ -91,11 +97,11 @@ static void hw_uart0_init(struct SerialHardware *_hw, struct Serial *serial, uin
     hal_uart_tx_mode_en(g_uart0.uart_base, HAL_ENABLE);
     hal_uart_en(g_uart0.uart_base, HAL_ENABLE);
     
-    hal_uart_it_en(g_uart0.uart_base, USART_IT_RXNE);
-    //uart_it_enable(g_uart0.uart_base, USART_IT_TXE);//uart_it_enable(g_uart0.uart_base, USART_IT_TXE);
+    // hal_uart_it_en(g_uart0.uart_base, USART_IT_RXNE);                        // Don't init, only use tx function
+    // uart_it_enable(g_uart0.uart_base, USART_IT_TXE);
 
-    NVIC_EnableIRQ(UART0_IRQn);    
-    
+    NVIC_EnableIRQ(UART0_IRQn);
+
     //request pin for uart
     uart_io_pin_request(hw->serial);
 }
@@ -161,40 +167,43 @@ static void hw_uart2_init(struct SerialHardware *_hw, struct Serial *serial, uin
 static void hw_uart0_cleanup(struct SerialHardware *_hw)
 {
     ln_serial_t *hw = NULL;
-
     LN_ASSERT(_hw);
-    hw = (ln_serial_t *)_hw;
-    hw->serial = NULL;
-    
+
     hal_misc_reset_uart0();
     NVIC_ClearPendingIRQ(UART0_IRQn);
     NVIC_DisableIRQ(UART0_IRQn);
+
+    hw = (ln_serial_t *)_hw;
+    uart_io_pin_release(hw->serial);
+    hw->serial = NULL;                                                          // must be reset to NULL
 }
 
 static void hw_uart1_cleanup(struct SerialHardware *_hw)
 {
     ln_serial_t *hw = NULL;
-
     LN_ASSERT(_hw);
-    hw = (ln_serial_t *)_hw;
-    hw->serial = NULL;
-    
+
     hal_misc_reset_uart1();
     NVIC_ClearPendingIRQ(UART1_IRQn);
     NVIC_DisableIRQ(UART1_IRQn);
+
+    hw = (ln_serial_t *)_hw;
+    uart_io_pin_release(hw->serial);
+    hw->serial = NULL;                                                          // must be reset to NULL
 }
 
 static void hw_uart2_cleanup(struct SerialHardware *_hw)
 {
     ln_serial_t *hw = NULL;
-
     LN_ASSERT(_hw);
-    hw = (ln_serial_t *)_hw;
-    hw->serial = NULL;
-    
+
     hal_misc_reset_uart2();
     NVIC_ClearPendingIRQ(UART2_IRQn);
     NVIC_DisableIRQ(UART2_IRQn);
+
+    hw = (ln_serial_t *)_hw;
+    uart_io_pin_release(hw->serial);
+    hw->serial = NULL;                                                          // must be reset to NULL
 }
 
 static void hw_uart_tx_start_polling(struct SerialHardware * _hw)

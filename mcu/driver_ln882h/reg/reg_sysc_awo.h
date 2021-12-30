@@ -106,7 +106,8 @@ typedef union
         uint32_t    reserved_1          : 3  ; // 27 : 25
         uint32_t    o_phy_pd_en         : 1  ; // 28 : 28
         uint32_t    o_digpll_po         : 1  ; // 29 : 29
-        uint32_t    reserved_0          : 2  ; // 31 : 30
+        uint32_t    xtal_pd_en          : 1  ; // 30 : 30
+        uint32_t    reserved_0          : 1  ; // 31 : 31
     } bit_field;
 } t_sysc_awo_pmu_cfg;
 
@@ -563,6 +564,11 @@ __STATIC_INLINE void sysc_awo_r_vtrim_setf(uint8_t r_vtrim)
 __STATIC_INLINE void sysc_awo_pmu_cfg_set(uint32_t value)
 {
     hwp_sysc_awo->pmu_cfg.val = value;
+}
+
+__STATIC_INLINE void sysc_awo_xtal_pd_en_setf(uint8_t xtal_pd_en)
+{
+    hwp_sysc_awo->pmu_cfg.bit_field.xtal_pd_en = xtal_pd_en;
 }
 
 __STATIC_INLINE void sysc_awo_o_digpll_po_setf(uint8_t o_digpll_po)
@@ -1168,6 +1174,11 @@ __STATIC_INLINE uint32_t sysc_awo_pmu_cfg_get(void)
     return hwp_sysc_awo->pmu_cfg.val;
 }
 
+__STATIC_INLINE uint8_t sysc_awo_xtal_pd_en_getf(void)
+{
+    return hwp_sysc_awo->pmu_cfg.bit_field.xtal_pd_en;
+}
+
 __STATIC_INLINE uint8_t sysc_awo_o_digpll_po_getf(void)
 {
     return hwp_sysc_awo->pmu_cfg.bit_field.o_digpll_po;
@@ -1720,10 +1731,11 @@ __STATIC_INLINE void sysc_awo_pmu_reg_pack(uint8_t r_xtal40m_syspll_fref_en, uin
                                   );
 }
 
-__STATIC_INLINE void sysc_awo_pmu_cfg_pack(uint8_t o_digpll_po, uint8_t o_phy_pd_en, uint8_t o_phy_po_en, uint8_t o_sram_pd_en, uint8_t o_sram_po_en, uint8_t o_digldo_retvdd, uint8_t o_digldo_norvdd, uint8_t ldo18_pd_en, uint8_t ldo18_po_en, uint8_t o_cpucore_retreg_po, uint8_t o_pdcmp_po)
+__STATIC_INLINE void sysc_awo_pmu_cfg_pack(uint8_t xtal_pd_en, uint8_t o_digpll_po, uint8_t o_phy_pd_en, uint8_t o_phy_po_en, uint8_t o_sram_pd_en, uint8_t o_sram_po_en, uint8_t o_digldo_retvdd, uint8_t o_digldo_norvdd, uint8_t ldo18_pd_en, uint8_t ldo18_po_en, uint8_t o_cpucore_retreg_po, uint8_t o_pdcmp_po)
 {
     hwp_sysc_awo->pmu_cfg.val = ( \
-                                    ((uint32_t )o_digpll_po       << 29) \
+                                    ((uint32_t )xtal_pd_en        << 30) \
+                                  | ((uint32_t )o_digpll_po       << 29) \
                                   | ((uint32_t )o_phy_pd_en       << 28) \
                                   | ((uint32_t )o_phy_po_en       << 24) \
                                   | ((uint32_t )o_sram_pd_en      << 20) \
@@ -1906,10 +1918,11 @@ __STATIC_INLINE void sysc_awo_pmu_reg_unpack(uint8_t * r_xtal40m_syspll_fref_en,
     *r_vtrim            = local_val.bit_field.r_vtrim;
 }
 
-__STATIC_INLINE void sysc_awo_pmu_cfg_unpack(uint8_t * o_digpll_po, uint8_t * o_phy_pd_en, uint8_t * o_phy_po_en, uint8_t * o_sram_pd_en, uint8_t * o_sram_po_en, uint8_t * o_digldo_retvdd, uint8_t * o_digldo_norvdd, uint8_t * ldo18_pd_en, uint8_t * ldo18_po_en, uint8_t * o_cpucore_retreg_po, uint8_t * o_pdcmp_po)
+__STATIC_INLINE void sysc_awo_pmu_cfg_unpack(uint8_t * xtal_pd_en, uint8_t * o_digpll_po, uint8_t * o_phy_pd_en, uint8_t * o_phy_po_en, uint8_t * o_sram_pd_en, uint8_t * o_sram_po_en, uint8_t * o_digldo_retvdd, uint8_t * o_digldo_norvdd, uint8_t * ldo18_pd_en, uint8_t * ldo18_po_en, uint8_t * o_cpucore_retreg_po, uint8_t * o_pdcmp_po)
 {
     t_sysc_awo_pmu_cfg local_val = hwp_sysc_awo->pmu_cfg;
 
+    *xtal_pd_en         = local_val.bit_field.xtal_pd_en;
     *o_digpll_po        = local_val.bit_field.o_digpll_po;
     *o_phy_pd_en        = local_val.bit_field.o_phy_pd_en;
     *o_phy_po_en        = local_val.bit_field.o_phy_po_en;

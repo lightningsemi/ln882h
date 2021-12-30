@@ -10,12 +10,12 @@
       <TargetName>firmware_ln882h</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060061::V5.06 update 1 (build 61)::ARMCC</pCCUsed>
+      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
       <TargetOption>
         <TargetCommonOption>
           <Device>ARMCM4_FP</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.5.4.0</PackID>
+          <PackID>ARM.CMSIS.4.5.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IROM(0x00000000,0x00040000) IRAM(0x20000000,0x00020000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -332,7 +332,7 @@
               <MiscControls>--gnu</MiscControls>
               <Define>LN882H,ARM_MATH_CM4</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\components\ble\app;..\..\..\components\ble\ble_api\common;..\..\..\components\ble\ble_api\gap_gatt\api;..\..\..\components\ble\ble_lib_import;..\..\..\components\ble\mac\ble\hl\api;..\..\..\components\ble\mac\ble\hl\inc;..\..\..\components\ble\mac\ble\ll\api;..\..\..\components\ble\mac\ble\ll\import;..\..\..\components\ble\mac\ble\ll\src;..\..\..\components\ble\mac\ble\ll\src\llm;..\..\..\components\ble\mac\ble\profiles\netcfg\api;..\..\..\components\ble\mac\em\api;..\..\..\components\ble\mac\hci\api;..\..\..\components\ble\mac\sch\api;..\..\..\components\ble\mac\sch\import;..\..\..\components\ble\modules\aes\api;..\..\..\components\ble\modules\common\api;..\..\..\components\ble\modules\dbg\api;..\..\..\components\ble\modules\ecc_p256\api;..\..\..\components\ble\modules\h4tl\api;..\..\..\components\ble\modules\ke\api;..\..\..\components\ble\modules\lib_ver\api;..\..\..\components\ble\modules\nvds\api;..\..\..\components\ble\modules\rf\api;..\..\..\components\ble\modules\rwip\api;..\..\..\components\net\lwip-2.0.3\src\include;..\..\..\components\net\lwip-2.0.3\src\port;..\..\..\components\net\lwip-2.0.3\src\port\arch;..\..\..\components\wifi\wifi_manager;..\..\..\components\wifi\wifi_lib_import;..\..\..\components\wifi\wifi_lib_export;..\..\..\components\fs\nvds;..\..\..\components\fs\partition_mgr;..\..\..\components\fs\kv\kv_port;..\..\..\components\fs\kv\kv;..\..\..\components\serial;..\..\..\components\net\dhcpd;..\..\..\components\net\iperf;..\..\..\components\net\ping;..\..\..\components\kernel;..\..\..\components\kernel\FreeRTOS\Source\include;..\..\..\components\kernel\FreeRTOS_Adapter;..\..\..\components\kernel\FreeRTOS\Source\portable\RVDS\ARM_CM4F;..\..\..\components\utils\debug\runtime;..\..\..\components\utils\debug\reboot_trace;..\..\..\components\utils;..\..\..\components;..\..\..\mcu\driver_ln882h;..\..\..\mcu\driver_ln882h\reg;..\..\..\mcu\CMSIS_5.3.0;..\..\..\mcu\ln882h;..\..\..\components;..\..\..\components\ln_at;..\..\..\components\ln_at\adapter;..\..\..\components\ln_at\cmd;..\..\..\components\ln_at\parser;..\..\..\components\ln_at\transfer;..\..\..\components\ln_at_cmd\system;..\cfg;..\bsp;..\app;..\app\ble_usr_app;..\app\ble_usr_app\app_callback</IncludePath>
+              <IncludePath>..\..\..\components\ble\app;..\..\..\components\ble\ble_api\common;..\..\..\components\ble\ble_api\gap_gatt\api;..\..\..\components\ble\ble_lib_import;..\..\..\components\ble\mac\ble\hl\api;..\..\..\components\ble\mac\ble\hl\inc;..\..\..\components\ble\mac\ble\ll\api;..\..\..\components\ble\mac\ble\ll\import;..\..\..\components\ble\mac\ble\ll\src;..\..\..\components\ble\mac\ble\ll\src\llm;..\..\..\components\ble\mac\ble\profiles\netcfg\api;..\..\..\components\ble\mac\em\api;..\..\..\components\ble\mac\hci\api;..\..\..\components\ble\mac\sch\api;..\..\..\components\ble\mac\sch\import;..\..\..\components\ble\modules\aes\api;..\..\..\components\ble\modules\common\api;..\..\..\components\ble\modules\dbg\api;..\..\..\components\ble\modules\ecc_p256\api;..\..\..\components\ble\modules\h4tl\api;..\..\..\components\ble\modules\ke\api;..\..\..\components\ble\modules\lib_ver\api;..\..\..\components\ble\modules\nvds\api;..\..\..\components\ble\modules\rf\api;..\..\..\components\ble\modules\rwip\api;..\..\..\components\net\lwip-2.0.3\src\include;..\..\..\components\net\lwip-2.0.3\src\port;..\..\..\components\net\lwip-2.0.3\src\port\arch;..\..\..\components\wifi\wifi_manager;..\..\..\components\wifi\wifi_lib_import;..\..\..\components\wifi\wifi_lib_export;..\..\..\components\fs\nvds;..\..\..\components\fs\partition_mgr;..\..\..\components\fs\kv\kv_port;..\..\..\components\fs\kv\kv;..\..\..\components\serial;..\..\..\components\net\dhcpd;..\..\..\components\net\iperf;..\..\..\components\net\ping;..\..\..\components\kernel;..\..\..\components\kernel\FreeRTOS\Source\include;..\..\..\components\kernel\FreeRTOS_Adapter;..\..\..\components\kernel\FreeRTOS\Source\portable\RVDS\ARM_CM4F;..\..\..\components\utils\debug\runtime;..\..\..\components\utils\debug\reboot_trace;..\..\..\components\utils;..\..\..\components;..\..\..\mcu\driver_ln882h;..\..\..\mcu\driver_ln882h\reg;..\..\..\mcu\CMSIS_5.3.0;..\..\..\mcu\ln882h;..\..\..\components;..\..\..\components\ln_at;..\..\..\components\ln_at\adapter;..\..\..\components\ln_at\cmd;..\..\..\components\ln_at\parser;..\..\..\components\ln_at\transfer;..\..\..\components\ln_at_cmd\system;..\cfg;..\bsp;..\app;..\app\ble_usr_app;..\app\ble_usr_app\app_callback;..\..\..\components\ble\ble_profiles\prf_common;..\..\..\components\ble;..\..\..\components\ble\ble_arch</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -569,6 +569,11 @@
               <FileName>ln_aes.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\components\utils\ln_aes.c</FilePath>
+            </File>
+            <File>
+              <FileName>ln_pm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\utils\power_mgmt\ln_pm.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1167,25 +1172,20 @@
               <FileType>5</FileType>
               <FilePath>..\..\..\components\ble\ble_lib_import\ble_port.h</FilePath>
             </File>
+            <File>
+              <FileName>ble_arch_main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\ble\ble_arch\ble_arch_main.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>ble_app</GroupName>
           <Files>
             <File>
-              <FileName>arch_main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\app\ble_usr_app\arch_main.c</FilePath>
-            </File>
-            <File>
               <FileName>usr_send_data.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\app\ble_usr_app\usr_send_data.c</FilePath>
-            </File>
-            <File>
-              <FileName>ln_app_callback.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\app\ble_usr_app\app_callback\ln_app_callback.c</FilePath>
             </File>
             <File>
               <FileName>ln_gap_callback.c</FileName>
@@ -1197,16 +1197,16 @@
               <FileType>1</FileType>
               <FilePath>..\app\ble_usr_app\app_callback\ln_gatt_callback.c</FilePath>
             </File>
+            <File>
+              <FileName>usr_ble_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\ble_usr_app\usr_ble_app.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>ble_api</GroupName>
           <Files>
-            <File>
-              <FileName>ln_def.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\components\ble\ble_api\common\ln_def.c</FilePath>
-            </File>
             <File>
               <FileName>ln_app_gap.c</FileName>
               <FileType>1</FileType>
@@ -1216,6 +1216,21 @@
               <FileName>ln_app_gatt.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\components\ble\ble_api\gap_gatt\src\ln_app_gatt.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>ble_profile</GroupName>
+          <Files>
+            <File>
+              <FileName>prf_ble.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\ble\ble_profiles\prf_common\prf_ble.c</FilePath>
+            </File>
+            <File>
+              <FileName>prf_utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\ble\ble_profiles\prf_common\prf_utils.c</FilePath>
             </File>
           </Files>
         </Group>

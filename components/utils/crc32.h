@@ -4,6 +4,8 @@
 
 #include <stdint.h>
 
+#define LN_SW_CRC32_USING_ROM_CODE (0)
+
 typedef struct {
     uint32_t    crc;
 } crc32_ctx_t;

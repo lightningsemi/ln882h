@@ -47,7 +47,7 @@ const uint8_t input_backup[33] = "11112222333344445555666677778888";
 
 // 加密用到的key 和初始化向量
 const uint8_t key[33] = "FEDCBA0987654321FEDCBA0987654321";
-const uint8_t iv[16] = "1234567890ABCDEF";
+const uint8_t iv[17] = "1234567890ABCDEF";
 
 uint8_t out[33];
 uint32_t out_len = 0;
@@ -63,7 +63,7 @@ void ln_aes_test()
 
     aes_init.aes_cbc_mod = AES_CBC_MOD_ECB_MOD;     //设置AES为CBC加密模式
     aes_init.aes_key_len = AES_KEY_LEN_256_BIT;     //设置密码长度为256bit
-    aes_init.aes_opcode  = AES_OPCODE_ENNCRYPT;     //设置当前模式为加密模式
+    aes_init.aes_opcode  = AES_OPCODE_ENCRYPT;     //设置当前模式为加密模式
     aes_init.aes_big_endian = AES_BIG_ENDIAN;       //默认配置（不要更改）
 
     hal_aes_init(AES_BASE,&aes_init);               //初始化AES
@@ -107,7 +107,7 @@ void ln_aes_test()
     hal_aes_init(AES_BASE,&aes_init);               //初始化AES    
     
     /* 8. 设置要解密的密文，其余的秘钥和初始化向量不变 */   
-    hal_aes_set_plain_text(AES_BASE,(uint8_t *)output,strlen((const char *)out_len));
+    hal_aes_set_plain_text(AES_BASE,(uint8_t *)output,strlen((const char *)output));
     hal_aes_set_key(AES_BASE,(uint8_t *)key,strlen((const char *)key));             //设置加密秘钥
     hal_aes_set_vector(AES_BASE,(uint8_t *)iv,strlen((const char *)iv));            //设置初始化向量
     

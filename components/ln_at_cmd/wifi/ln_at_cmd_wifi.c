@@ -297,12 +297,23 @@ static ln_at_err_t ln_at_set_wifi_mode_def(uint8_t para_num, const char *name)
     }
 
     wifi_stop();
+    if (curr_mode == WIFI_MODE_STATION)
+    {
+        netdev_set_state(NETIF_IDX_STA, NETDEV_DOWN);
+    }
+    else
+    {
+        netdev_set_state(NETIF_IDX_AP, NETDEV_DOWN);
+    }
 
     if (mode == WIFI_MODE_STATION)
     {
         netdev_set_mac_addr(NETIF_IDX_STA, mac_addr);
         netdev_set_active(NETIF_IDX_STA);
         wifi_sta_start(mac_addr, ps_mode);
+    }
+    else {
+
     }
 
     g_ln_at_ctrl_p->mode = mode;
@@ -562,7 +573,7 @@ static ln_at_err_t _ln_at_parse_cwjap(uint8_t para_num, const char *name)
         }
     }
 
-    LOG(LOG_LVL_INFO, "ssid:%s; pwd:%s; bssid:%s\r\n",
+    LOG(LOG_LVL_INFO, "AT CWJAP:[ssid:%s; pwd:%s; bssid:%s]\r\n",
         ssid_p, pwd_p, bssid_p == NULL ? "NULL" : bssid_p);
 
     if (bssid_p != NULL)
@@ -580,8 +591,9 @@ static ln_at_err_t _ln_at_parse_cwjap(uint8_t para_num, const char *name)
         goto __exit;
     }
 
-    wifi_sta_disconnect();
+    // wifi_sta_disconnect();
     wifi_stop();
+    netdev_set_state(NETIF_IDX_STA, NETDEV_DOWN);
 
     netdev_set_mac_addr(NETIF_IDX_STA, mac_addr);
     netdev_set_active(NETIF_IDX_STA);
@@ -1207,6 +1219,7 @@ static ln_at_err_t _ln_at_cwsap_set_parse(ln_at_cmd_type_e type, uint8_t para_nu
         ap_cfg.ext_cfg.beacon_interval);
 
     wifi_stop();
+    netdev_set_state(NETIF_IDX_AP, NETDEV_DOWN);
 
     {
         tcpip_ip_info_t  ip_info = {0};

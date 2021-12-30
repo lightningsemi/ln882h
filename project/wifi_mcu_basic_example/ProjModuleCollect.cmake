@@ -66,6 +66,7 @@ set(UTILS_SRC
     ${COMP_UTILS_DIR}/fifo/fifobuf.c
     ${COMP_UTILS_DIR}/reboot_trace/reboot_trace.c
     ${COMP_UTILS_DIR}/runtime/runtime.c
+    ${COMP_UTILS_DIR}/power_mgmt/ln_pm.c
 
     ${COMP_UTILS_DIR}/ln_psk_calc.c
     ${COMP_UTILS_DIR}/ln_sha1.c

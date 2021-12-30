@@ -66,6 +66,7 @@ set(UTILS_SRC
     ${COMP_UTILS_DIR}/fifo/fifobuf.c
     ${COMP_UTILS_DIR}/reboot_trace/reboot_trace.c
     ${COMP_UTILS_DIR}/runtime/runtime.c
+    ${COMP_UTILS_DIR}/power_mgmt/ln_pm.c
 
     ${COMP_UTILS_DIR}/ln_psk_calc.c
     ${COMP_UTILS_DIR}/ln_sha1.c
@@ -118,13 +119,15 @@ list(APPEND MODULE_SRC ${MCU_SRC})
 
 ###############################   BLE (export) #################################
 file(GLOB_RECURSE  BLE_LIB_IMPORT_SRC   ${COMP_BLE_DIR}/ble_lib_import/*.c)
-file(GLOB_RECURSE  BLE_API_COMMON       ${COMP_BLE_DIR}/ble_api/common/*.c)
+file(GLOB_RECURSE  BLE_ARCH             ${COMP_BLE_DIR}/ble_arch/*.c)
 file(GLOB_RECURSE  BLE_API_GAP_GATT     ${COMP_BLE_DIR}/ble_api/gap_gatt/*.c)
-
+file(GLOB_RECURSE  BLE_PROFILE_COMMON   ${COMP_BLE_DIR}/ble_profiles/prf_common/*.c)
+include_directories(${COMP_BLE_DIR})
+include_directories(${COMP_BLE_DIR}/ble_arch)
 include_directories(${COMP_BLE_DIR}/ble_lib_import)
 include_directories(${COMP_BLE_DIR}/ble_api/gap_gatt/api)
-include_directories(${COMP_BLE_DIR}/ble_api/common)
 include_directories(${COMP_BLE_DIR}/ble_api/gap_gatt/api)
+include_directories(${COMP_BLE_DIR}/ble_profiles/prf_common)
 include_directories(${COMP_BLE_DIR}/ble_lib_import)
 include_directories(${COMP_BLE_DIR}/mac/ble/hl/api)
 include_directories(${COMP_BLE_DIR}/mac/ble/hl/inc)
@@ -150,9 +153,9 @@ include_directories(${COMP_BLE_DIR}/modules/rwip/api)
 
 
 list(APPEND MODULE_SRC ${BLE_LIB_IMPORT_SRC})
-list(APPEND MODULE_SRC ${BLE_API_COMMON})
+list(APPEND MODULE_SRC ${BLE_ARCH})
 list(APPEND MODULE_SRC ${BLE_API_GAP_GATT})
-
+list(APPEND MODULE_SRC ${BLE_PROFILE_COMMON})
 ###################################   MISC  ####################################
 set(MISC_SRC
     ${COMP_WIFI_DIR}/wifi_manager/wifi_manager.c

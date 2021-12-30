@@ -53,7 +53,7 @@
 #define CFG_DBG
 #define CFG_EMB
 #define CFG_BLE
-#define CFG_NVDS
+//#define CFG_NVDS     //if use NVDS,should call nvds_init(uint8_t *base, uint32_t len) to initialize NVDS
 
 /***********************************************************
 *CFG_BLE Role:
@@ -64,6 +64,9 @@
 *    BLE_ALLROLES    = 4
 ***********************************************************/    
 #define CFG_ALLROLES 
+//#define CFG_OBSERVER
+//#define CFG_PERIPHERAL
+//#define CFG_ATTC
 
 /***********************************************************
 * use the ble host 
@@ -73,10 +76,6 @@
 * host Profile Support 
 ***********************************************************/  
 #define  CFG_PRF
-/***********************************************************
-* Ble profile support 
-***********************************************************/  
-#define  CFG_BLE_PRF
 /***********************************************************
 * Application Support 
 ***********************************************************/  
@@ -98,7 +97,7 @@
 * Max simultaneous BLE activities support.
 * if ble and mesh all support, it at least 5
 ***********************************************************/  
-#define  CFG_ACT   5
+#define  CFG_ACT   3
 
 /***********************************************************
 * Max simultaneous BLE connections support 
@@ -118,8 +117,8 @@
 /***********************************************************
 * Ble controller use 
 ***********************************************************/ 
-#define  CFG_AOA
-#define  CFG_AOD
+// #define  CFG_AOA
+// #define  CFG_AOD
 #define  CFG_CONLESS_CTE_TX
 #define  CFG_CONLESS_CTE_RX
 #define  CFG_CON_CTE_REQ

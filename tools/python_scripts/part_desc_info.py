@@ -17,13 +17,10 @@
 
 import zlib
 from ln_tools import *
-
-# boot code start addr and size.
-BOOT_SPACE_OFFSET       = 0
-BOOT_SPACE_SIZE         = 1024 * 36
+from boot_header import BootHeader
 
 # partition table start addr and size.
-PARTITION_TAB_OFFSET    = BOOT_SPACE_OFFSET + BOOT_SPACE_SIZE
+PARTITION_TAB_OFFSET    = BootHeader.BOOT_START_ADDR + BootHeader.BOOT_SIZE_LIMIT
 PARTITION_TAB_SIZE      = 1024 * 4
 
 PARTITION_DESC_INFO_SIZE = 4 + 4 + 4 + 4

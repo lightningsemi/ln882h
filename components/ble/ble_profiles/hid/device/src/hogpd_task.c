@@ -24,7 +24,7 @@
  */
 
 #include "rwip_config.h"
-
+#include "rwprf_config.h"
 #if (BLE_HID_DEVICE)
 #include "gap.h"
 #include "gattc_task.h"

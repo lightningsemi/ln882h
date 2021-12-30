@@ -78,12 +78,24 @@ void wlib_software_reset_core(void)
     hal_misc_reset_all();
 }
 
+static wlib_pvtcmd_output_pfn wlib_pvtcmd_output_cb = NULL;
+void wlib_pvtcmd_output_cb_set(wlib_pvtcmd_output_pfn cb)
+{
+    wlib_pvtcmd_output_cb = cb;
+}
+
+wlib_pvtcmd_output_pfn wlib_pvtcmd_output_cb_get(void)
+{
+    return wlib_pvtcmd_output_cb;
+}
+
 void wlib_pvtcmd_printf(const char *format, ...)
 {
-#include "ln_at.h"
     va_list args;
     va_start(args, format);
-    ln_at_vprintf(format, args);
+    if (wlib_pvtcmd_output_cb) {
+        wlib_pvtcmd_output_cb(format, args);
+    }
     va_end(args);
 }
 
@@ -270,7 +282,7 @@ void wlib_assert(int expr, const char *fun, int line)
 /* sniffer pool buf */
 #include "utils/ln_mem_pool.h"
 #define SNIFFER_MEM_POOL_USE_DYNAMIC_MEM   (1)
-#define SNIFFER_MEM_POOL_CHUNK_CNT         (200)
+#define SNIFFER_MEM_POOL_CHUNK_CNT         (50) // Office environment maximum use 32
 #define SNIFFER_MEM_POOL_CHUNK_BUF_SIZE    (30)
 #define SNIFFER_MEM_POOL_CHUNK_SIZE        (MEM_POOL_CHUNK_INFO_SIZE + SNIFFER_MEM_POOL_CHUNK_BUF_SIZE)
 static ln_mem_pool_t sniffer_mem_pool = {0};
@@ -328,13 +340,15 @@ uint16_t wlib_sniffer_mem_chunk_buf_size_get(void)
 
 
 /* cpu sleep voter register */
-//#include "hal/hal_sleep.h"
+#include "utils/power_mgmt/ln_pm.h"
 void wlib_cpu_sleep_voter_reg(void *vote_check, void *pre_sleep, void *post_sleep)
 {
-    LN_UNUSED(vote_check);
-    LN_UNUSED(pre_sleep);
-    LN_UNUSED(post_sleep);
-//    hal_sleep_register(MOD_MAC, (sleep_condition_cb_t)vote_check, (sleep_processing_cb_t)pre_sleep, (sleep_processing_cb_t)post_sleep);
+    sleep_mode_t mode = ln_pm_sleep_mode_get();
+    if (mode == LIGHT_SLEEP) {
+        ln_pm_obj_register("wifi_stack", (int(*)(void))vote_check, (int(*)(void))NULL, (int(*)(void))NULL);
+    } else if (mode >= DEEP_SLEEP) {
+        ln_pm_obj_register("wifi_stack", (int(*)(void))vote_check, (int(*)(void))pre_sleep, (int(*)(void))post_sleep);
+    }
 }
 
 

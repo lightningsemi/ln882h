@@ -24,6 +24,7 @@
  ****************************************************************************************
  */
 #include "rwprf_config.h"
+#include "rwprf_config.h"
 
 #if (BLE_HID_REPORT_HOST)
 #include "co_utils.h"

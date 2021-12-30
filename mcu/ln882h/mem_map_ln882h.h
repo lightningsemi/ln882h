@@ -69,7 +69,7 @@
 
 //BOOTRAM
 #define BOOTRAM_BASE                (RAM_BASE)
-#define BOOTRAM_LIMIT               (SIZE_4KB*9)
+#define BOOTRAM_LIMIT               (SIZE_4KB*6)
 
 //FLASH
 #define CACHE_FLASH_BASE            (0x10000000)

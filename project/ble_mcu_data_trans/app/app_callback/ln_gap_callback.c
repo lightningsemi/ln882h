@@ -45,8 +45,9 @@
 #include "rwip_task.h"      // Task definitions
 #include "ke_task.h"        // Kernel Task
 
+#include "ble_arch/arch.h"
+#include "usr_ble_app.h"
 
-#include "ln_def.h"
 #include "ln_app_callback.h"
 #include "ln_gatt_callback.h"
 #if (TRACE_ENABLE)
@@ -242,7 +243,7 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
 #if (TRACE_ENABLE)
     LOG(LOG_LVL_TRACE,"app_gapm_cmp_evt_handler: operation=0x%x, status=0x%x\r\n", p_param->operation,p_param->status);
 #endif
-    usr_release_semaphore();
+    ke_msg_sync_lock_release();
     //memcpy(&(app_env_info.cmp_evt_info),p_param,sizeof(struct gapm_cmp_evt));
     switch(p_param->operation)
     {
@@ -254,14 +255,14 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
             struct ln_gapm_set_dev_config_cmd cfg_param;
             memset(&cfg_param,0,sizeof(struct ln_gapm_set_dev_config_cmd));
             // Set Data length parameters
-            cfg_param.sugg_max_tx_octets = 251; //BLE_MIN_OCTETS;
-            cfg_param.sugg_max_tx_time   = 2120;//BLE_MIN_TIME;
+            cfg_param.sugg_max_tx_octets = BLE_MIN_OCTETS;
+            cfg_param.sugg_max_tx_time   = BLE_MIN_TIME;
             // Host privacy enabled by default
             cfg_param.privacy_cfg = 0;
             memset((void *)&cfg_param.irk.key[0], 0x00, KEY_LEN);
             cfg_param.role    = GAP_ROLE_ALL;
-            cfg_param.max_mtu = 1200;//2048;
-            cfg_param.max_mps = 1200;//2048;
+            //cfg_param.max_mtu = 1200;//2048;
+            //cfg_param.max_mps = 1200;//2048;
             ln_app_set_dev_config(&cfg_param);
            
         }
@@ -686,7 +687,7 @@ static int gapc_cmp_evt_handler(ke_msg_id_t const msgid,
     LOG(LOG_LVL_TRACE,"gapc_cmp_evt_handler   operation=0x%x, status=0x%x   conidx=0x%x\r\n",p_param->operation,p_param->status,conidx);
 #endif
     //memcpy(&(app_env_info.gapc_cmp_info),p_param,sizeof(struct gapc_cmp_evt));
-    usr_release_semaphore();
+    ke_msg_sync_lock_release();
     return (KE_MSG_CONSUMED);
 }
 
@@ -704,7 +705,7 @@ static int gapc_disconnect_ind_handler(ke_msg_id_t const msgid,
     //app_env_info.dis_conn_info.reason=p_param->reason;
     //app_env_info.dis_conn_info.conidx=conidx;
     con_num--;
-    usr_release_semaphore();
+    ke_msg_sync_lock_release();
 #if (SLAVE)
     app_restart_adv();
 #endif

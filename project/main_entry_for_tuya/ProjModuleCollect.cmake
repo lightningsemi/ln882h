@@ -80,6 +80,7 @@ set(UTILS_SRC
     ${COMP_UTILS_DIR}/fifo/fifobuf.c
     ${COMP_UTILS_DIR}/reboot_trace/reboot_trace.c
     ${COMP_UTILS_DIR}/runtime/runtime.c
+    ${COMP_UTILS_DIR}/power_mgmt/ln_pm.c
 
     ${COMP_UTILS_DIR}/ln_psk_calc.c
     ${COMP_UTILS_DIR}/ln_sha1.c
@@ -119,7 +120,9 @@ set(MCU_SRC
     ${MCU_LN882X_DIR}/driver_${CHIP_SERIAL}/hal/hal_clock.c
     ${MCU_LN882X_DIR}/driver_${CHIP_SERIAL}/hal/hal_misc.c
     ${MCU_LN882X_DIR}/driver_${CHIP_SERIAL}/hal/hal_ext.c
+    ${MCU_LN882X_DIR}/driver_${CHIP_SERIAL}/hal/hal_efuse.c
     ${MCU_LN882X_DIR}/driver_${CHIP_SERIAL}/hal/hal_timer.c
+    ${MCU_LN882X_DIR}/driver_${CHIP_SERIAL}/hal/hal_adv_timer.c
     ${MCU_LN882X_DIR}/${CHIP_SERIAL}/system_${CHIP_SERIAL}.c
 )
 
@@ -128,6 +131,55 @@ include_directories(${MCU_LN882X_DIR}/CMSIS_5.3.0)
 include_directories(${MCU_LN882X_DIR}/driver_${CHIP_SERIAL})
 include_directories(${MCU_LN882X_DIR}/driver_${CHIP_SERIAL}/reg)
 list(APPEND MODULE_SRC ${MCU_SRC})
+
+
+###############################   BLE (export) #################################
+option(BUILD_INCLUDE_BLE        "Add ble code to compile"                    ON)
+
+if(BUILD_INCLUDE_BLE)
+    message(STATUS      "Add ble code to compile!")
+
+
+    file(GLOB_RECURSE  BLE_LIB_IMPORT_SRC   ${COMP_BLE_DIR}/ble_lib_import/*.c)
+    file(GLOB_RECURSE  BLE_ARCH             ${COMP_BLE_DIR}/ble_arch/*.c)
+    file(GLOB_RECURSE  BLE_API_GAP_GATT     ${COMP_BLE_DIR}/ble_api/gap_gatt/*.c)
+    message(STATUS ${COMP_BLE_DIR})
+
+    include_directories(${COMP_BLE_DIR})
+    include_directories(${COMP_BLE_DIR}/ble_arch)
+    include_directories(${COMP_BLE_DIR}/ble_lib_import)
+    include_directories(${COMP_BLE_DIR}/ble_api/gap_gatt/api)
+    include_directories(${COMP_BLE_DIR}/ble_api/common)
+    include_directories(${COMP_BLE_DIR}/ble_api/gap_gatt/api)
+    include_directories(${COMP_BLE_DIR}/ble_lib_import)
+    include_directories(${COMP_BLE_DIR}/mac/ble/hl/api)
+    include_directories(${COMP_BLE_DIR}/mac/ble/hl/inc)
+    include_directories(${COMP_BLE_DIR}/mac/ble/ll/api)
+    include_directories(${COMP_BLE_DIR}/mac/ble/ll/import)
+    include_directories(${COMP_BLE_DIR}/mac/ble/ll/src)
+    include_directories(${COMP_BLE_DIR}/mac/ble/ll/src/llm)
+    include_directories(${COMP_BLE_DIR}/mac/em/api)
+    include_directories(${COMP_BLE_DIR}/mac/hci/api)
+    include_directories(${COMP_BLE_DIR}/mac/sch/api)
+    include_directories(${COMP_BLE_DIR}/mac/sch/import)
+    include_directories(${COMP_BLE_DIR}/modules/aes/api)
+    include_directories(${COMP_BLE_DIR}/modules/aes/api)
+    include_directories(${COMP_BLE_DIR}/modules/common/api)
+    include_directories(${COMP_BLE_DIR}/modules/dbg/api)
+    include_directories(${COMP_BLE_DIR}/modules/ecc_p256/api)
+    include_directories(${COMP_BLE_DIR}/modules/h4tl/api)
+    include_directories(${COMP_BLE_DIR}/modules/ke/api)
+    include_directories(${COMP_BLE_DIR}/modules/lib_ver/api)
+    include_directories(${COMP_BLE_DIR}/modules/nvds/api)
+    include_directories(${COMP_BLE_DIR}/modules/rf/api)
+    include_directories(${COMP_BLE_DIR}/modules/rwip/api)
+
+
+    list(APPEND MODULE_SRC ${BLE_LIB_IMPORT_SRC})
+    list(APPEND MODULE_SRC ${BLE_ARCH})
+    list(APPEND MODULE_SRC ${BLE_API_COMMON})
+    list(APPEND MODULE_SRC ${BLE_API_GAP_GATT})
+endif()
 
 ###################################   MISC  ####################################
 set(MISC_SRC

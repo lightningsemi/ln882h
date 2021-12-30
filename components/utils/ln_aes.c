@@ -21,6 +21,7 @@
                         ((box)[(((x) >> 16) & 0xFF)] << 16) | \
                         ((box)[(((x) >> 24) & 0xFF)] << 24))
 
+#if (!(LN_SW_AES_USING_ROM_CODE))
 /* These tables combine both the S-boxes and the mixcolumn transformation,   */
 /* so that we can perform a round's encryption or by means of four table     */
 /* lookups and four XOR's per column of state.                               */
@@ -671,3 +672,28 @@ static void key_addition32to8(uint32_t *txt, uint32_t *key,
       *ptr++ = (val >> 8 * j) & 0xFF;
   }
 }
+#else
+#include "ln882h_rom_fun.h"
+
+typedef void (*rom_func_aes_setup)(ln_aes_context_t *, uint8_t, const uint8_t *);
+typedef void (*rom_func_aes_encrypt)(ln_aes_context_t *, const uint8_t *, uint8_t *);
+typedef void (*rom_func_aes_decrypt)(ln_aes_context_t *, const uint8_t *, uint8_t *);
+
+void ln_aes_setup(ln_aes_context_t *ctx, uint8_t keysize, const uint8_t *key)
+{
+    rom_func_aes_setup aes_setup = (rom_func_aes_setup)ROM_FUN_AES_SETUP;
+    aes_setup(ctx, keysize, key);
+}
+
+void ln_aes_encrypt(ln_aes_context_t *ctxt, const uint8_t *ptext, uint8_t *ctext)
+{
+    rom_func_aes_encrypt aes_enc = (rom_func_aes_encrypt)ROM_FUN_AES_ENCRYPT;
+    aes_enc(ctxt, ptext, ctext);
+}
+
+void ln_aes_decrypt(ln_aes_context_t *ctxt, const uint8_t *ctext, uint8_t *ptext)
+{
+    rom_func_aes_decrypt aes_dec = (rom_func_aes_decrypt)ROM_FUN_AES_DECRYPT;
+    aes_dec(ctxt, ctext, ptext);
+}
+#endif /* !(LN_SW_AES_USING_ROM_CODE) */

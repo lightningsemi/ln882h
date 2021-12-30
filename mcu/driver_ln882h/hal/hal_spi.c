@@ -149,10 +149,10 @@ void hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init)
     switch (spi_init->spi_cpha)
     {
         case SPI_CPHA_1EDGE:
-            spi_cpol_setf(spi_x_base,0);
+            spi_cpha_setf(spi_x_base,0);
             break;
         case SPI_CPHA_2EDGE:
-            spi_cpol_setf(spi_x_base,1);
+            spi_cpha_setf(spi_x_base,1);
             break;
         default:
             break;

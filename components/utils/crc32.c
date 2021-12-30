@@ -1,6 +1,7 @@
 
 #include "utils/crc32.h"
 
+#if (!(LN_SW_CRC32_USING_ROM_CODE))
 const uint32_t Crc32Table[256] = {
 		0x00000000,0x77073096,0xEE0E612C,0x990951BA,
 		0x076DC419,0x706AF48F,0xE963A535,0x9E6495A3,
@@ -99,5 +100,35 @@ uint32_t ln_crc32_signle_cal(uint8_t *ptr, int len)
 	}
 	return crc^0xffffffff;
 }
+#else
+#include "ln882h_rom_fun.h"
 
+typedef void (*rom_func_crc32_init)(crc32_ctx_t *);
+typedef void (*rom_func_crc32_update)(crc32_ctx_t *, uint8_t *, uint32_t);
+typedef void (*rom_func_crc32_final)(crc32_ctx_t *);
+typedef void (*rom_func_crc32_signle_cal)(uint8_t *, int);
 
+void ln_crc32_init(crc32_ctx_t *ctx)
+{
+    rom_func_crc32_init init = (rom_func_crc32_init)ROM_FUN_CRC32_INIT;
+    init(ctx);
+}
+
+void ln_crc32_update(crc32_ctx_t *ctx, uint8_t *data, uint32_t len)
+{
+    rom_func_crc32_update update = (rom_func_crc32_update)ROM_FUN_CRC32_UPDATE;
+    update(ctx, data, len);
+}
+
+uint32_t ln_crc32_final(crc32_ctx_t *ctx)
+{
+    rom_func_crc32_final final = (rom_func_crc32_final)ROM_FUN_CRC32_FINAL;
+    final(ctx);
+}
+
+uint32_t ln_crc32_signle_cal(uint8_t *ptr, int len)
+{
+    rom_func_crc32_signle_cal signle_cal = (rom_func_crc32_signle_cal)ROM_FUN_CRC32_SIGNLE_CAL;
+    signle_cal(ptr, len);
+}
+#endif /* !(LN_SW_CRC32_USING_ROM_CODE) */

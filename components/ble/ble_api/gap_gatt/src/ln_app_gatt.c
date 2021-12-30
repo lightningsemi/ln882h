@@ -42,7 +42,6 @@
 
 //#include "co_math.h"                 // Common Maths Definition
 //#include "co_utils.h"
-#include "ln_def.h"
 
 
 /*

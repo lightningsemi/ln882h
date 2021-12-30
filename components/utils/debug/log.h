@@ -22,6 +22,7 @@ void hexdump(uint8_t level, const char *info, void *buff, uint32_t count);
 int log_stdio_write(char *buf, size_t size);
 
 #define log_printf(...)     __wrap_sprintf((stdio_write_fn)log_stdio_write, __VA_ARGS__)
+#define log_raw_data_flush(data, len) __wrap_stdio_raw_data_flush((const char *)data, (stdio_write_fn)log_stdio_write, (size_t)len)
 
 #if (PRINTF_OMIT == DISABLE)
         #define LOG(level, ...)                  \

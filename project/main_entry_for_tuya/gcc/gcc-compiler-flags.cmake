@@ -9,11 +9,12 @@ set(MCU         "-mthumb  -mabi=aapcs  ${CPU}  ${FPU}  ${FLOAT_ABI}")
 
 set(C_WARNFLAGS   "-Wall  -Wextra  -Wundef  -Wshadow  -Wredundant-decls        \
     -Wstrict-prototypes  -Wimplicit-function-declaration  -Wmissing-prototypes \
-    -Wdouble-promotion  -Wfloat-conversion  -pedantic"
+    -Wdouble-promotion  -Wfloat-conversion"
 )
+# -pedantic  for warning: ISO C forbids zero-size array
 
 set(CXX_WARNFLAGS   "-Wall  -Wextra  -Wundef  -Wshadow  -Wredundant-decls      \
-    -Wdouble-promotion  -Wfloat-conversion  -pedantic"
+    -Wdouble-promotion  -Wfloat-conversion"
 )
 
 set(PREPFLAGS   "-MD -MP")
@@ -21,7 +22,7 @@ set(SPECSFLAGS  "")
 set(ASFLAGS     ${MCU})
 set(ARCHFLAGS   ${MCU})
 set(OPTFLAGS    ${OPTFLAGS})
-set(LINK_FLAGS  "${ARCHFLAGS} -Wl,--gc-sections")
+set(LINK_FLAGS  "${ARCHFLAGS} -Wl,--gc-sections -u _printf_float -u _scanf_float")
 
 
 ##################################  C Flags  ###################################

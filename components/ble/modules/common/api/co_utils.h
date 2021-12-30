@@ -165,7 +165,7 @@ extern const uint16_t co_sca2ppm[];
 extern const struct bd_addr co_null_bdaddr;
 
 /// Default BD address
-extern const struct bd_addr co_default_bdaddr;
+extern struct bd_addr co_default_bdaddr;
 
 /// NULL Key
 extern const uint8_t co_null_key[KEY_LEN];

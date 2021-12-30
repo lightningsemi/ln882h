@@ -23,7 +23,6 @@
         
 /* TIMERx(x=0,1,2,3) definitions */
 
-#define TIMER_IT_BASE               TIMER_BASE
 #define TIMER0_BASE                 (TIMER_BASE + 0x00000000U)
 #define TIMER1_BASE                 (TIMER_BASE + 0x00000018U)
 #define TIMER2_BASE                 (TIMER_BASE + 0x00000030U)

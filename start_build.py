@@ -161,7 +161,7 @@ def action_jflash():
         print("Not supported platform!!!")
         exit(-1)
 
-    opts = " -erasechip  -programverify  -startapp"
+    opts = "-erasesectors -programverify"
     cmd = "{_j} -openprj{_top}/tools/JFlash/ln882h.jflash -open{_b}/bin/flashimage.bin,0x0 {_opt}"\
             .format(_j=jflash_exe, _top=os.path.dirname(os.path.abspath(__file__)) ,_b=build_path, _opt=opts)
     os.system(cmd)
@@ -171,10 +171,16 @@ def action_jflash():
 
 def call_sdk_env_check():
     script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "python_scripts", "sdk_env_check.py")
-    cmd = " ".join(["python", script_path])
-    retcode = subprocess.check_call(cmd)
-    if retcode != 0:
+    try:
+        retcode = subprocess.check_call(["python", script_path])
+        if retcode != 0:
+            return False
+    except subprocess.CalledProcessError as err:
+        print("returncode: {}".format(err.returncode))
+        print("cmd: {}".format(err.cmd))
+        print("output: {}".format(err.output))
         return False
+
     return True
 
 

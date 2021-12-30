@@ -40,7 +40,7 @@
 #include "gattm_task.h"               // GATT Manager Task API
 #include "gattc_task.h"               // GATT Controller Task API
 #include "ln_app_callback.h"
-#include "ln_def.h"
+#include "usr_ble_app.h"
 //#include "co_math.h"                 // Common Maths Definition
 //#include "co_utils.h"
 
@@ -67,7 +67,7 @@ int gattm_add_svc_rsp_handler(ke_msg_id_t const msgid,
 	LOG(LOG_LVL_TRACE,"gattm_add_svc_rsp_handler ,start_handler:0x%x,status:0x%x\r\n",param->start_hdl,param->status);
 #endif
 	memcpy(&(app_env_info.add_svc_rsp_info),param,sizeof( struct gattm_add_svc_rsp));
-	usr_release_semaphore();
+	ke_msg_sync_lock_release();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -83,7 +83,7 @@ int gattm_svc_get_permission_rsp_handler(ke_msg_id_t const msgid,
 	LOG(LOG_LVL_TRACE,"gattm_svc_get_permission_rsp_handler ,status:0x%x\r\n",param->status);
 #endif
 	memcpy(&(app_env_info.svc_get_permission_rsp_info),param,sizeof( struct gattm_svc_get_permission_rsp));
-	usr_release_semaphore();
+	ke_msg_sync_lock_release();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -98,7 +98,7 @@ int gattm_svc_set_permission_rsp_handler(ke_msg_id_t const msgid,
 	LOG(LOG_LVL_TRACE,"gattm_svc_set_permission_rsp_handler ,status:0x%x\r\n",param->status);
 #endif
 	memcpy(&(app_env_info.svc_set_permission_rsp_info),param,sizeof( struct gattm_svc_set_permission_rsp));
-	usr_release_semaphore();
+	ke_msg_sync_lock_release();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -115,7 +115,7 @@ int gattm_att_get_permission_rsp_handler(ke_msg_id_t const msgid,
 	LOG(LOG_LVL_TRACE,"gattm_att_get_permission_rsp_handler ,status:0x%x\r\n",param->status);
 #endif
 	memcpy(&(app_env_info.att_get_permission_rsp_info),param,sizeof( struct gattm_att_get_permission_rsp));
-	usr_release_semaphore();
+	ke_msg_sync_lock_release();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -130,7 +130,7 @@ int gattm_att_set_permission_rsp_handler(ke_msg_id_t const msgid,
 	LOG(LOG_LVL_TRACE,"gattm_att_set_permission_rsp_handler ,status:0x%x\r\n",param->status);
 #endif
 	memcpy(&(app_env_info.att_set_permission_rsp_info),param,sizeof( struct gattm_att_set_permission_rsp));
-	usr_release_semaphore();
+	ke_msg_sync_lock_release();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -145,7 +145,7 @@ int gattm_att_get_value_rsp_handler(ke_msg_id_t const msgid,
 	LOG(LOG_LVL_TRACE,"gattm_att_get_value_rsp_handler ,status:0x%x\r\n",param->status);
 #endif
 	memcpy(&(app_env_info.att_get_value_rsp_info),param,sizeof( struct gattm_att_get_value_rsp));
-	usr_release_semaphore();
+	ke_msg_sync_lock_release();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -161,7 +161,7 @@ int gattm_att_set_value_rsp_handler(ke_msg_id_t const msgid,
 	LOG(LOG_LVL_TRACE,"gattm_att_set_value_rsp_handler ,status:0x%x\r\n",param->status);
 #endif
 	memcpy(&(app_env_info.att_set_value_rsp_info),param,sizeof( struct gattm_att_set_value_rsp));
-	usr_release_semaphore();
+	ke_msg_sync_lock_release();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -175,7 +175,7 @@ int gattm_unknown_msg_ind_handler(ke_msg_id_t const msgid,
 #if (TRACE_ENABLE)
 	LOG(LOG_LVL_TRACE,"gattm_unknown_msg_ind_handler msg_id:0x%x\r\n",param->unknown_msg_id);
 #endif
-	usr_release_semaphore();
+	ke_msg_sync_lock_release();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -189,7 +189,7 @@ int gattm_destroy_db_rsp_handler(ke_msg_id_t const msgid,
 #if (TRACE_ENABLE)
 	LOG(LOG_LVL_TRACE,"gattm_destroy_db_rsp_handler ,status:0x%x\r\n",param->status);
 #endif
-	usr_release_semaphore();
+	ke_msg_sync_lock_release();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -202,7 +202,7 @@ int gattm_svc_get_list_rsp_handler(ke_msg_id_t const msgid,
 #if (TRACE_ENABLE)
 	LOG(LOG_LVL_TRACE,"gattm_svc_get_list_rsp_handler ,status:0x%x\r\n",param->status);
 #endif
-	usr_release_semaphore();
+	ke_msg_sync_lock_release();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -216,7 +216,7 @@ int gattm_att_get_info_rsp_handler(ke_msg_id_t const msgid,
 #if (TRACE_ENABLE)
 	LOG(LOG_LVL_TRACE,"gattm_att_get_info_rsp_handler ,status:0x%x\r\n",param->status);
 #endif
-	usr_release_semaphore();
+	ke_msg_sync_lock_release();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -229,7 +229,7 @@ int gattm_att_db_hash_comp_rsp_handler(ke_msg_id_t const msgid,
 #if (TRACE_ENABLE)
 	LOG(LOG_LVL_TRACE,"gattm_att_db_hash_comp_rsp_handler, status:0x%x\r\n",param->status);
 #endif
-	usr_release_semaphore();
+	ke_msg_sync_lock_release();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -249,7 +249,7 @@ int gattc_cmp_evt_handler(ke_msg_id_t const msgid,
 	LOG(LOG_LVL_TRACE,"gattc_cmp_evt_handler   conidx:0x%x,status:0x%x,operaton:0x%x\r\n",conidx,param->status,param->operation);
 #endif
 	memcpy(&(app_env_info.gattc_cmp_evt_info),param,sizeof( struct gattc_cmp_evt));
-	usr_release_semaphore();
+	ke_msg_sync_lock_release();
 	return (KE_MSG_CONSUMED);
 }
 

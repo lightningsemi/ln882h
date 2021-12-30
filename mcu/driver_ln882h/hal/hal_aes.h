@@ -40,12 +40,12 @@ typedef enum
 
 typedef enum
 {
-    AES_OPCODE_ENNCRYPT      = 0,             
+    AES_OPCODE_ENCRYPT      = 0,             
     AES_OPCODE_DECRYPT       = 1,             
     AES_OPCODE_KEYEXPAND     = 2,                   
 }aes_opcode_t;
 
-#define IS_AES_OPCODE(VALUE)  (((VALUE) == AES_OPCODE_ENNCRYPT) || ((VALUE) == AES_OPCODE_DECRYPT) || ((VALUE) == AES_OPCODE_KEYEXPAND))
+#define IS_AES_OPCODE(VALUE)  (((VALUE) == AES_OPCODE_ENCRYPT) || ((VALUE) == AES_OPCODE_DECRYPT) || ((VALUE) == AES_OPCODE_KEYEXPAND))
 
 typedef enum
 {

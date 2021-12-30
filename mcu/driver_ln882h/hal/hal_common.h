@@ -67,7 +67,7 @@ typedef enum
     #define hal_assert(expr) ((expr) ? (void)0U : assert_failed((uint8_t *)__FILE__, __LINE__))
 #else
     #define hal_assert(expr) ((void)0U)
-#endif /* FULL_ASSERT */  
+#endif /* HAL_ASSERT_EN */  
 
 
 #ifdef __cpluscplus

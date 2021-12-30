@@ -197,8 +197,10 @@ static void sta_netif_status_changed_cb(struct netif *nif)
 {
     if (!ip4_addr_cmp(ip_2_ip4(&nif->ip_addr), IP4_ADDR_ANY4))
     {
-        if (dhcp_supplied_address(nif)) {
+        if (dhcp_supplied_address(nif) && (nif->flags & NETIF_FLAG_UP)
+            && (netif_is_link_up(nif))) {
             print_netdev_info(nif);
+            wifi_set_allow_cpu_sleep_flag(1);
         }
     }
 }

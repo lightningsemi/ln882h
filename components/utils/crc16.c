@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "utils/crc16.h"
 
+#if (!(LN_SW_CRC16_USING_ROM_CODE))
 const uint16_t crc16tab[256] = {
     0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50a5, 0x60c6, 0x70e7, 0x8108,
     0x9129, 0xa14a, 0xb16b, 0xc18c, 0xd1ad, 0xe1ce, 0xf1ef, 0x1231, 0x0210,
@@ -43,3 +44,15 @@ uint16_t crc16_ccitt(const char *buf, int len)
 
     return crc;
 }
+#else
+#include "ln882h_rom_fun.h"
+
+typedef uint16_t (*rom_func_crc16_ccitt)(const char *, int);
+
+uint16_t crc16_ccitt(const char *buf, int len)
+{
+    rom_func_crc16_ccitt ccitt = (rom_func_crc16_ccitt)ROM_FUN_CRC16_CCITT;
+    ccitt(buf, len);
+}
+
+#endif /* !(LN_SW_CRC16_USING_ROM_CODE) */

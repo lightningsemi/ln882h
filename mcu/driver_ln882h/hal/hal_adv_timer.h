@@ -306,6 +306,8 @@ void        hal_adv_tim_b_en(uint32_t adv_tim_x_base,hal_en_t en);
 
 void        hal_adv_tim_set_dead_gap(uint32_t adv_tim_x_base,uint16_t value);
 void        hal_adv_tim_set_load_value(uint32_t adv_tim_x_base,uint16_t value);
+void        hal_adv_tim_set_inv_a(uint32_t adv_tim_x_base,uint8_t value);
+void        hal_adv_tim_set_inv_b(uint32_t adv_tim_x_base,uint8_t value);
 void        hal_adv_tim_set_comp_b(uint32_t adv_tim_x_base,uint16_t value);
 void        hal_adv_tim_set_comp_a(uint32_t adv_tim_x_base,uint16_t value);
 void        hal_adv_tim_set_trig_value(uint32_t adv_tim_x_base,uint16_t value);

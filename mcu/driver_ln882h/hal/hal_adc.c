@@ -55,9 +55,9 @@ void hal_adc_init(uint32_t adc_base,adc_init_t_def* adc_init)
     tem_val_3 = hal_efuse_read_corrent_reg(EFUSE_REG_1);
 
     if((tem_val_3 >> 26) & 0x01){
-       adc_cal_param_1 = -((tem_val_3 >> 22) & 0x0F) * 4;
+       adc_cal_param_1 = -((tem_val_3 >> 22) & 0x0F) * 6;
     } else {
-       adc_cal_param_1 = ((tem_val_3 >> 22) & 0x0F) * 4;
+       adc_cal_param_1 = ((tem_val_3 >> 22) & 0x0F) * 6;
     }
 
     tem_val_1 = (int8_t)(tem_val_3 & 0xFF);
@@ -77,9 +77,9 @@ void hal_adc_init(uint32_t adc_base,adc_init_t_def* adc_init)
     adc_cal_param_5 = 1 + 1.0f * adc_cal_param_3 / 512;
     adc_cal_param_6 = adc_cal_param_2 * adc_cal_param_5;
 
-    tem_val_2 = 800 - adc_cal_param_1;
+    tem_val_2 = 750 - adc_cal_param_1;
     tem_val_2 = (uint16_t)(tem_val_2 * adc_cal_param_5 + adc_cal_param_6);
-    adc_cal_param_4 = 800 - tem_val_2;
+    adc_cal_param_4 = 750 - tem_val_2;
 
 
     if (adc_init->adc_awd_sgl == ADC_AWD_ALL_CH) {

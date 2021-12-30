@@ -24,7 +24,7 @@
  */
 
 #include "rwip_config.h"
-
+#include "rwprf_config.h"
 #if (BLE_BATT_CLIENT)
 
 #include "gap.h"

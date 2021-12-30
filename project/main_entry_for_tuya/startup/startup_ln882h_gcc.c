@@ -1,6 +1,6 @@
 
 #include "ln882h.h"
-
+#include "ln_compiler.h"
 
 /*----------------------------------------------------------------------------
   Linker generated Symbols
@@ -26,14 +26,60 @@ typedef void( *pFunc )( void );
   External References
  *----------------------------------------------------------------------------*/
 //extern void _start     (void) __attribute__((noreturn)); /* PreeMain (C library entry point) */
-extern int main (int argc, char* argv[]);
+extern int main (int argc, char *argv[]);
 
 
 /*----------------------------------------------------------------------------
   Internal References
  *----------------------------------------------------------------------------*/
-void Default_Handler(void) __attribute__ ((noreturn));
-void Reset_Handler  (void) __attribute__ ((noreturn));
+void Reset_Handler  (void) ;
+__WEAK__ void NMI_Handler            (void);
+__WEAK__ void HardFault_Handler      (void);
+__WEAK__ void MemManage_Handler      (void);
+__WEAK__ void BusFault_Handler       (void);
+__WEAK__ void UsageFault_Handler     (void);
+__WEAK__ void SVC_Handler            (void);
+__WEAK__ void DebugMon_Handler       (void);
+__WEAK__ void PendSV_Handler         (void);
+__WEAK__ void SysTick_Handler        (void);
+__WEAK__ void WDT_IRQHandler         (void);
+__WEAK__ void EXT_IRQHandler         (void);
+__WEAK__ void RTC_IRQHandler         (void);
+__WEAK__ void RFSLP_IRQHandler       (void);
+__WEAK__ void MAC_IRQHandler         (void);
+__WEAK__ void BLE_WAKE_IRQHandler    (void);
+__WEAK__ void BLE_ERR_IRQHandler     (void);
+__WEAK__ void BLE_MAC_IRQHandler     (void);
+__WEAK__ void DMA_IRQHandler         (void);
+__WEAK__ void QSPI_IRQHandler        (void);
+__WEAK__ void SDIO_F1_IRQHandler     (void);
+__WEAK__ void SDIO_F2_IRQHandler     (void);
+__WEAK__ void SDIO_F3_IRQHandler     (void);
+__WEAK__ void CM4_FPIXC_IRQHandler   (void);
+__WEAK__ void CM4_FPOFC_IRQHandler   (void);
+__WEAK__ void CM4_FPUFC_IRQHandler   (void);
+__WEAK__ void CM4_FPIOC_IRQHandler   (void);
+__WEAK__ void CM4_FPDZC_IRQHandler   (void);
+__WEAK__ void CM4_FPIDC_IRQHandler   (void);
+__WEAK__ void I2C_IRQHandler         (void);
+__WEAK__ void SPI0_IRQHandler        (void);
+__WEAK__ void SPI1_IRQHandler        (void);
+__WEAK__ void UART0_IRQHandler       (void);
+__WEAK__ void UART1_IRQHandler       (void);
+__WEAK__ void UART2_IRQHandler       (void);
+__WEAK__ void ADC_IRQHandler         (void);
+__WEAK__ void WS_IRQHandler          (void);
+__WEAK__ void I2S_IRQHandler         (void);
+__WEAK__ void GPIOA_IRQHandler       (void);
+__WEAK__ void GPIOB_IRQHandler       (void);
+__WEAK__ void TIMER0_IRQHandler      (void);
+__WEAK__ void TIMER1_IRQHandler      (void);
+__WEAK__ void TIMER2_IRQHandler      (void);
+__WEAK__ void TIMER3_IRQHandler      (void);
+__WEAK__ void ADV_TIMER_IRQHandler   (void);
+__WEAK__ void AES_IRQHandler         (void);
+__WEAK__ void TRNG_IRQHandler        (void);
+__WEAK__ void PAOTD_IRQHandler       (void);
 
 
 /*----------------------------------------------------------------------------
@@ -42,8 +88,19 @@ void Reset_Handler  (void) __attribute__ ((noreturn));
 //<h> Stack Configuration
 //  <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
 //</h>
-#define  __STACK_SIZE  0x00002000
+#define  __STACK_SIZE  0x00000800
 static uint8_t stack[__STACK_SIZE] __attribute__ ((aligned(8), used, section(".stack")));
+
+void ln_main_stack_attr_get(uint8_t **start_addr, size_t *size)
+{
+    if (start_addr == NULL || size == NULL)
+    {
+      return;
+    }
+
+    *size = __STACK_SIZE;
+    *start_addr = &stack[0];
+}
 
 #if 0
 //<h> Heap Configuration
@@ -60,68 +117,53 @@ static uint8_t heap[__HEAP_SIZE]   __attribute__ ((aligned(8), used, section(".h
   Exception / Interrupt Handler
  *----------------------------------------------------------------------------*/
 /* Exceptions */
-void NMI_Handler            (void) __attribute__ ((weak, alias("Default_Handler")));
-void HardFault_Handler      (void) __attribute__ ((weak, alias("Default_Handler")));
-void MemManage_Handler      (void) __attribute__ ((weak, alias("Default_Handler")));
-void BusFault_Handler       (void) __attribute__ ((weak, alias("Default_Handler")));
-void UsageFault_Handler     (void) __attribute__ ((weak, alias("Default_Handler")));
-void SVC_Handler            (void) __attribute__ ((weak, alias("Default_Handler")));
-void DebugMon_Handler       (void) __attribute__ ((weak, alias("Default_Handler")));
-void PendSV_Handler         (void) __attribute__ ((weak, alias("Default_Handler")));
-void SysTick_Handler        (void) __attribute__ ((weak, alias("Default_Handler")));
-
-void WDT_IRQHandler             (void) __attribute__ ((weak, alias("Default_Handler")));
-void EXT_IRQHandler             (void) __attribute__ ((weak, alias("Default_Handler")));
-void RTC_IRQHandler             (void) __attribute__ ((weak, alias("Default_Handler")));
-void RFSLP_IRQHandler           (void) __attribute__ ((weak, alias("Default_Handler")));
-
-void MAC_IRQHandler             (void) __attribute__ ((weak, alias("Default_Handler")));
-
-void BLE_WAKE_IRQHandler        (void) __attribute__ ((weak, alias("Default_Handler")));
-void BLE_ERR_IRQHandler         (void) __attribute__ ((weak, alias("Default_Handler")));
-void BLE_MAC_IRQHandler         (void) __attribute__ ((weak, alias("Default_Handler")));
-
-void DMA_IRQHandler             (void) __attribute__ ((weak, alias("Default_Handler")));
-void QSPI_IRQHandler            (void) __attribute__ ((weak, alias("Default_Handler")));
-
-void SDIO_F1_IRQHandler         (void) __attribute__ ((weak, alias("Default_Handler")));
-void SDIO_F2_IRQHandler         (void) __attribute__ ((weak, alias("Default_Handler")));
-void SDIO_F3_IRQHandler         (void) __attribute__ ((weak, alias("Default_Handler")));
-// void SDIO_ASYNC_HOST_IRQHandler (void) __attribute__ ((weak, alias("Default_Handler")));
-// void SDIO_M2S_IRQHandler        (void) __attribute__ ((weak, alias("Default_Handler")));
-
-void CM4_FPIXC_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
-void CM4_FPOFC_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
-void CM4_FPUFC_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
-void CM4_FPIOC_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
-void CM4_FPDZC_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
-void CM4_FPIDC_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
-
-void I2C_IRQHandler             (void) __attribute__ ((weak, alias("Default_Handler")));
-
-void SPI0_IRQHandler            (void) __attribute__ ((weak, alias("Default_Handler")));
-void SPI1_IRQHandler            (void) __attribute__ ((weak, alias("Default_Handler")));
-
-void UART0_IRQHandler           (void) __attribute__ ((weak, alias("Default_Handler")));
-void UART1_IRQHandler           (void) __attribute__ ((weak, alias("Default_Handler")));
-void UART2_IRQHandler           (void) __attribute__ ((weak, alias("Default_Handler")));
-
-void ADC_IRQHandler             (void) __attribute__ ((weak, alias("Default_Handler")));
-void WS_IRQHandler              (void) __attribute__ ((weak, alias("Default_Handler")));
-void I2S_IRQHandler             (void) __attribute__ ((weak, alias("Default_Handler")));
-
-void GPIOA_IRQHandler           (void) __attribute__ ((weak, alias("Default_Handler")));
-void GPIOB_IRQHandler           (void) __attribute__ ((weak, alias("Default_Handler")));
-
-void TIMER0_IRQHandler          (void) __attribute__ ((weak, alias("Default_Handler")));
-void TIMER1_IRQHandler          (void) __attribute__ ((weak, alias("Default_Handler")));
-void TIMER2_IRQHandler          (void) __attribute__ ((weak, alias("Default_Handler")));
-void TIMER3_IRQHandler          (void) __attribute__ ((weak, alias("Default_Handler")));
-void ADV_TIMER_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
-
-void AES_IRQHandler             (void) __attribute__ ((weak, alias("Default_Handler")));
-void TRNG_IRQHandler            (void) __attribute__ ((weak, alias("Default_Handler")));
-void PAOTD_IRQHandler           (void) __attribute__ ((weak, alias("Default_Handler")));
+__WEAK__ void NMI_Handler            (void) { while(1); }
+__WEAK__ void HardFault_Handler      (void) { while(1); }
+__WEAK__ void MemManage_Handler      (void) { while(1); }
+__WEAK__ void BusFault_Handler       (void) { while(1); }
+__WEAK__ void UsageFault_Handler     (void) { while(1); }
+__WEAK__ void SVC_Handler            (void) { while(1); }
+__WEAK__ void DebugMon_Handler       (void) { while(1); }
+__WEAK__ void PendSV_Handler         (void) { while(1); }
+__WEAK__ void SysTick_Handler        (void) { while(1); }
+__WEAK__ void WDT_IRQHandler         (void) { while(1); }
+__WEAK__ void EXT_IRQHandler         (void) { while(1); }
+__WEAK__ void RTC_IRQHandler         (void) { while(1); }
+__WEAK__ void RFSLP_IRQHandler       (void) { while(1); }
+__WEAK__ void MAC_IRQHandler         (void) { while(1); }
+__WEAK__ void BLE_WAKE_IRQHandler    (void) { while(1); }
+__WEAK__ void BLE_ERR_IRQHandler     (void) { while(1); }
+__WEAK__ void BLE_MAC_IRQHandler     (void) { while(1); }
+__WEAK__ void DMA_IRQHandler         (void) { while(1); }
+__WEAK__ void QSPI_IRQHandler        (void) { while(1); }
+__WEAK__ void SDIO_F1_IRQHandler     (void) { while(1); }
+__WEAK__ void SDIO_F2_IRQHandler     (void) { while(1); }
+__WEAK__ void SDIO_F3_IRQHandler     (void) { while(1); }
+__WEAK__ void CM4_FPIXC_IRQHandler   (void) { while(1); }
+__WEAK__ void CM4_FPOFC_IRQHandler   (void) { while(1); }
+__WEAK__ void CM4_FPUFC_IRQHandler   (void) { while(1); }
+__WEAK__ void CM4_FPIOC_IRQHandler   (void) { while(1); }
+__WEAK__ void CM4_FPDZC_IRQHandler   (void) { while(1); }
+__WEAK__ void CM4_FPIDC_IRQHandler   (void) { while(1); }
+__WEAK__ void I2C_IRQHandler         (void) { while(1); }
+__WEAK__ void SPI0_IRQHandler        (void) { while(1); }
+__WEAK__ void SPI1_IRQHandler        (void) { while(1); }
+__WEAK__ void UART0_IRQHandler       (void) { while(1); }
+__WEAK__ void UART1_IRQHandler       (void) { while(1); }
+__WEAK__ void UART2_IRQHandler       (void) { while(1); }
+__WEAK__ void ADC_IRQHandler         (void) { while(1); }
+__WEAK__ void WS_IRQHandler          (void) { while(1); }
+__WEAK__ void I2S_IRQHandler         (void) { while(1); }
+__WEAK__ void GPIOA_IRQHandler       (void) { while(1); }
+__WEAK__ void GPIOB_IRQHandler       (void) { while(1); }
+__WEAK__ void TIMER0_IRQHandler      (void) { while(1); }
+__WEAK__ void TIMER1_IRQHandler      (void) { while(1); }
+__WEAK__ void TIMER2_IRQHandler      (void) { while(1); }
+__WEAK__ void TIMER3_IRQHandler      (void) { while(1); }
+__WEAK__ void ADV_TIMER_IRQHandler   (void) { while(1); }
+__WEAK__ void AES_IRQHandler         (void) { while(1); }
+__WEAK__ void TRNG_IRQHandler        (void) { while(1); }
+__WEAK__ void PAOTD_IRQHandler       (void) { while(1); }
 
 /*----------------------------------------------------------------------------
   Exception / Interrupt Vector table
@@ -193,7 +235,6 @@ void Reset_Handler(void) {
     uint32_t *pSrc, *pDest;
     uint32_t *pTable __attribute__((unused));
 
-
     /* Firstly it copies data from read only memory to RAM.
      * There are two schemes to copy. One can copy more than one sections.
      * Another can copy only one section. The former scheme needs more
@@ -229,13 +270,4 @@ void Reset_Handler(void) {
 
     SystemInit();                             /* CMSIS System Initialization */
     main(0, NULL);
-}
-
-
-/*----------------------------------------------------------------------------
-  Default Handler for Exceptions / Interrupts
- *----------------------------------------------------------------------------*/
-void Default_Handler(void) {
-
-  while(1);
 }

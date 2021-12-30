@@ -24,29 +24,6 @@ include_directories(${COMP_KERNEL_DIR}/FreeRTOS/Source/include)
 include_directories(${COMP_KERNEL_DIR}/FreeRTOS/Source/portable/GCC/ARM_CM4F)
 list(APPEND MODULE_SRC ${KERNEL_SRC})
 
-##################################  LN_AT  #####################################
-file(GLOB_RECURSE  LNAT_SRC  ${COMP_LNAT_DIR}/*.c)
-include_directories(${COMP_LNAT_DIR})
-include_directories(${COMP_LNAT_DIR}/adapter)
-include_directories(${COMP_LNAT_DIR}/cmd)
-include_directories(${COMP_LNAT_DIR}/parser)
-include_directories(${COMP_LNAT_DIR}/transfer)
-list(APPEND MODULE_SRC ${LNAT_SRC})
-
-file(GLOB_RECURSE  LNAT_CMD_SRC  ${COMP_LNAT_CMD_DIR}/*.c)
-include_directories(${COMP_LNAT_CMD_DIR})
-list(APPEND MODULE_SRC ${LNAT_CMD_SRC})
-
-###################################  ping  #####################################
-file(GLOB_RECURSE  PING_SRC  ${COMP_PING_DIR}/*.c)
-include_directories(${COMP_PING_DIR})
-list(APPEND MODULE_SRC ${PING_SRC})
-
-###################################  iperf  ####################################
-file(GLOB_RECURSE  IPERF_SRC  ${COMP_IPERF_DIR}/*.c)
-include_directories(${COMP_IPERF_DIR})
-list(APPEND MODULE_SRC ${IPERF_SRC})
-
 #############################   Partition MGR   ################################
 file(GLOB_RECURSE  PARTMGR_SRC  ${COMP_PARTMGR_DIR}/*.c)
 include_directories(${COMP_PARTMGR_DIR})
@@ -71,14 +48,11 @@ set(UTILS_SRC
     ${COMP_UTILS_DIR}/fifo/fifobuf.c
     ${COMP_UTILS_DIR}/reboot_trace/reboot_trace.c
     ${COMP_UTILS_DIR}/runtime/runtime.c
+    ${COMP_UTILS_DIR}/power_mgmt/ln_pm.c
 
-    ${COMP_UTILS_DIR}/ln_psk_calc.c
-    ${COMP_UTILS_DIR}/ln_sha1.c
-    ${COMP_UTILS_DIR}/ln_aes.c
     ${COMP_UTILS_DIR}/ln_misc.c
     ${COMP_UTILS_DIR}/crc16.c
     ${COMP_UTILS_DIR}/crc32.c
-    ${COMP_UTILS_DIR}/system_parameter.c
     ${COMP_UTILS_DIR}/wrap_stdio.c
 )
 
@@ -122,13 +96,14 @@ list(APPEND MODULE_SRC ${MCU_SRC})
 
 ###############################   BLE (export) #################################
 file(GLOB_RECURSE  BLE_LIB_IMPORT_SRC   ${COMP_BLE_DIR}/ble_lib_import/*.c)
-file(GLOB_RECURSE  BLE_API_COMMON       ${COMP_BLE_DIR}/ble_api/common/*.c)
+file(GLOB_RECURSE  BLE_ARCH             ${COMP_BLE_DIR}/ble_arch/*.c)
 file(GLOB_RECURSE  BLE_API_GAP_GATT     ${COMP_BLE_DIR}/ble_api/gap_gatt/*.c)
-
+file(GLOB_RECURSE  BLE_PROFILE_COMMON   ${COMP_BLE_DIR}/ble_profiles/prf_common/*.c)
+include_directories(${COMP_BLE_DIR})
+include_directories(${COMP_BLE_DIR}/ble_arch)
 include_directories(${COMP_BLE_DIR}/ble_lib_import)
 include_directories(${COMP_BLE_DIR}/ble_api/gap_gatt/api)
-include_directories(${COMP_BLE_DIR}/ble_api/common)
-include_directories(${COMP_BLE_DIR}/ble_api/gap_gatt/api)
+include_directories(${COMP_BLE_DIR}/ble_profiles/prf_common)
 include_directories(${COMP_BLE_DIR}/ble_lib_import)
 include_directories(${COMP_BLE_DIR}/mac/ble/hl/api)
 include_directories(${COMP_BLE_DIR}/mac/ble/hl/inc)
@@ -154,17 +129,13 @@ include_directories(${COMP_BLE_DIR}/modules/rwip/api)
 
 
 list(APPEND MODULE_SRC ${BLE_LIB_IMPORT_SRC})
-list(APPEND MODULE_SRC ${BLE_API_COMMON})
+list(APPEND MODULE_SRC ${BLE_ARCH})
 list(APPEND MODULE_SRC ${BLE_API_GAP_GATT})
+list(APPEND MODULE_SRC ${BLE_PROFILE_COMMON})
 
 ###################################   MISC  ####################################
 set(MISC_SRC
-    ${COMP_WIFI_DIR}/wifi_manager/wifi_manager.c
-    ${COMP_WIFI_DIR}/wifi_lib_import/wifi_port.c
     ${COMP_LIBC_STUB_DIR}/newlib_stub.c
 )
 include_directories(${LN_SDK_ROOT}/components)
-include_directories(${COMP_WIFI_DIR}/wifi_manager)
-include_directories(${COMP_WIFI_DIR}/wifi_lib_import)
-include_directories(${COMP_WIFI_DIR}/wifi_lib_export)
 list(APPEND MODULE_SRC ${MISC_SRC})

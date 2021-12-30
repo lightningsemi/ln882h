@@ -16,8 +16,6 @@
 # limitations under the License.
 
 import os
-import argparse
-import subprocess
 from ln_tools import check_python_version
 from makeimage import MakeImageTool
 from ota_image_generator import OTATOOL

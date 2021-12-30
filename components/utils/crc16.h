@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define LN_SW_CRC16_USING_ROM_CODE (0)
+
 uint16_t crc16_ccitt(const char *buf, int len);
 
 #endif // __CRC16_H__

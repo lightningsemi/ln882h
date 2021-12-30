@@ -26,7 +26,8 @@ class BootHeader:
 
     CRP_VALID_FLAG = 0x46505243
 
-    BOOT_SIZE_LIMIT  = (1024 * 36)
+    BOOT_START_ADDR  = 0
+    BOOT_SIZE_LIMIT  = (1024 * 24)
 
     def __init__(self, other_buf) -> None:
         self.__bootram_target_addr  = 0

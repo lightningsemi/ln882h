@@ -24,12 +24,12 @@
  */
 
 #include "rwip_config.h"
-
+#include "rwprf_config.h"
 #if (BLE_BATT_SERVER)
 #include "bass.h"
 #include "bass_task.h"
 #include "prf_utils.h"
-#include "prf.h"
+#include "prf_ble.h"
 
 #include "ke_mem.h"
 

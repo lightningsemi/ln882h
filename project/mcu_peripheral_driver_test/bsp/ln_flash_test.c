@@ -35,7 +35,7 @@ static uint32_t err_cnt = 0;
 
 void ln_flash_test()
 {
-    hal_flash_init();
+    //hal_flash_init();
 
     /* 1. 读取flash ID */
     flash_id = hal_flash_read_id();

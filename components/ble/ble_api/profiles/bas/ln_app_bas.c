@@ -34,9 +34,8 @@
 #include <string.h>
 #include "ke_msg.h"
 #include "gapm_task.h"
-#include "ln_def.h"
 #include "ln_app_bas.h"
-#include "ln_def.h"
+
 /*
  * DEFINES
  ****************************************************************************************

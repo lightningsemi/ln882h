@@ -5,6 +5,9 @@
 #include "ln_compiler.h"
 #include "ln_types.h"
 #include "ln_wifi_err.h"
+#include <stdarg.h>
+
+typedef size_t (*wlib_pvtcmd_output_pfn)(const char *format, va_list args);
 
 /* hardware for MAC Interrupt */
 void    wlib_mac_isr_enable(void);
@@ -16,6 +19,8 @@ void    wlib_hwtimer_start(void);
 void    wlib_hwtimer_stop(void);
 void    wlib_software_reset_core(void);
 void    wlib_pvtcmd_printf(const char *format, ...);
+void    wlib_pvtcmd_output_cb_set(wlib_pvtcmd_output_pfn cb);
+wlib_pvtcmd_output_pfn wlib_pvtcmd_output_cb_get(void);
 void    wlib_xtal40m_cap_set(uint8_t cap);
 void    wlib_xtal40m_vol_set(uint8_t vol);
 void    wlib_r_xtal40m_ibsel(uint8_t sel);

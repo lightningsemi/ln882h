@@ -32,10 +32,17 @@ class AfterBuildKeil(AfterBuildBase):
             print("keil_proj_filepath MUST be provided!!!")
             return False
 
-        keil_proj_filepath = args[0]
+        sdk_root = os.path.abspath(args[0])
+        if os.path.exists(sdk_root) and os.path.isdir(sdk_root):
+            self.sdkroot_dir = sdk_root
+        else:
+            print("Error: `sdkroot` is invalid for keil after build cmd!!!")
+            return False
+
+        keil_proj_filepath = args[1]
         output_filename = None
         if len(args) > 1:
-            output_filename = args[1]
+            output_filename = args[2]
 
         if not os.path.exists(keil_proj_filepath):
             print("\nError: not exist: {}".format(keil_proj_filepath))
@@ -62,7 +69,7 @@ class AfterBuildKeil(AfterBuildBase):
             print("Error: chip type macro (such as LN882H) has not been found!!!")
             return False
 
-        self.boot_filepath = os.path.abspath(os.path.join(keil_proj_dir, "../../../lib/boot_{}.bin".format(chip_type)))
+        self.boot_filepath = os.path.abspath(os.path.join(keil_proj_dir, "{_r}/lib/boot_{_c}.bin".format(_r=self.sdkroot_dir, _c=chip_type)))
         self.app_filepath = os.path.join(keil_proj_dir, self.buildout_name + ".bin")
 
         if (output_filename is None) or len(output_filename) == 0:
@@ -114,12 +121,13 @@ class AfterBuildKeil(AfterBuildBase):
         """
         axf_filepath = os.path.join(self.buildout_dir, self.buildout_name + ".axf")
         app_filepath = self.app_filepath
-        cmd = " ".join(["fromelf", "--bin", "--output=" + app_filepath, axf_filepath])
         try:
-            retval = subprocess.check_call(cmd, stdout=subprocess.DEVNULL, shell=True)
+            retval = subprocess.check_call(["fromelf", "--bin", "--output={}".format(app_filepath), axf_filepath], stdout=subprocess.DEVNULL, shell=True)
         except subprocess.CalledProcessError as err:
-            print(str(err))
             retval = err.returncode
+            print("returncode: {}".format(err.returncode))
+            print("cmd: {}".format(err.cmd))
+            print("output: {}".format(err.output))
 
         if retval != 0:
             print("Error: produce {} failed!!!".format(os.path.basename(app_filepath)))
@@ -158,6 +166,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog=prog, description=desc)
     parser.add_argument("-k", "--keilproj", help="*.uvprojx filepath", type=str)
     parser.add_argument("-o", "--output",   help="final image name, default is 'flashimage.bin'", type=str)
+    parser.add_argument("-s", "--sdkroot",  help="LN SDK root directory", type=str, default="../../../")
     args = parser.parse_args()
 
     if not args.keilproj:
@@ -166,7 +175,9 @@ if __name__ == "__main__":
 
     buildObj = AfterBuildKeil()
 
-    if not buildObj.prepare(args.keilproj, args.output):
+    if not buildObj.prepare(args.sdkroot,
+                            args.keilproj,
+                            args.output):
         exit(-2)
 
     if not buildObj.doAllWork():

@@ -24,13 +24,13 @@
  ****************************************************************************************
  */
 #include "rwip_config.h"
-
+#include "rwprf_config.h"
 #if (BLE_DIS_SERVER)
 #include "co_utils.h"
 #include "gap.h"
 #include "gattc_task.h"
 #include "diss.h"
-#include "dis/diss/api/diss_task.h"
+#include "diss_task.h"
 #include "prf_utils.h"
 
 #include "ke_mem.h"

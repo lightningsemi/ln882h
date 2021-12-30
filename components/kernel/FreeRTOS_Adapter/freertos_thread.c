@@ -33,8 +33,6 @@ OS_Status OS_ThreadCreate(OS_Thread_t *thread, const char *name,
 {
 	BaseType_t ret;
 
-	OS_HANDLE_ASSERT(!OS_ThreadIsValid(thread), thread->handle);
-
 	ret = xTaskCreate(entry, name, stackSize / sizeof(StackType_t), arg, priority, &thread->handle);
 	if (ret != pdPASS) {
 		OS_ERR("err %"OS_BASETYPE_F"\r\n", ret);

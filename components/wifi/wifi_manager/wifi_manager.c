@@ -70,28 +70,29 @@ __STATIC_INLINE__ int ap_info_list_update(const ap_info_t *info)
     uint32_t curr_ticks = 0;
     ap_info_list_ctrl_t * list_ctrl = &ap_info_list_ctrl;
     ap_info_node_t *pnode, *tmp, *node_new = NULL;
-    
+
     OS_MutexLock(&list_ctrl->lock, OS_WAIT_FOREVER);
     if (list_ctrl->enable != LN_TRUE) {
         ret = WIFI_ERR_NONE;
         goto __exit;
     }
+
     // creat new info node.
     if (NULL == (node_new = OS_Malloc(sizeof(ap_info_node_t)))) {
         ret = WIFI_ERR_MEM;
         goto __exit;
-    }    
+    }
     memcpy(&node_new->info, info, sizeof(ap_info_t));
     curr_ticks = OS_GetTicks();
     node_new->life_ticks = curr_ticks;
-    
+
     ap_list_remove_life_timeout_node(list_ctrl);
 
     if (ln_is_list_empty(&list_ctrl->list)) {
         ln_list_add(&list_ctrl->list, &node_new->list);
         list_ctrl->node_count++;
     } else {
-         //list full,remove a node.
+        //list full,remove a node.
         if (list_ctrl->node_count >= AP_LIST_NODE_MAX) {
             pnode = LN_LIST_ENTRY(list_ctrl->list.prev, ap_info_node_t, list);
             ln_list_rm(list_ctrl->list.prev);
@@ -108,26 +109,32 @@ __STATIC_INLINE__ int ap_info_list_update(const ap_info_t *info)
                 list_ctrl->node_count--;
             }
         }
-        
+
         //add new node
         if (list_ctrl->rule == NORMAL_SORT) {
             ln_list_add(&list_ctrl->list, &node_new->list);
             list_ctrl->node_count++;
-        } else {
-            LN_LIST_FOR_EACH_ENTRY_SAFE(pnode, tmp, ap_info_node_t, list, &list_ctrl->list) 
-            {
+        } else { // RSSI_SORT
+            /**
+             * If the smaller rssi is not found after traversing the list, 
+             * then the for loop exits finally,
+             * now the "entry(&pnode->list)" points to the "head(&list_ctrl->list)".
+             * At this time, needs to add item to the end of the list,
+             * code as "if (&pnode->list == &list_ctrl->list)".
+            */
+            LN_LIST_FOR_EACH_ENTRY_SAFE(pnode, tmp, ap_info_node_t, list, &list_ctrl->list) {
                 if (info->rssi >= pnode->info.rssi)
                 {
                     ln_list_insert(&pnode->list, &node_new->list);
                     list_ctrl->node_count++;
                     break;
-                } else if (pnode->list.next == &list_ctrl->list) {
-                    ln_list_add(&pnode->list, &node_new->list);
-                    list_ctrl->node_count++;
-                    break;
-                } else {
-                    //nothing todo,but don't break.
                 }
+            }
+
+            if (&pnode->list == &list_ctrl->list)
+            {
+                ln_list_insert(&pnode->list, &node_new->list);
+                list_ctrl->node_count++;
             }
         }
     }

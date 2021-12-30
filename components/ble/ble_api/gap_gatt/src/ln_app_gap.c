@@ -37,7 +37,7 @@
 
 #include "co_math.h"                 // Common Maths Definition
 #include "co_utils.h"
-#include "ln_def.h"
+
 #include "ble_port.h"
 
 /*
@@ -53,7 +53,6 @@ void ln_app_gapm_reset(void)
                                    gapm_reset_cmd);
     p_cmd->operation = GAPM_RESET;
     ln_ke_msg_send(p_cmd);
-    rw_queue_msg_send(KE_EVENT_KE_MESSAGE, 0, NULL);//first msg to make the main schedule run.
 }
 
 void ln_app_set_dev_config(struct ln_gapm_set_dev_config_cmd *cfg_param)
@@ -70,10 +69,10 @@ void ln_app_set_dev_config(struct ln_gapm_set_dev_config_cmd *cfg_param)
     p_cmd->pairing_mode = cfg_param->pairing_mode;
     p_cmd->gap_start_hdl = cfg_param->gap_start_hdl;
     p_cmd->gatt_start_hdl = cfg_param->gatt_start_hdl;
-    p_cmd->att_cfg = (cfg_param->att_devname_write_perm & GAPM_ATT_NAME_PERM_MASK) | 
-                     (cfg_param->att_apperance_write_perm & GAPM_ATT_APPEARENCE_PERM_MASK) | 
-                     (cfg_param->att_slv_pref_conn_param_present & GAPM_ATT_SLV_PREF_CON_PAR_EN_MASK) | 
-                     (cfg_param->svc_change_feat_present & 0x80);
+    p_cmd->att_cfg = (cfg_param->att_devname_write_perm & 0x7) |
+                     ((cfg_param->att_apperance_write_perm & 0x7) << 3) |
+                     ((cfg_param->att_slv_pref_conn_param_present & 0x1) << 6) |
+                     ((cfg_param->svc_change_feat_present & 0x1) << 7);
     p_cmd->sugg_max_tx_octets = cfg_param->sugg_max_tx_octets;
     p_cmd->sugg_max_tx_time = cfg_param->sugg_max_tx_time;
     p_cmd->max_mtu = cfg_param->max_mtu;
@@ -353,7 +352,7 @@ void ln_app_set_scan_rsp_data(struct ln_gapm_set_adv_data_cmd *scan_rsp_data)
     p_cmd->operation = GAPM_SET_SCAN_RSP_DATA;
     p_cmd->actv_idx = scan_rsp_data->actv_idx;
     p_cmd->length = scan_rsp_data->length;
-    memcpy(scan_rsp_data->data, scan_rsp_data->data, scan_rsp_data->length);
+    memcpy(p_cmd->data, scan_rsp_data->data, scan_rsp_data->length);
     // Send the message
     ln_ke_msg_send(p_cmd);
 }
@@ -372,7 +371,7 @@ void ln_app_advertise_start(struct ln_gapm_activity_start_cmd * adv_start_param)
     ln_ke_msg_send(p_cmd);
 }
 
-void ln_app_scan_creat(struct ln_gapm_activity_create_adv_cmd *scan_creat_param)
+void ln_app_scan_creat(struct ln_gapm_activity_create_cmd *scan_creat_param)
 {
     // Prepare the GAPM_ACTIVITY_CREATE_CMD message
     struct gapm_activity_create_cmd *p_cmd = KE_MSG_ALLOC(GAPM_ACTIVITY_CREATE_CMD,
@@ -410,7 +409,7 @@ void ln_app_scan_start(struct ln_gapm_activity_start_cmd * scan_start_param)
 
 
 
-void ln_app_init_creat(struct ln_gapm_activity_create_adv_cmd *init_creat_param)
+void ln_app_init_creat(struct ln_gapm_activity_create_cmd *init_creat_param)
 {
     // Prepare the GAPM_ACTIVITY_CREATE_CMD message
     struct gapm_activity_create_cmd *p_cmd = KE_MSG_ALLOC(GAPM_ACTIVITY_CREATE_CMD,
@@ -511,7 +510,7 @@ void ln_app_activity_delete(int actv_idx)
 
 
 
-void ln_app_use_enc(struct gapm_use_enc_block_cmd *p_param)
+void ln_app_use_enc(struct ln_gapm_use_enc_block_cmd *p_param)
 {
     
     struct gapm_use_enc_block_cmd *p_cmd = KE_MSG_ALLOC(GAPM_USE_ENC_BLOCK_CMD,
@@ -588,7 +587,7 @@ void ln_app_conn_cfm(int conidx, struct ln_gapc_connection_cfm *p_cfm)
     ke_msg_send(p_cmd);
 }
 
-void ln_app_get_peer_info(int conidx,struct gapc_get_info_cmd* get_info)
+void ln_app_get_peer_info(int conidx,struct ln_gapc_get_info_cmd* get_info)
 {
     struct gapc_get_info_cmd *p_cmd = KE_MSG_ALLOC( GAPC_GET_INFO_CMD,
                                       KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
@@ -636,7 +635,7 @@ void ln_app_get_peer_info(int conidx,struct gapc_get_info_cmd* get_info)
 }
 
 
-void ln_app_param_update_cfm(int conidx, struct gapc_param_update_cfm *update_cfm)
+void ln_app_param_update_cfm(int conidx, struct ln_gapc_param_update_cfm *update_cfm)
 {
     struct gapc_param_update_cfm *p_cmd = KE_MSG_ALLOC(GAPC_PARAM_UPDATE_CFM,
                                           KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
@@ -650,7 +649,7 @@ void ln_app_param_update_cfm(int conidx, struct gapc_param_update_cfm *update_cf
 }
 
 
-void ln_app_param_set_pkt_size(int conidx, struct gapc_set_le_pkt_size_cmd *pkt_size)
+void ln_app_param_set_pkt_size(int conidx, struct ln_gapc_set_le_pkt_size_cmd *pkt_size)
 {
     struct gapc_set_le_pkt_size_cmd *p_cmd = KE_MSG_ALLOC(GAPC_SET_LE_PKT_SIZE_CMD,
                                           KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
@@ -682,7 +681,7 @@ void  ln_app_bond(int conidx,struct ln_gapc_bond_cmd *p_param )
 }
 
 
-void ln_app_bond_cfm(int conidx,struct gapc_bond_cfm *p_param)
+void ln_app_bond_cfm(int conidx,struct ln_gapc_bond_cfm *p_param)
 {
     struct gapc_bond_cfm *p_cmd = KE_MSG_ALLOC( GAPC_BOND_CFM,
                                   KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
@@ -726,7 +725,7 @@ void ln_app_bond_cfm(int conidx,struct gapc_bond_cfm *p_param)
     ke_msg_send(p_cmd);
 }
 
-void ln_app_keypress_notify(int conidx, struct gapc_key_press_notif_cmd *p_param)
+void ln_app_keypress_notify(int conidx, struct ln_gapc_key_press_notif_cmd *p_param)
 {
     
     struct gapc_key_press_notif_cmd *p_cmd = KE_MSG_ALLOC(GAPC_KEY_PRESS_NOTIFICATION_CMD,
@@ -739,7 +738,7 @@ void ln_app_keypress_notify(int conidx, struct gapc_key_press_notif_cmd *p_param
     
 }
 
-void ln_app_get_dev_info_cfm(int conidx, struct gapc_get_dev_info_cfm *p_param)
+void ln_app_get_dev_info_cfm(int conidx, struct ln_gapc_get_dev_info_cfm *p_param)
 {
     struct gapc_get_dev_info_cfm *p_cmd = KE_MSG_ALLOC_DYN(GAPC_GET_DEV_INFO_CFM,
                                                        KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
@@ -764,7 +763,7 @@ void ln_app_get_dev_info_cfm(int conidx, struct gapc_get_dev_info_cfm *p_param)
 }
 
 
-void ln_app_set_dev_info_cfm(int conidx, struct gapc_set_dev_info_cfm *p_param)
+void ln_app_set_dev_info_cfm(int conidx, struct ln_gapc_set_dev_info_cfm *p_param)
 {
     struct gapc_set_dev_info_cfm *p_cmd = KE_MSG_ALLOC(GAPC_SET_DEV_INFO_CFM,
                                                       KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
@@ -776,7 +775,7 @@ void ln_app_set_dev_info_cfm(int conidx, struct gapc_set_dev_info_cfm *p_param)
 }
 
 
-void ln_app_encrypt(int conidx,struct gapc_encrypt_cmd *p_param)
+void ln_app_encrypt(int conidx,struct ln_gapc_encrypt_cmd *p_param)
 {
     struct gapc_encrypt_cmd *p_cmd = KE_MSG_ALLOC(GAPC_ENCRYPT_CMD,
                                                   KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
@@ -791,7 +790,7 @@ void ln_app_encrypt(int conidx,struct gapc_encrypt_cmd *p_param)
 }
 
 /// issue from master
-void ln_app_encrypt_cfm(int conidx, struct gapc_encrypt_cfm *p_param)
+void ln_app_encrypt_cfm(int conidx, struct ln_gapc_encrypt_cfm *p_param)
 {
     struct gapc_encrypt_cfm *p_cmd = KE_MSG_ALLOC(GAPC_ENCRYPT_CFM,
                                                   KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
@@ -804,7 +803,7 @@ void ln_app_encrypt_cfm(int conidx, struct gapc_encrypt_cfm *p_param)
 }
 
 /// issue from slave
-void ln_app_req_security(int conidx, struct gapc_security_cmd *p_param)
+void ln_app_req_security(int conidx, struct ln_gapc_security_cmd *p_param)
 {  
     struct gapc_security_cmd *p_cmd = KE_MSG_ALLOC(GAPC_SECURITY_CMD,
                                                     KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
@@ -818,7 +817,7 @@ void ln_app_req_security(int conidx, struct gapc_security_cmd *p_param)
 
 
 
-void ln_app_set_ping_tmo(int conidx, struct gapc_set_le_ping_to_cmd *p_param)
+void ln_app_set_ping_tmo(int conidx, struct ln_gapc_set_le_ping_to_cmd *p_param)
 {
     struct gapc_set_le_ping_to_cmd *p_cmd = KE_MSG_ALLOC(GAPC_SET_LE_PING_TO_CMD,
                                                         KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,

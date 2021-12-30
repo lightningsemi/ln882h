@@ -86,7 +86,7 @@ void SetSysClock(void)
     
     
     /*
-        APB0 Clock = 80M
+        APB0 Clock = 40M
         AHB  Clock = 160M
         Core Clock = 160M
     */
@@ -97,11 +97,14 @@ void SetSysClock(void)
 
     //1. xtal40m config
     //hal_misc_awo_set_ldo18_2_vset(5);       // tx_rx_filter LDO18_2 vol set
-    hal_misc_awo_set_r_xtal40m_ldo_vbit(5); // xtal40m LDO (1.2V ~ )
-    hal_misc_awo_set_r_xtal40m_cap_bit(0); // xtal40m Cap (pf)
-    hal_misc_awo_set_r_xtal40m_ibsel(1);
+    hal_misc_awo_set_r_xtal40m_ldo_vbit(1);   //5 xtal40m LDO (1.2V ~ )
+    hal_misc_awo_set_r_xtal40m_cap_bit(0);    // xtal40m Cap (pf)
+    hal_misc_awo_set_r_xtal40m_ibsel(0);      //1
+    hal_misc_awo_set_ldo18_4_vset(7);
     hal_misc_awo_set_ldo18_2_vset(6);
     hal_misc_awo_set_ldo15_1_vset(6);
+
+    hal_misc_awo_set_o_cpu_sleep_counter_bp(0); //32K RCO cal
 
     //2. clock
     hal_clock_init(&clock_init);

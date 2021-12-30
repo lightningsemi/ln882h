@@ -38,11 +38,6 @@ static int ota_upg_state_get(upg_state_t *state)
     return LN_FALSE;
 }
 
-static void chip_reboot(void)
-{
-    NVIC_SystemReset();
-}
-
 ota_err_t ota_port_init(void)
 {
     ota_port.flash_drv.read  = flash_read;
@@ -51,9 +46,7 @@ ota_err_t ota_port_init(void)
     
     ota_port.upg_state_set   = ota_upg_state_set;
     ota_port.upg_state_get   = ota_upg_state_get;
-    
-    ota_port.chip_reboot     = chip_reboot;
-    
+
     return OTA_ERR_NONE;
 }
 

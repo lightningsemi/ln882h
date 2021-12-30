@@ -27,8 +27,7 @@ del firmware*.asm /s
 del firmware*.bin /s
 del flashimage*.bin /s
 del *.uvguix.* /s
-del *buildout_keil_* /s
-
+del *buildout_*.txt /s
 
 del *.iex /s
 del *.htm /s

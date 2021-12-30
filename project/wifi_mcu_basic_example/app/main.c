@@ -20,8 +20,6 @@ int main (int argc, char* argv[])
     LN_UNUSED(argc);
     LN_UNUSED(argv);
 
-    *(uint32_t *)(0x40100098) = 0x13141517;
-
     //0. check reboot cause
     ln_chip_get_reboot_cause();
 

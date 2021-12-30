@@ -8,7 +8,7 @@
 #include "att.h"
 #include "usr_send_data.h"
 #include "ln_app_gatt.h"
-
+#include "usr_ble_app.h"
 typedef struct {
 	
     uint16_t hdl_svc;
@@ -20,7 +20,7 @@ typedef struct {
  data_trans_svr_t  data_trans_svr = {0};
 
 
-static const struct ln_gattm_att_desc  data_trans_atts[] = {
+static const struct gattm_att_desc  data_trans_atts[] = {
     [DATA_TRANS_DECL_CHAR_RX] = {
         .uuid = { 0x03, 0x28 }, 
         .perm = PERM_MASK_RD,
@@ -60,17 +60,13 @@ uint8_t svc_uuid[16]={0x85,0x41,0xDC,0x24,0x0E,0xE5,0xA9,0xE0,0x93,0xF3,0xA3,0xB
 void data_trans_svc_add(void)
 {
     int nb_att = sizeof(data_trans_atts)/sizeof(data_trans_atts[0]);
-    struct ln_gattm_add_svc_req *p_svc_desc = blib_malloc(sizeof(struct ln_gattm_svc_desc)  + nb_att * sizeof(struct ln_gattm_att_desc));
-
-    /// Service Definition
-    p_svc_desc->svc_desc.start_hdl = 0;	
-    p_svc_desc->svc_desc.perm = (2 << 5);		
-    memcpy(p_svc_desc->svc_desc.uuid, svc_uuid, 16);
-    p_svc_desc->svc_desc.nb_att = nb_att;		
-    memcpy(p_svc_desc->svc_desc.atts, &data_trans_atts[0], nb_att * sizeof(struct ln_gattm_att_desc));
-   
-    ln_app_gatt_add_svc(p_svc_desc);
-    blib_free(p_svc_desc);
+    struct ln_gattm_add_svc_req p_svc_desc;
+    p_svc_desc.svc_desc.start_hdl = 0; 
+    p_svc_desc.svc_desc.perm = (2 << 5);       
+    memcpy(p_svc_desc.svc_desc.uuid, svc_uuid, 16);
+    p_svc_desc.svc_desc.nb_att = nb_att;
+    p_svc_desc.svc_desc.atts = data_trans_atts;  
+    ln_app_gatt_add_svc(&p_svc_desc);
 }
 
 

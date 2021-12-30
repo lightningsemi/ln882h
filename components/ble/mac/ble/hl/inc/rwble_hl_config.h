@@ -184,7 +184,7 @@
 #define BLE_PROFILES      (1)
 /// Number of Profile tasks managed by GAP manager.
 #define BLE_NB_PROFILES   (CFG_NB_PRF)
-#include "rwprf_config.h"
+//#include "rwprf_config.h"
 #else
 #define BLE_PROFILES      (0)
 #define BLE_NB_PROFILES   (0)

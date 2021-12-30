@@ -86,13 +86,13 @@ class AfterBuildForBoot:
 
         # app.axf --> app.asm
         asm_filepath = os.path.join(os.path.dirname(self.keilproj), self.buildout_name + ".asm")
-        cmd = " ".join(["fromelf", "-c", "-v", "-a", "--output=" + asm_filepath, axf_filepath])
-        print(cmd)
         try:
-            retval = subprocess.check_call(cmd, stdout=subprocess.DEVNULL, shell=True)
+            retval = subprocess.check_call(["fromelf", "-c", "-v", "-a", "--output={}".format(asm_filepath), axf_filepath], stdout=subprocess.DEVNULL, shell=True)
         except subprocess.CalledProcessError as err:
-            print(str(err))
             retval = err.returncode
+            print("returncode: {}".format(err.returncode))
+            print("cmd: {}".format(err.cmd))
+            print("output: {}".format(err.output))
 
         if retval != 0:
             print("Error: produce {} failed!!!".format(os.path.basename(asm_filepath)))
@@ -100,13 +100,13 @@ class AfterBuildForBoot:
 
         # app.axf --> app.bin
         app_filepath = self.app_filepath
-        cmd = " ".join(["fromelf", "--bin", "--output=" + app_filepath, axf_filepath])
-        print(cmd)
         try:
-            retval = subprocess.check_call(cmd, stdout=subprocess.DEVNULL, shell=True)
+            retval = subprocess.check_call(["fromelf", "--bin", "--output={}".format(app_filepath), axf_filepath], stdout=subprocess.DEVNULL, shell=True)
         except subprocess.CalledProcessError as err:
-            print(str(err))
             retval = err.returncode
+            print("returncode: {}".format(err.returncode))
+            print("cmd: {}".format(err.cmd))
+            print("output: {}".format(err.output))
 
         if retval != 0:
             print("Error: produce {} failed!!!".format(os.path.basename(app_filepath)))

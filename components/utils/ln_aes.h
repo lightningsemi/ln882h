@@ -18,6 +18,8 @@
 #define NUM_ROUNDS         10 // 128 -> 10; 196 -> 12; 256 -> 14
 #define KEY_SIZE           16 // 128 -> 16; 192 -> 24; 256 -> 32  uint: byte
 
+#define LN_SW_AES_USING_ROM_CODE (0)
+
 typedef struct
 {
   uint32_t keys[60];

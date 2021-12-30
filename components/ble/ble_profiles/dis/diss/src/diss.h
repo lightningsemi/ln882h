@@ -28,9 +28,10 @@
  ****************************************************************************************
  */
 #include "rwip_config.h"
+#include "rwprf_config.h"
 #if (BLE_DIS_SERVER)
 #include "prf_types.h"
-#include "prf.h"
+#include "prf_ble.h"
 
 /*
  * DEFINES

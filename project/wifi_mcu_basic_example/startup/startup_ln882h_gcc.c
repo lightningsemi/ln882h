@@ -88,7 +88,7 @@ __WEAK__ void PAOTD_IRQHandler       (void);
 //<h> Stack Configuration
 //  <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
 //</h>
-#define  __STACK_SIZE  0x00002000
+#define  __STACK_SIZE  0x00000800
 static uint8_t stack[__STACK_SIZE] __attribute__ ((aligned(8), used, section(".stack")));
 
 #if 0
@@ -223,7 +223,6 @@ const pFunc __Vectors[240] __attribute__ ((section(".vectors"))) = {
 void Reset_Handler(void) {
     uint32_t *pSrc, *pDest;
     uint32_t *pTable __attribute__((unused));
-
 
     /* Firstly it copies data from read only memory to RAM.
      * There are two schemes to copy. One can copy more than one sections.

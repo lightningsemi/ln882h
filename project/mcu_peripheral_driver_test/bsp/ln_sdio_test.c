@@ -45,6 +45,8 @@
 #include "ln_test_common.h"
 #include "ln_sdio_test.h"
 
+#include "utils/debug/log.h"
+
 static uint8_t sdio_cis_fn0[128];
 static uint8_t sdio_cis_fn1[128];
 
@@ -53,13 +55,15 @@ static uint8_t rx_data[512];
 
 void ln_sdio_init()
 {
-    hal_gpio_pin_pull_set(GPIOA_BASE,GPIO_PIN_6,GPIO_PULL_UP);              //配置引脚上拉
-    hal_gpio_pin_pull_set(GPIOA_BASE,GPIO_PIN_7,GPIO_PULL_UP);              //配置引脚上拉
-    hal_gpio_pin_pull_set(GPIOA_BASE,GPIO_PIN_8,GPIO_PULL_UP);              //配置引脚上拉
-    hal_gpio_pin_pull_set(GPIOA_BASE,GPIO_PIN_9,GPIO_PULL_UP);              //配置引脚上拉
+    hal_gpio_pin_pull_set(GPIOA_BASE,GPIO_PIN_6,GPIO_PULL_NONE);              //配置引脚上拉
+    hal_gpio_pin_pull_set(GPIOA_BASE,GPIO_PIN_7,GPIO_PULL_NONE);              //配置引脚上拉
+    hal_gpio_pin_pull_set(GPIOA_BASE,GPIO_PIN_10,GPIO_PULL_NONE);             //配置引脚上拉
+    hal_gpio_pin_pull_set(GPIOA_BASE,GPIO_PIN_11,GPIO_PULL_NONE);             //配置引脚上拉
     
-    hal_gpio_pin_pull_set(GPIOA_BASE,GPIO_PIN_10,GPIO_PULL_UP);             //配置引脚上拉
-    hal_gpio_pin_pull_set(GPIOA_BASE,GPIO_PIN_11,GPIO_PULL_UP);             //配置引脚上拉
+    hal_gpio_pin_pull_set(GPIOA_BASE,GPIO_PIN_8,GPIO_PULL_NONE);              //配置引脚上拉
+    hal_gpio_pin_pull_set(GPIOA_BASE,GPIO_PIN_9,GPIO_PULL_NONE);              //配置引脚上拉
+    
+
 
     hal_misc_cmp_set_sdio_io_en(1);                                         //使能SDIO引脚
 
@@ -106,9 +110,6 @@ void sdio_boot_sdio_device_send_data(void)
 }
 
 
-
-
-
 void ln_sdio_test()
 {
     ln_sdio_init();
@@ -129,6 +130,7 @@ void ln_sdio_test()
 
 void SDIO_F1_IRQHandler(void)
 {
+    LOG(LOG_LVL_INFO,"it %d! \n",sdio_sdio_ahb_int_sts1_get());
     if(hal_sdio_device_it_get_flag(FN1_WRITE_OVER_INTERRPT) == HAL_SET)
     {
         unsigned int len = hal_sdio_device_get_recv_buf_size();
@@ -137,9 +139,12 @@ void SDIO_F1_IRQHandler(void)
         if(len == 256)
         {
             // set the next receive buffer address.
+            
+            LOG(LOG_LVL_INFO,"recv_it! \n");
             hal_sdio_device_set_recv_buf_addr(rx_data);
             
             // send data
+ 
             tx_data[0] ++;
             sdio_boot_sdio_device_send_data();
         }
@@ -152,18 +157,21 @@ void SDIO_F1_IRQHandler(void)
     
     if(hal_sdio_device_it_get_flag(FN1_READ_OVER_INTERRPT) == HAL_SET)
     {
+        LOG(LOG_LVL_INFO,"read_it! \n");
         hal_sdio_device_it_clr_flag(FN1_READ_OVER_INTERRPT);
     }
 
 
     if(hal_sdio_device_it_get_flag(READ_ERROR_FN1_INTERRPT) == HAL_SET)
     {
+        LOG(LOG_LVL_INFO,"read error it! \n");
         hal_sdio_device_it_clr_flag(READ_ERROR_FN1_INTERRPT);
     }
     
     //CRC ERROR
     if(hal_sdio_device_it_get_flag(WRITE_ERROR_FN1_INTERRPT) == HAL_SET)
     {
+        LOG(LOG_LVL_INFO,"crc error it! \n");
         hal_sdio_device_it_clr_flag(WRITE_ERROR_FN1_INTERRPT);
     }
     if(hal_sdio_device_it_get_flag(WRITE_ABORT_FN1_INTERRPT) == HAL_SET)
@@ -178,6 +186,7 @@ void SDIO_F1_IRQHandler(void)
     //when host enable the FN1 interrupt,will receive the interrupt.
     if(hal_sdio_device_it_get_flag(FN1_ENABLE_INTERRPT) == HAL_SET)
     {
+       LOG(LOG_LVL_INFO,"enable it! \n");
        hal_sdio_device_it_clr_flag(FN1_ENABLE_INTERRPT);
     }
     
@@ -205,5 +214,6 @@ void SDIO_F1_IRQHandler(void)
     {
         hal_sdio_device_it_clr_flag(FN1_M2S_INT_INTERRPT);
     }
+    
 }
 

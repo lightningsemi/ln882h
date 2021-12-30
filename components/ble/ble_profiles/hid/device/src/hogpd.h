@@ -28,12 +28,13 @@
  ****************************************************************************************
  */
 #include "rwip_config.h"
+#include "rwprf_config.h"
 
 #if (BLE_HID_DEVICE)
 #include "hogp_common.h"
 #include "hogpd_task.h"
 
-#include "prf.h"
+#include "prf_ble.h"
 #include "prf_types.h"
 
 

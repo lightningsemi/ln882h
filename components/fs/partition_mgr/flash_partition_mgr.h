@@ -3,7 +3,7 @@
 
 #include "ln_types.h"
 
-#define PARTITION_TAB_BASE        (1024*36)/* < Warning: Do not change it! */
+#define PARTITION_TAB_BASE        (1024*24)/* < Warning: Do not change it! */
 #define PARTITION_TAB_SIZE        (1024*4) /* < Warning: Do not change it! */
 
 typedef enum {

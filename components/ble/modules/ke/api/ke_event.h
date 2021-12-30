@@ -88,6 +88,14 @@ void ke_event_init(void);
  */
 uint8_t ke_event_callback_set(uint8_t event_type, void (*p_callback)(void));
 
+typedef void (*ke_event_notify_cb)(void);
+
+/**
+ * @brief Notify up layer to trigger rw scheduler
+*/
+void ke_event_notify_cb_set(ke_event_notify_cb cb);
+void ke_event_notify_cb_clc(void);
+
 /**
  ****************************************************************************************
  * @brief Set an event

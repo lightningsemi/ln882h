@@ -21,7 +21,7 @@ extern "C" {
 void ble_creat_usr_app_task(void);
 void app_restart_adv(void);
 void app_create_init(void);
-
+void usr_queue_msg_send(uint16_t id, uint16_t length, void *msg);
 
 #ifdef __cplusplus
 }

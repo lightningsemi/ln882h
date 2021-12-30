@@ -8,13 +8,14 @@
 #include "drv_adc_measure.h"
 #include "utils/debug/ln_assert.h"
 #include "utils/system_parameter.h"
+#include "utils/sysparam_factory_setting.h"
 #include "utils/ln_psk_calc.h"
+#include "utils/power_mgmt/ln_pm.h"
 #include "hal/hal_adc.h"
 #include "ln_nvds.h"
 #include "ln_wifi_err.h"
 #include "ln_misc.h"
 #include "usr_app.h"
-
 
 static OS_Thread_t g_usr_app_thread;
 #define USR_APP_TASK_STACK_SIZE   6*256 //Byte
@@ -91,14 +92,26 @@ static void wifi_scan_complete_cb(void * arg)
 
 void wifi_init_sta(void)
 {
-    ln_generate_random_mac(mac_addr);
+    //1. sta mac get
+     if (SYSPARAM_ERR_NONE != sysparam_sta_mac_get(mac_addr)) {
+        LOG(LOG_LVL_ERROR, "[%s]sta mac get filed!!!\r\n", __func__);
+        return;
+    }
+    if (mac_addr[0] == STA_MAC_ADDR0 &&
+        mac_addr[1] == STA_MAC_ADDR1 &&
+        mac_addr[2] == STA_MAC_ADDR2 &&
+        mac_addr[3] == STA_MAC_ADDR3 &&
+        mac_addr[4] == STA_MAC_ADDR4 &&
+        mac_addr[5] == STA_MAC_ADDR5) {
+        ln_generate_random_mac(mac_addr);
+        sysparam_sta_mac_update((const uint8_t *)mac_addr);
+    }
 
-    //1. net device(lwip)
+    //2. net device(lwip)
     netdev_set_mac_addr(NETIF_IDX_STA, mac_addr);
     netdev_set_active(NETIF_IDX_STA);
-    sysparam_sta_mac_update((const uint8_t *)mac_addr);
 
-    //2. wifi start
+    //3. wifi start
     wifi_manager_reg_event_callback(WIFI_MGR_EVENT_STA_SCAN_COMPLETE, &wifi_scan_complete_cb);
 
     if(WIFI_ERR_NONE != wifi_sta_start(mac_addr, WIFI_NO_POWERSAVE)){
@@ -169,7 +182,7 @@ void usr_app_task_entry(void *params)
 {
     LN_UNUSED(params);
 
-    // hal_sleep_set_mode(ACTIVE);
+    ln_pm_sleep_mode_set(ACTIVE);
 
     wifi_manager_init();
 
@@ -180,6 +193,7 @@ void usr_app_task_entry(void *params)
     while(NETDEV_LINK_UP != netdev_get_link_state(netdev_get_active())){
         OS_MsDelay(1000);
     }
+    
     while(1)
     {
         OS_MsDelay(1000);

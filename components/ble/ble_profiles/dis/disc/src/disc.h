@@ -36,6 +36,8 @@
  */
 
 #include "rwip_config.h"
+#include "rwprf_config.h"
+
 #if (BLE_DIS_CLIENT)
 #include <stdint.h>
 #include <stdbool.h>

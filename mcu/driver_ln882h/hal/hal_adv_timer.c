@@ -329,6 +329,23 @@ void hal_adv_tim_set_comp_a(uint32_t adv_tim_x_base,uint16_t value)
     pwm_cmp_a_setf(adv_tim_x_base,value);
 }
 
+void hal_adv_tim_set_inv_a(uint32_t adv_tim_x_base,uint8_t value)
+{
+    /* check the parameters */
+    hal_assert(IS_ADV_TIMER_ALL_PERIPH(adv_tim_x_base));
+    hal_assert(IS_TIMER_CHA_INV_EN(value));
+    pwm_inva_setf(adv_tim_x_base,value);
+}
+
+void hal_adv_tim_set_inv_b(uint32_t adv_tim_x_base,uint8_t value)
+{
+    /* check the parameters */
+    hal_assert(IS_ADV_TIMER_ALL_PERIPH(adv_tim_x_base));
+    hal_assert(IS_TIMER_CHB_INV_EN(value));
+    pwm_invb_setf(adv_tim_x_base,value);
+}
+
+
 void hal_adv_tim_set_trig_value(uint32_t adv_tim_x_base,uint16_t value)
 {
     /* check the parameters */

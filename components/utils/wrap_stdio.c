@@ -74,3 +74,13 @@ void __wrap_sprintf(stdio_write_fn write, const char *format, ...)
     __sprintf(NULL, write, format, args);
     va_end(args);
 }
+
+void __wrap_stdio_raw_data_flush(const char *buff, stdio_write_fn write, size_t size)
+{
+    printf_mutex_lock();
+    if(write)
+    {
+        write(buff, size);
+    }
+    printf_mutex_unlock();
+}

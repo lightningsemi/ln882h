@@ -209,6 +209,9 @@ int     wifi_get_country_code(wifi_country_code_t *country_code);
 int     wifi_set_channel(uint8_t channel);
 int     wifi_get_channel(uint8_t *channel);
 
+int     wifi_set_11n_enable(uint8_t ht_enable);
+int     wifi_set_allow_cpu_sleep_flag(uint8_t allow);
+
 int     wifi_sta_set_dtim_period(int period);
 int     wifi_sta_get_rssi(int8_t *rssi);
 
