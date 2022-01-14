@@ -102,7 +102,7 @@ int gattc_write_req_ind_handler(ke_msg_id_t const msgid,
     p_cfm->status = GAP_ERR_NO_ERROR;
     ke_msg_send(p_cfm);
 
-    hexdump(LOG_LVL_INFO, "[recv data]", (void *)param->value, param->length);
+    // hexdump(LOG_LVL_INFO, "[recv data]", (void *)param->value, param->length);
 
     {
         tuya_ble_data_buf_t data;

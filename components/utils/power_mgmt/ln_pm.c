@@ -99,14 +99,14 @@ __STATIC_INLINE void soc_stop_lightsleep(void)
     }
 }
 
-__STATIC_INLINE void soc_module_clk_gate_disable(uint32_t gate_cfg)
+void soc_module_clk_gate_disable(uint32_t gate_cfg)
 {
     uint32_t gate = sysc_cmp_sw_clkg_get();
     gate &= ~gate_cfg;
     sysc_cmp_sw_clkg_set(gate);
 }
 
-__STATIC_INLINE void soc_module_clk_gate_enable(uint32_t gate_cfg)
+void soc_module_clk_gate_enable(uint32_t gate_cfg)
 {
     uint32_t gate = sysc_cmp_sw_clkg_get();
     gate |= gate_cfg;
@@ -118,19 +118,34 @@ __STATIC_INLINE void soc_rom_phase_reset_flag(void)
     sysc_awo_idle_reg_set(0x52);
 }
 
+__STATIC_INLINE void soc_pll2xtal(void)
+{
+    sysc_awo_clk_src_sel_setf(0);       //0 = xtal 1 = pll
+    sysc_cmp_pclk0_div_para_m1_setf(0); //0 = 1div
+    sysc_cmp_pclk0_div_para_up_setf(1);
+    sysc_awo_syspll_en_setf(0);         //pll disable
+}
+
+__STATIC_INLINE void soc_xtal2pll(void)
+{
+    sysc_awo_syspll_en_setf(1);         //pll enable
+    sysc_cmp_pclk0_div_para_m1_setf(3); //3 = 4div
+    sysc_cmp_pclk0_div_para_up_setf(1);
+    sysc_awo_clk_src_sel_setf(1);       //0 = xtal 1 = pll
+}
 
 /*****************************************************************************/
 /*                        power save management                              */
 /*****************************************************************************/
-
 __STATIC_INLINE void pmu_pre_sleep_update(pm_ctl_t * ctrl)
 {
     switch (ctrl->slp_mode)
     {
         case LIGHT_SLEEP:
-            SOC_AWO_PMU_CFG_SET(1, 1, 7, 7, 4, 4, 0, 0, 0, 0, 1, 1); /* 0x600044FF */
+            SOC_AWO_PMU_CFG_SET(1, 1, 7, 7, 4, 4, 0, 0, 1, 1, 1, 1); /* 0x600044FF */
             soc_io_pmu_ret_config(0, 0);                             /* no pd cmp, not need retention/unret */
             soc_module_clk_gate_disable(ctrl->clk_gate_cfg);
+            soc_pll2xtal();
             soc_start_lightsleep();                                  /* trigger sleep at last */
             break;
 
@@ -158,6 +173,7 @@ __STATIC_INLINE void pmu_post_sleep_update(pm_ctl_t * ctrl)
     {
         case LIGHT_SLEEP:
             soc_stop_lightsleep();
+            soc_xtal2pll();
             soc_module_clk_gate_enable(ctrl->clk_gate_cfg);
             break;
 

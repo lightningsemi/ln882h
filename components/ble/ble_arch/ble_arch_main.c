@@ -49,23 +49,23 @@ static void ke_msg_sync_lock_deinit(void)
 
 static void ke_msg_sync_lock_acquire(void)
 {
-    if (OS_SemaphoreWait(&g_ke_msg_sync_sem, OS_WAIT_FOREVER) != 0)
-    {
-        BLIB_LOG(BLIB_LOG_LVL_E, "[%s] Error\r\n", __func__);
-    }
+    // if (OS_SemaphoreWait(&g_ke_msg_sync_sem, OS_WAIT_FOREVER) != 0)
+    // {
+    //     BLIB_LOG(BLIB_LOG_LVL_E, "[%s] Error\r\n", __func__);
+    // }
 }
 
 void ke_msg_sync_lock_release(void)
 {
-    if (OS_SemaphoreRelease(&g_ke_msg_sync_sem) != 0)
-    {
-        BLIB_LOG(BLIB_LOG_LVL_E, "[%s] Error\r\n", __func__);
-    }
+    // if (OS_SemaphoreRelease(&g_ke_msg_sync_sem) != 0)
+    // {
+    //     BLIB_LOG(BLIB_LOG_LVL_E, "[%s] Error\r\n", __func__);
+    // }
 }
 
 void ln_ke_msg_send(void const *param_ptr)
 {
-    ke_msg_sync_lock_acquire();
+    // ke_msg_sync_lock_acquire();
     // Send the message
     ke_msg_send(param_ptr);
 }

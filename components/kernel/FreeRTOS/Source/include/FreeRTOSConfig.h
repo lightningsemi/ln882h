@@ -129,7 +129,7 @@
     #define portGET_OS_TICK_COMPENSATE_VAL(x)    ln_get_os_tick_comp_val(x)
 #endif
 
-#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP                   8//(3)
+#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP                   3//(3)
 
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES 		0

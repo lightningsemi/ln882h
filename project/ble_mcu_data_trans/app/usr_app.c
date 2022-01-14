@@ -1,16 +1,9 @@
 #include "utils/debug/log.h"
 #include "utils/debug/ln_assert.h"
-#include "rwip_config.h"
-#include "llm_int.h"
-#include "ln_app_gatt.h"
-#include "ln_app_gap.h"
 #include "usr_app.h"
-#include "gapm_task.h"
 #include "ln_app_gap.h"
 #include "ln_app_gatt.h"
-#include "ln_app_callback.h"
 #include "osal/osal.h"
-
 #include "usr_ble_app.h"
 #include "usr_send_data.h"
 

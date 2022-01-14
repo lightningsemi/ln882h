@@ -1,10 +1,6 @@
-#include <stdlib.h>         // standard lib functions
-#include <stdint.h>         // standard integer definition
-
 #include "rwip_config.h"    // RW SW configuration TASK_APP
 #include "ke_task.h"        // Kernel Task
 #include "ln_app_gap.h"     // gapm reset
-
 #include "usr_ble_app.h"
 
 void ble_app_init(void)

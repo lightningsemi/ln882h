@@ -1,11 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include "utils/debug/log.h"
-#include "utils/debug/ln_assert.h"
-#include "rwip_config.h"
-#include "llm_int.h"
-#include "att.h"
 #include "usr_send_data.h"
 #include "ln_app_gatt.h"
 

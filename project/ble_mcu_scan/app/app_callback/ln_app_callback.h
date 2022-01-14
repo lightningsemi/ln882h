@@ -41,43 +41,13 @@
 #include "rwip_task.h" // Task definitions
 #include "ke_msg.h"
 #include "ln_gatt_callback.h"
+#include "ln_app_gap.h"
 /*
  * DEFINES
  ****************************************************************************************
  */
 
 
-struct ln_gapc_connection_req_info
-{
-    /// Connection handle
-    uint16_t conhdl;
-    /// Connection interval
-    uint16_t con_interval;
-    /// Connection latency
-    uint16_t con_latency;
-    /// Link supervision timeout
-    uint16_t sup_to;
-    /// Clock accuracy
-    uint8_t clk_accuracy;
-    /// Peer address type
-    uint8_t peer_addr_type;
-    /// Peer BT address
-    bd_addr_t peer_addr;
-    /// Role of device in connection (0 = Master / 1 = Slave)
-    uint8_t role;
-    /// Connection index
-    uint8_t conidx;
-};
-
-struct ln_gapc_disconnect_info
-{
-    /// Connection handle
-    uint16_t conhdl;
-    /// Reason of disconnection
-    uint8_t reason;
-    /// Connection index
-    uint8_t conidx;
-};
 
 
 /// Application environment information structure

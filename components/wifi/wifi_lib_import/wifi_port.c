@@ -114,6 +114,11 @@ void wlib_r_xtal40m_ibsel(uint8_t sel)
     hal_misc_awo_set_r_xtal40m_ibsel(sel);
 }
 
+void wlib_awo_set_r_vtrim(uint8_t value)
+{
+    hal_misc_awo_set_r_vtrim(value);
+}
+
 /* misc */
 #include "utils/ln_misc.h"
 uint8_t wlib_char2hex(char c)
@@ -343,12 +348,7 @@ uint16_t wlib_sniffer_mem_chunk_buf_size_get(void)
 #include "utils/power_mgmt/ln_pm.h"
 void wlib_cpu_sleep_voter_reg(void *vote_check, void *pre_sleep, void *post_sleep)
 {
-    sleep_mode_t mode = ln_pm_sleep_mode_get();
-    if (mode == LIGHT_SLEEP) {
-        ln_pm_obj_register("wifi_stack", (int(*)(void))vote_check, (int(*)(void))NULL, (int(*)(void))NULL);
-    } else if (mode >= DEEP_SLEEP) {
-        ln_pm_obj_register("wifi_stack", (int(*)(void))vote_check, (int(*)(void))pre_sleep, (int(*)(void))post_sleep);
-    }
+    ln_pm_obj_register("wifi_stack", (int(*)(void))vote_check, (int(*)(void))pre_sleep, (int(*)(void))post_sleep);
 }
 
 

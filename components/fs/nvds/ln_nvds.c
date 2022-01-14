@@ -321,6 +321,18 @@ int ln_nvds_get_boot_delay_en(uint8_t *val) {
     return ln_nvds_read(NV8_BOOT_DELAY_EN_OFFSET, val, NV8_BOOT_DELAY_EN_LEN);
 }
 
+/* NV9_ATE_RESULT_OFFSET, NV9_ATE_RESULT_LEN */
+int ln_nvds_set_ate_result(uint8_t  val) {
+    uint8_t rd_val = 0;
+    if (NVDS_ERR_OK == ln_nvds_get_ate_result(&rd_val)) {
+        if (rd_val == val) {
+            return NVDS_ERR_OK;
+        }
+    }
 
+    return ln_nvds_write(NV9_ATE_RESULT_OFFSET, &val, NV9_ATE_RESULT_LEN);
+}
 
-
+int ln_nvds_get_ate_result(uint8_t *val) {
+    return ln_nvds_read(NV9_ATE_RESULT_OFFSET, val, NV9_ATE_RESULT_LEN);
+}

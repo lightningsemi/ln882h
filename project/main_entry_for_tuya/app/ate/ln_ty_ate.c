@@ -36,13 +36,68 @@
 #define LN_TY_ATE_CLI_CMD_BUFF_SIZE  (512)
 #define LN_TY_ATE_CLI_LOG_BUFF_SIZE  (128)
 #define LN_TY_ATE_CLI_CMD_END_MARK   ('\n')
+#define ATE_OK_AND_SAVED_OK_STR      ("SAVE_FLASH_OK\r\n")
+#define ATE_OK_AND_SAVED_FAIL_STR    ("SAVE_FLASH_FAIL\r\n")
+#define ATE_CMD_FOUND                (0)
+#define ATE_CMD_NOT_FOUND            (-1)
+#define ATE_CMD_PRINT(fmt, ...)      ln_ty_ate_printf(fmt, __VA_ARGS__)
+
+typedef struct cmd_tbl_s
+{
+    char *name;        /* Command Name */
+    int maxargs;       /* maximum number of arguments */
+    int (*cmd)(struct cmd_tbl_s *, int, const char *);
+    char *usage;       /* Usage message	(short) */
+} cmd_tbl_t;
 
 static Serial_t sg_ate_cli_serial = { 0 };
 static OS_Semaphore_t sg_ate_cli_rx_sem = { 0 };
 static uint8_t *sg_ate_cli_cmd_buff_p = NULL;
 static uint8_t *sg_ate_cli_log_buff_p = NULL;
 
+static int do_set_rf_channel(cmd_tbl_t *cmd, int argc, const char *line)
+{
+    LOG(LOG_LVL_INFO, "[%s:%d] %s \thelp:\r\n%s\r\n",
+            __func__, __LINE__, cmd->name, cmd->usage);
+    return 0;
+}
+
+static int do_ate_ok(cmd_tbl_t *cmd, int argc, const char *line)
+{
+    int status = 1;
+    LOG(LOG_LVL_INFO, "[%s:%d] %s \thelp:\r\n%s\r\n",
+            __func__, __LINE__, cmd->name, cmd->usage);
+    if (status == 1) {
+        ATE_CMD_PRINT("%s", ATE_OK_AND_SAVED_OK_STR);
+    } else {
+        ATE_CMD_PRINT("%s", ATE_OK_AND_SAVED_FAIL_STR);
+    }
+    return 0;
+}
+
+static const cmd_tbl_t sg_cmd_list[] = {
+    {"set_rf_channel", 1, do_set_rf_channel, "eg: set_rf_channel <chan>\r\nchan: [1:14]\r\n"},
+    {"XTAL_CAP",       1, do_set_rf_channel, "eg: XTAL_CAP <offset>\r\n"},
+    {"TX_POWER",       1, do_set_rf_channel, "eg: TX_POWER <offset>\r\n"},
+    {"ATE_OK",         1, do_ate_ok,         "eg: ATE_OK <status>\r\n0:fail;1:succ\r\n"},
+};
+
 size_t ln_ty_ate_vprintf(const char *format, va_list args);
+
+static const cmd_tbl_t *find_cmd (const char *cmd)
+{
+    const cmd_tbl_t *cmdtp = NULL;
+    int i;
+
+    for (i = 0; i < (sizeof(sg_cmd_list) / sizeof(sg_cmd_list[0])); i++) {
+        cmdtp = &sg_cmd_list[i];
+        if (strncasecmp(cmd, cmdtp->name, strlen(cmdtp->name)) == 0) {
+            return cmdtp;   /* full match */
+        }
+    }
+
+    return NULL;
+}
 
 static int ln_ty_ate_wifi_init(void)
 {
@@ -104,6 +159,14 @@ size_t ln_ty_ate_vprintf(const char *format, va_list args)
     return ret;
 }
 
+void ln_ty_ate_printf(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    ln_ty_ate_vprintf(format, args);
+    va_end(args);
+}
+
 /**
  * SER_PORT_UART1 -> A2:TX; A3:RX
 */
@@ -137,6 +200,49 @@ __exit:
     return -1;
 }
 
+static int ate_cmd_parser(const char *line)
+{
+    int ret = ATE_CMD_FOUND;
+    cmd_tbl_t *cmdtp;
+
+    /* Look up command in command table */
+    if ((cmdtp = (cmd_tbl_t *)find_cmd(line)) == 0) {
+        // LOG(LOG_LVL_ERROR, "Unknown command: %s\r\n", line);
+        ret = ATE_CMD_NOT_FOUND;
+    } else if (cmdtp->cmd) {
+        (cmdtp->cmd)(cmdtp, 0, line);
+    }
+    return ret;
+}
+
+static bool is_ate_complete_cmd(char * cmd_str)
+{
+    char *str = NULL;
+    if ((str = strstr(cmd_str, "ATE_OK")) > 0) {
+        /* 1. save to nvds(flash) */
+        //1.1 save XTAL_CAP
+        //ln_nvds_set_xtal_comp_val();
+
+        //1.2 save TX_POWER
+        //ln_nvds_set_tx_power_comp();
+
+        //1.3 save ATE result
+        //('S'=ate_successful, 'F'=ate_failed)
+        if (strstr(str, "=1") > 0) {
+            ln_nvds_set_ate_result('S');
+        } else {
+            ln_nvds_set_ate_result('F');
+        }
+
+        /* 2.Response to instrument: SAVE_FLASH_OK\r\n */
+        ln_ty_ate_printf("SAVE_FLASH_OK\r\n");
+
+        return true;
+    }
+
+    return false;
+}
+
 static void ate_cli_thr_entry(void *arg)
 {
     int ret = 0;
@@ -157,30 +263,35 @@ static void ate_cli_thr_entry(void *arg)
 
     while(1)
     {
-        if (0 == OS_SemaphoreWait(&sg_ate_cli_rx_sem, OS_WAIT_FOREVER))
+        if (0 != OS_SemaphoreWait(&sg_ate_cli_rx_sem, OS_WAIT_FOREVER)) continue;
+
+        while (!fifo_isempty(&port->rxfifo))
         {
-            while (!fifo_isempty(&port->rxfifo))
+            len = serial_read(port, &ch, 1);
+            if((len > 0) && 
+                (isprint(ch) || (ch == LN_TY_ATE_CLI_CMD_END_MARK) ||
+                (ch == '\r')))
             {
-                len = serial_read(port, &ch, 1);
-                if((len > 0) && 
-                    (isprint(ch) || (ch == LN_TY_ATE_CLI_CMD_END_MARK) ||
-                    (ch == '\r')))
-                {
-                    // LOG(LOG_LVL_INFO, "[%c]\r\n", ch);
-                    sg_ate_cli_cmd_buff_p[counter++] = ch;
-                    if (counter >= LN_TY_ATE_CLI_CMD_BUFF_SIZE) {
-                        counter = 0;
-                        continue;
-                    }
+                // LOG(LOG_LVL_INFO, "[%c]\r\n", ch);
+                sg_ate_cli_cmd_buff_p[counter++] = ch;
+                if (counter >= LN_TY_ATE_CLI_CMD_BUFF_SIZE) {
+                    counter = 0;
+                    continue;
+                }
 
-                    if (ch == LN_TY_ATE_CLI_CMD_END_MARK) {
-                        sg_ate_cli_cmd_buff_p[counter] = '\0';
+                if (ch == LN_TY_ATE_CLI_CMD_END_MARK) {
+                    sg_ate_cli_cmd_buff_p[counter] = '\0';
 
-                        if(0 != wifi_private_command(sg_ate_cli_cmd_buff_p)) {
-                            LOG(LOG_LVL_ERROR, "send pvt cmd failed!\r\n");
+                    // if (ATE_CMD_NOT_FOUND == ate_cmd_parser(sg_ate_cli_cmd_buff_p))
+                    {
+                        if (!is_ate_complete_cmd(sg_ate_cli_cmd_buff_p)) {
+                            if(0 != wifi_private_command(sg_ate_cli_cmd_buff_p)) {
+                                LOG(LOG_LVL_ERROR, "send pvt cmd failed!\r\n");
+                            }
                         }
-                        counter = 0;
                     }
+                    counter = 0;
+                    memset(sg_ate_cli_cmd_buff_p, 0x0, sizeof(LN_TY_ATE_CLI_CMD_BUFF_SIZE));
                 }
             }
         }

@@ -161,10 +161,16 @@ void blib_modem_init(void)
     *(uint32_t*)0x4000D3c4 = 0x1e;
     *(uint32_t*)0x4000D3cc = 0x300;
 
-    *(uint32_t*)0x4000D394 = 0xFDEF7FFF;  //2m_12_18
-    *(uint32_t*)0x4000D398 = 0xF6AD040F;
+//    *(uint32_t*)0x4000D394 = 0xFDEF7FFF;  //2m_12_18
+//    *(uint32_t*)0x4000D398 = 0xF6AD040F;
+//    *(uint32_t*)0x4000D39c = 0x1e;
+//    *(uint32_t*)0x4000D3a4 = 0x780;
+
+    *(uint32_t*)0x4000D394 = 0x81ff7bdc;  //2m_12_18
+    *(uint32_t*)0x4000D398 = 0xF7314720;
     *(uint32_t*)0x4000D39c = 0x1e;
     *(uint32_t*)0x4000D3a4 = 0x780;
+
 
     *(uint32_t*)0x4000D380 = 0x81ff7bdc;  //1m_10_18
     *(uint32_t*)0x4000D384 = 0xF7314720;

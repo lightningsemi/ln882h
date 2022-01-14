@@ -14,10 +14,11 @@
 #include "hal/hal_adc.h"
 #include "hal/hal_efuse.h"
 
+
 static int8_t adc_cal_param_1 = 0;
 static int8_t adc_cal_param_2 = 0;
 static int8_t adc_cal_param_3 = 0;
-static uint8_t adc_cal_param_4 = 0;
+static int8_t adc_cal_param_4 = 0;
 static float  adc_cal_param_5 = 0;
 static float  adc_cal_param_6 = 0;
 void hal_adc_init(uint32_t adc_base,adc_init_t_def* adc_init)
@@ -53,12 +54,13 @@ void hal_adc_init(uint32_t adc_base,adc_init_t_def* adc_init)
     
     /*get efuse data*/
     tem_val_3 = hal_efuse_read_corrent_reg(EFUSE_REG_1);
-
+    /*****************modify by liushanbiao 202201004***********************/
     if((tem_val_3 >> 26) & 0x01){
        adc_cal_param_1 = -((tem_val_3 >> 22) & 0x0F) * 6;
     } else {
        adc_cal_param_1 = ((tem_val_3 >> 22) & 0x0F) * 6;
     }
+   /**********************************************************************/
 
     tem_val_1 = (int8_t)(tem_val_3 & 0xFF);
     if (tem_val_1 & 0x80) {
@@ -73,13 +75,11 @@ void hal_adc_init(uint32_t adc_base,adc_init_t_def* adc_init)
     } else {
         adc_cal_param_3 = tem_val_1 & 0x3F;
     }
-
-    adc_cal_param_5 = 1 + 1.0f * adc_cal_param_3 / 512;
-    adc_cal_param_6 = adc_cal_param_2 * adc_cal_param_5;
-
-    tem_val_2 = 750 - adc_cal_param_1;
-    tem_val_2 = (uint16_t)(tem_val_2 * adc_cal_param_5 + adc_cal_param_6);
-    adc_cal_param_4 = 750 - tem_val_2;
+    adc_cal_param_5 = 1 - 1.0f * adc_cal_param_3 / 512;                      //modify by liushanbiao
+    //adc_cal_param_6 = adc_cal_param_2 * adc_cal_param_5;
+    tem_val_2 = 750 - adc_cal_param_1;   //modify by liushanbiao
+    tem_val_2 = (uint16_t)((tem_val_2 - adc_cal_param_2) / adc_cal_param_5); //modify by liushanbiao
+    adc_cal_param_4 = 750 - tem_val_2; //modify by liushanbiao
 
 
     if (adc_init->adc_awd_sgl == ADC_AWD_ALL_CH) {
@@ -377,9 +377,9 @@ uint16_t hal_adc_get_data(uint32_t adc_base,adc_ch_t ch)
         default:
             break;
     }
-    
-    data = (uint16_t)((data * adc_cal_param_5 + adc_cal_param_6));
-    
+    // data = (uint16_t)((data * adc_cal_param_5 + adc_cal_param_6)); //
+    data = (uint16_t)((data - adc_cal_param_2) / adc_cal_param_5); //modify by liushanbiao 20220104
+
     if(ch == ADC_CH0){
         data += adc_cal_param_4;
         if(data > 4095)

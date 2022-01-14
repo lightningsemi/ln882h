@@ -3,6 +3,8 @@
 #include "ln_types.h"
 #include "utils/reboot_trace/reboot_trace.h"
 
+#include "hal/hal_misc.h"
+
 static uint8_t  no_init_data[128]  __attribute__((section(".no_init_data"),aligned(8))) __ZERO_INIT__;
 
 static int ln_chip_set_reboot_cause(chip_reboot_cause_t cause)
@@ -50,5 +52,5 @@ chip_reboot_cause_t ln_chip_get_reboot_cause(void)
 void ln_chip_reboot(void)
 {
     ln_chip_set_reboot_cause(CHIP_REBOOT_SOFTWARE);
-    NVIC_SystemReset();
+    hal_misc_reset_all();
 }

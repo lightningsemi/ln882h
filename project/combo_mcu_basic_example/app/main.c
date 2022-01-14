@@ -60,6 +60,7 @@ int main (int argc, char* argv[])
 
     //Init wifi stack.
     wifi_init();
+    wlib_pvtcmd_output_cb_set(ln_at_vprintf);
 
     //Init lwip stack.
     lwip_tcpip_init();

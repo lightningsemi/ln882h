@@ -148,6 +148,7 @@ typedef void (*wifi_if_recv_cb_t)(uint8_t *data, uint16_t len);
 typedef void (*wifi_sniffer_cb_t)(void *buf, uint16_t len, wifi_pkt_type_t pkt_type, int8_t rssi_db);
 typedef void (*wifi_recv_ethernet_pkt_cb_t)(uint8_t *data, uint16_t len);
 
+typedef void (*wifi_mgnt_cb_t)(uint8_t *buf, uint32_t len);
 
 typedef struct {
     sta_startup_cb_t           startup;
@@ -165,6 +166,7 @@ typedef struct {
 
 typedef struct {
     int                        enable;
+    int                        type;         // 0: sniffer mode; 1: monitor mode
     uint32_t                   filter_mask;
 } sniffer_cfg_t;
 
@@ -240,6 +242,8 @@ void    wifi_rf_preprocess(void);
 void    wifi_rf_image_cal(void);
 void    wifi_temp_cal_init(uint16_t adc_ch0_val,int8_t cap_comp);
 void    wifi_do_temp_cal_period(uint16_t adc_ch0_val);
+
+void ln_wifi_mgnt_cb_set(wifi_mgnt_cb_t cb);
 
 // wifi lib version
 uint32_t    wifi_lib_version_number_get(void);

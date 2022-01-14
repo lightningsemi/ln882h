@@ -17,6 +17,7 @@ typedef enum
 
 typedef enum
 {
+    CLK_G_BLE       = (1U << 0U ),
     CLK_G_QSPI      = (1U << 1U ),
     CLK_G_ADC       = (1U << 2U ),
     CLK_G_I2S       = (1U << 3U ),
@@ -30,6 +31,7 @@ typedef enum
     CLK_G_UART1     = (1U << 11U),
     CLK_G_UART2     = (1U << 12U),
     CLK_G_WDT       = (1U << 13U),
+    CLK_G_TIM_REG   = (1U << 14U),
     CLK_G_TIM1      = (1U << 15U),
     CLK_G_TIM2      = (1U << 16U),
     CLK_G_TIM3      = (1U << 17U),

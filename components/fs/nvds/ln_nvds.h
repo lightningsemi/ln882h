@@ -52,8 +52,13 @@
 #define NV8_BOOT_DELAY_EN              ('e')
 #define NV8_BOOT_DELAY_DIS             (0xFF)
 
+#define NV9_ATE_RESULT_OFFSET          (NV8_BOOT_DELAY_EN_OFFSET + NV8_BOOT_DELAY_EN_LEN)
+#define NV9_ATE_RESULT_LEN             (1)
+#define NV9_ATE_RESULT_OK              ('S')
+#define NV9_ATE_RESULT_FAILED          ('F')
+
 //If vendor add new macro into the nvds,please update it!
-#if ((NV8_BOOT_DELAY_EN_OFFSET + NV8_BOOT_DELAY_EN_LEN) > SIZE_4KB)
+#if ((NV9_ATE_RESULT_OFFSET + NV9_ATE_RESULT_LEN) > SIZE_4KB)
   #error "NVDS area overflow!!!"
 #endif
 
@@ -97,6 +102,8 @@ int    ln_nvds_get_boot_delay_ms(uint16_t *ms);
 int    ln_nvds_set_boot_delay_en(uint8_t  val);
 int    ln_nvds_get_boot_delay_en(uint8_t *val);
 
+int    ln_nvds_set_ate_result(uint8_t  val);
+int    ln_nvds_get_ate_result(uint8_t *val);
 
 #ifdef __cplusplus
 }

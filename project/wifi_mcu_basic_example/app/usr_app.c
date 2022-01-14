@@ -17,15 +17,18 @@
 #include "ln_misc.h"
 #include "usr_app.h"
 
-static OS_Thread_t g_usr_app_thread;
-#define USR_APP_TASK_STACK_SIZE   6*256 //Byte
+#define PM_DEFAULT_SLEEP_MODE             (ACTIVE)
+#define PM_WIFI_DEFAULT_PS_MODE           (WIFI_NO_POWERSAVE)
+#define WIFI_TEMP_CALIBRATE               (1)
 
-#define WIFI_TEMP_CALIBRATE             1//1
+#define USR_APP_TASK_STACK_SIZE           (6*256) //Byte
 
 #if WIFI_TEMP_CALIBRATE
 static OS_Thread_t g_temp_cal_thread;
-#define TEMP_APP_TASK_STACK_SIZE   4*256 //Byte
+#define TEMP_APP_TASK_STACK_SIZE          (4*256) //Byte
 #endif
+
+static OS_Thread_t g_usr_app_thread;
 
 /* declaration */
 static void wifi_init_ap(void);
@@ -92,6 +95,8 @@ static void wifi_scan_complete_cb(void * arg)
 
 void wifi_init_sta(void)
 {
+    sta_ps_mode_t ps_mode = PM_WIFI_DEFAULT_PS_MODE;
+
     //1. sta mac get
      if (SYSPARAM_ERR_NONE != sysparam_sta_mac_get(mac_addr)) {
         LOG(LOG_LVL_ERROR, "[%s]sta mac get filed!!!\r\n", __func__);
@@ -114,7 +119,7 @@ void wifi_init_sta(void)
     //3. wifi start
     wifi_manager_reg_event_callback(WIFI_MGR_EVENT_STA_SCAN_COMPLETE, &wifi_scan_complete_cb);
 
-    if(WIFI_ERR_NONE != wifi_sta_start(mac_addr, WIFI_NO_POWERSAVE)){
+    if(WIFI_ERR_NONE != wifi_sta_start(mac_addr, ps_mode)){
         LOG(LOG_LVL_ERROR, "[%s]wifi sta start filed!!!\r\n", __func__);
     }
 
@@ -182,13 +187,10 @@ void usr_app_task_entry(void *params)
 {
     LN_UNUSED(params);
 
-    ln_pm_sleep_mode_set(ACTIVE);
-
     wifi_manager_init();
 
     wifi_init_sta();
     // wifi_init_ap();
-
 
     while(NETDEV_LINK_UP != netdev_get_link_state(netdev_get_active())){
         OS_MsDelay(1000);
@@ -203,9 +205,10 @@ void usr_app_task_entry(void *params)
 void temp_cal_app_task_entry(void *params)
 {
     LN_UNUSED(params);
-
+    volatile uint8_t cnt = 0;
     int8_t cap_comp = 0;
     uint16_t adc_val = 0;
+    int16_t curr_adc = 0;
 
     if (NVDS_ERR_OK == ln_nvds_get_tx_power_comp((uint8_t *)&cap_comp)) {
         if ((uint8_t)cap_comp == 0xFF) {
@@ -223,11 +226,39 @@ void temp_cal_app_task_entry(void *params)
 
         adc_val = drv_adc_read(ADC_CH0);
         wifi_do_temp_cal_period(adc_val);
+
+        curr_adc = (adc_val & 0xFFF);
+
+        cnt++;
+        if ((cnt % 60) == 0) {
+            LOG(LOG_LVL_INFO, "adc raw: %4d, temp_IC: %4d\r\n",
+                    curr_adc, (int16_t)(25 + (curr_adc - 750) / 2.54f));
+        }
     }
 }
 
 void creat_usr_app_task(void)
 {
+    {
+        ln_pm_sleep_mode_set(PM_DEFAULT_SLEEP_MODE);
+
+        /**
+         * CLK_G_EFUSE: For wifi temp calibration
+         * CLK_G_BLE  CLK_G_I2S  CLK_G_WS2811  CLK_G_DBGH  CLK_G_SDIO  CLK_G_EFUSE  CLK_G_AES
+        */
+        ln_pm_always_clk_disable_select(CLK_G_I2S | CLK_G_WS2811 | CLK_G_SDIO | CLK_G_AES);
+
+        /**
+         * ADC0: For wifi temp calibration
+         * TIM3: For wifi pvtcmd evm test
+         * CLK_G_ADC  CLK_G_GPIOA  CLK_G_GPIOB  CLK_G_SPI0  CLK_G_SPI1  CLK_G_I2C0  CLK_G_UART1  CLK_G_UART2
+         * CLK_G_WDT  CLK_G_TIM_REG  CLK_G_TIM1  CLK_G_TIM2  CLK_G_TIM3  CLK_G_TIM4  CLK_G_MAC  CLK_G_DMA
+         * CLK_G_RF  CLK_G_ADV_TIMER  CLK_G_TRNG
+        */
+        ln_pm_lightsleep_clk_disable_select(CLK_G_GPIOA | CLK_G_GPIOB | CLK_G_SPI0 | CLK_G_SPI1 | CLK_G_I2C0 |
+                                            CLK_G_UART1 | CLK_G_UART2 | CLK_G_WDT | CLK_G_TIM_REG | CLK_G_TIM1 | CLK_G_TIM2 | CLK_G_TIM4 | CLK_G_MAC | CLK_G_DMA | CLK_G_RF | CLK_G_ADV_TIMER| CLK_G_TRNG);
+    }
+
     if(OS_OK != OS_ThreadCreate(&g_usr_app_thread, "UsrAPP", usr_app_task_entry, NULL, OS_PRIORITY_BELOW_NORMAL, USR_APP_TASK_STACK_SIZE)) {
         LN_ASSERT(1);
     }

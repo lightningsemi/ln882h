@@ -27,19 +27,11 @@
  * INCLUDE FILES
  ****************************************************************************************
  */
-#include "rwip_config.h"             // SW configuration
 #include "ln_app_gap.h"
 #include <string.h>
-
-#include "gap.h"                     // GAP Definition
 #include "gapm_task.h"               // GAP Manallger Task API
 #include "gapc_task.h"               // GAP Controller Task API
-
-#include "co_math.h"                 // Common Maths Definition
-#include "co_utils.h"
-
 #include "ble_port.h"
-
 /*
  * FUNCTION DEFINITIONS
  ****************************************************************************************
@@ -463,7 +455,7 @@ void ln_app_init_start(struct ln_gapm_activity_start_cmd * init_start_param)
 
     p_cmd->u_param.init_param.peer_addr.addr_type = init_start_param->u_param.init_param.peer_addr.addr_type;
     memcpy(p_cmd->u_param.init_param.peer_addr.addr.addr, init_start_param->u_param.init_param.peer_addr.addr.addr, GAP_BD_ADDR_LEN);
-    BLIB_LOG_I("app_start_initiating peer_addr_type=%d, peer_addr[0-5]=0x%x:0x%x:0x%x:0x%x:0x%x:0x%x\r\n",
+    BLIB_LOG_I("app_start_initiating peer_addr_type=%d, peer_addr:0x%x:0x%x:0x%x:0x%x:0x%x:0x%x\r\n",
         p_cmd->u_param.init_param.peer_addr.addr_type,
         p_cmd->u_param.init_param.peer_addr.addr.addr[0],
         p_cmd->u_param.init_param.peer_addr.addr.addr[1],

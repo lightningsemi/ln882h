@@ -50,21 +50,19 @@ static void uart_io_pin_request(struct Serial *serial)
 {
     if (serial->port_id == SER_PORT_UART0) {
 #if 0 // pin same as uart0 of ROM
-        hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_2,UART0_TX);
-        hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_3,UART0_RX);
-        hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_2,HAL_ENABLE);
-        hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_3,HAL_ENABLE);
+
 #else //pin same as uart0 of LN8825 EVK
-        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_7,UART0_TX);
-        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_6,UART0_RX);
-        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_7,HAL_ENABLE);
-        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_6,HAL_ENABLE);
-#endif
-    } else if (serial->port_id == SER_PORT_UART1){
-        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_9,UART1_TX);
-        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_8,UART1_RX);
+        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_9,UART0_TX);
+        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_8,UART0_RX);
         hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_9,HAL_ENABLE);
         hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_8,HAL_ENABLE);
+
+#endif
+    } else if (serial->port_id == SER_PORT_UART1){
+        hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_2,UART1_TX);
+        hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_3,UART1_RX);
+        hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_2,HAL_ENABLE);
+        hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_3,HAL_ENABLE);
     } else if (serial->port_id == SER_PORT_UART2){
 
     }

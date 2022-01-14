@@ -7,6 +7,25 @@
         <td>摘要</td>
     </tr>
     <tr>
+        <td>2022-01-14 15:54:00</td>
+        <td>v1.2</td>
+        <td>76f51138</td>
+        <td>
+            <b>SDK changelog:</b> <br />
+            1. ble 禁用 ke_msg_send lock，该 lock 在使用不当的时候会导致死锁 <br />
+            2. ble 更新 ble 硬件参数，提升 phy 的稳定性 <br />
+            3. ble cmp event 事件增加 active index 参数，为了方便在应用层 cb 里知道是哪个 active 的事件 <br />
+            4. nvds 增加 ate 相关数据存储 <br />
+            5. freertos 配置 进入休眠的 idle 事件为 3 个 tick，原来是 8 个 tick <br />
+            6. pm 组件，更新 <br />
+            7. reboot 使用更安全的接口 <br />
+            8. WiFi 增加 WiFi monitor 模式，并增加 monitor callback <br />
+            9. wifi 增加 wlib_awo_set_r_vtrim 接口 <br />
+            10. WiFi 完善低功耗接口 <br />
+            11. 优化 adc 精度 <br />
+        </td>
+    </tr>
+    <tr>
         <td>
             2021-12-30 14:30:00
         </td>

@@ -23,6 +23,7 @@
 
 #include "ty_ada_export_api.h"
 #include "ln_ty_sdk_version.h"
+#include "utils/power_mgmt/ln_pm.h"
 
 
 #define REBOOT_MAGIC_WORD (0xdeadbeefa5a55a5a)
@@ -88,6 +89,36 @@ int main (int argc, char* argv[])
     TUYA_LwIP_Init();
 
     ty_ada_bt_init();
+
+    ln_pm_sleep_mode_set(ACTIVE);
+
+    /**
+     * CLK_G_I2S | CLK_G_WS2811 | CLK_G_DBGH |
+     * CLK_G_SDIO | CLK_G_EFUSE | CLK_G_AES
+    */
+    ln_pm_always_clk_disable_select(CLK_G_I2S | CLK_G_WS2811 |
+                                    CLK_G_SDIO | CLK_G_AES);
+    /**
+     * CLK_G_BLE | CLK_G_ADC | CLK_G_GPIOA | CLK_G_GPIOB |
+     * CLK_G_SPI0 | CLK_G_SPI1 | CLK_G_I2C0 |
+     * CLK_G_UART1 | CLK_G_UART2 | CLK_G_WDT |
+     * CLK_G_TIM_REG | CLK_G_TIM1 | CLK_G_TIM2 |
+     * CLK_G_TIM3 | CLK_G_TIM4 | CLK_G_MAC |
+     * CLK_G_DMA | CLK_G_RF | CLK_G_ADV_TIMER |
+     * CLK_G_TRNG
+     * 
+     * CLK_G_TIM3:
+     *      For WiFi hardware burst test, in burst mode, need to enable the clock.
+     * CLK_G_ADC:
+     *      For WiFi calibration
+     * 
+    */
+    ln_pm_lightsleep_clk_disable_select(CLK_G_GPIOA | CLK_G_GPIOB |
+                                        CLK_G_SPI0 | CLK_G_SPI1 | CLK_G_I2C0 |
+                                        CLK_G_UART1 | CLK_G_UART2 | CLK_G_WDT |
+                                        CLK_G_TIM_REG | CLK_G_TIM1 | CLK_G_TIM2 | 
+                                        CLK_G_TIM4 | CLK_G_MAC | CLK_G_DMA |
+                                        CLK_G_RF | CLK_G_ADV_TIMER | CLK_G_TRNG);
 
     //Creat usr app task.
     creat_usr_app_task();

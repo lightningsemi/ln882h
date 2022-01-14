@@ -493,7 +493,7 @@ int gattc_event_req_ind_handler(ke_msg_id_t const msgid,
 	LOG(LOG_LVL_TRACE,"gattc_event_req_ind_handler   indication  conidx:0x%x,length:%d,handler:%d\r\n",conidx,param->length,param->handle);
 #endif
 	memcpy(&(app_env_info.event_req_info),param,sizeof( struct gattc_event_ind));
-	struct gattc_event_cfm *p_cfm= KE_MSG_ALLOC(GATTC_ATT_INFO_CFM, src_id, dest_id, gattc_event_cfm);
+	struct gattc_event_cfm *p_cfm= KE_MSG_ALLOC(GATTC_EVENT_CFM, src_id, dest_id, gattc_event_cfm);
 	p_cfm->handle = param->handle;
 	ke_msg_send(p_cfm);
 	return (KE_MSG_CONSUMED);

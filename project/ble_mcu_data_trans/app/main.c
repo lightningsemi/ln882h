@@ -3,7 +3,7 @@
 #include "hal/hal_interrupt.h"
 #include "ln_utils.h"
 #include "ln_misc.h"
-#include "ln_kv_api.h"
+//#include "ln_kv_api.h"
 #include "utils/debug/CmBacktrace/cm_backtrace.h"
 #include "utils/reboot_trace/reboot_trace.h"
 #include "utils/runtime/runtime.h"

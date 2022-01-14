@@ -165,7 +165,7 @@ typedef enum IRQn
  * LN882H_SDK_MINOR_V:    0-255
  */
 #define LN882H_SDK_MAJOR_V        1
-#define LN882H_SDK_MINOR_V        1
+#define LN882H_SDK_MINOR_V        2
 
 #define LN882H_SDK_VERSTR2(x)     #x
 #define LN882H_SDK_VERSTR(x)      LN882H_SDK_VERSTR2(x)

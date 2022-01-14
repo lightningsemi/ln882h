@@ -35,6 +35,7 @@ int main (int argc, char* argv[])
     //3.rf preprocess,img cal
     wifi_rf_preprocess();
     wifi_rf_image_cal();
+    wlib_pvtcmd_output_cb_set(ln_at_vprintf);
 
     //4.init log&AT
     log_init();

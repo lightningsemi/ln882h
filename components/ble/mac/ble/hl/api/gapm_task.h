@@ -1052,6 +1052,8 @@ struct gapm_cmp_evt
     uint8_t operation;
     /// Status of the request
     uint8_t status;
+    /// Activity identifier currently used for air operation
+    uint8_t actv_idx;
 };
 
 ///  Reset link layer and the host command

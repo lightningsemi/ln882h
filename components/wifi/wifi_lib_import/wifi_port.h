@@ -24,6 +24,7 @@ wlib_pvtcmd_output_pfn wlib_pvtcmd_output_cb_get(void);
 void    wlib_xtal40m_cap_set(uint8_t cap);
 void    wlib_xtal40m_vol_set(uint8_t vol);
 void    wlib_r_xtal40m_ibsel(uint8_t sel);
+void wlib_awo_set_r_vtrim(uint8_t value);
 
 /* misc */
 uint8_t wlib_char2hex(char c);

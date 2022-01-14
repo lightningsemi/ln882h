@@ -57,16 +57,16 @@ static int gapm_activity_created_ind_handler(ke_msg_id_t const msgid,
         ke_task_id_t const src_id)
 {
     struct gapm_activity_created_ind *p_param = (struct gapm_activity_created_ind *)param;
+
 #if (TRACE_ENABLE)
-    LOG(LOG_LVL_TRACE, "gapm_activity_created_ind_handler: actv_idx=%d,actv_type=%d \r\n",p_param->actv_idx,p_param->actv_type);
+    LOG(LOG_LVL_TRACE, 
+            "gapm_activity_created_ind_handler: actv_idx=%d,actv_type=%d \r\n",
+            p_param->actv_idx,p_param->actv_type);
 #endif
 
-    if(p_param->actv_type  ==GAPM_ACTV_TYPE_ADV)
+    if(p_param->actv_type  ==GAPM_ACTV_TYPE_ADV) {
         g_adv_actv_idx =p_param->actv_idx;
-    // if(p_param->actv_type  ==GAPM_ACTV_TYPE_INIT)
-    //     init_actv_idx =p_param->actv_idx;
-    if (p_param->actv_type  == GAPM_ACTV_TYPE_SCAN)
-    {
+    } else if (p_param->actv_type  == GAPM_ACTV_TYPE_SCAN) {
         g_scan_actv_idx = p_param->actv_idx;
     }
     return (KE_MSG_CONSUMED);
@@ -79,18 +79,15 @@ static int gapm_activity_stopped_ind_handler(ke_msg_id_t const msgid,
         ke_task_id_t const src_id)
 {
     struct gapm_activity_stopped_ind *p_param = (struct gapm_activity_stopped_ind *)param;
+
 #if (TRACE_ENABLE)
     LOG(LOG_LVL_TRACE,"gapm_activity_stopped_ind_handler   actv_id=%d   actv_type=%d, reason=0x%x\r\n", p_param->actv_idx, p_param->actv_type,p_param->reason);
 #endif
 
-    if (p_param->actv_type == GAPM_ACTV_TYPE_ADV && g_adv_actv_idx == p_param->actv_idx)
-    {
+    if (p_param->actv_type == GAPM_ACTV_TYPE_ADV && g_adv_actv_idx == p_param->actv_idx) {
         // adv have stopped
         g_adv_is_started = 0;
-    }
-
-    if (p_param->actv_type == GAPM_ACTV_TYPE_SCAN && g_scan_actv_idx == p_param->actv_idx)
-    {
+    } else if (p_param->actv_type == GAPM_ACTV_TYPE_SCAN && g_scan_actv_idx == p_param->actv_idx) {
         // scan stop
     }
 
@@ -114,7 +111,7 @@ static int gapm_ext_adv_report_ind_handler(ke_msg_id_t const msgid,
         p_param->rssi, p_param->tx_pwr, p_param->length);
     LOG(LOG_LVL_TRACE, "---------------------\r\n");
 
-    hexdump(LOG_LVL_TRACE, "[recv data]", (void *)p_param->data, p_param->length);
+    // hexdump(LOG_LVL_TRACE, "[recv data]", (void *)p_param->data, p_param->length);
 #endif
     extern void ty_bt_scan_adv_data_parser(struct gapm_ext_adv_report_ind *adv);
     ty_bt_scan_adv_data_parser(p_param);
@@ -141,7 +138,9 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
 {
     struct gapm_cmp_evt *p_param = (struct gapm_cmp_evt *)param;
 #if (TRACE_ENABLE)
-    LOG(LOG_LVL_TRACE,"app_gapm_cmp_evt_handler: operation=0x%x, status=0x%x\r\n", p_param->operation,p_param->status);
+    LOG(LOG_LVL_TRACE,
+        "app_gapm_cmp_evt_handler: operation=0x%x, idx:%d, status=0x%x\r\n",
+        p_param->operation, p_param->actv_idx, p_param->status);
 #endif
     ke_msg_sync_lock_release();
 

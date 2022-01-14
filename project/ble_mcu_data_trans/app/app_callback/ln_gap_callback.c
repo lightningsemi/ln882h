@@ -27,27 +27,15 @@
  * INCLUDE FILES
  ****************************************************************************************
  */
-
-#include "rwip_config.h"             // SW configuration
 #include "ln_app_gap.h"
-#include "ln_app_gatt.h"
 #include "usr_app.h"
 #include <string.h>
-
-#include "gap.h"                     // GAP Definition
 #include "gapm_task.h"               // GAP Manallger Task API
 #include "gapc_task.h"               // GAP Controller Task API
-#include "gattm_task.h"               // GAP Manallger Task API
-#include "gattc_task.h"               // GAP Controller Task API
 #include "co_math.h"                 // Common Maths Definition
 #include "co_utils.h"
-
-#include "rwip_task.h"      // Task definitions
 #include "ke_task.h"        // Kernel Task
-
-#include "ble_arch/arch.h"
 #include "usr_ble_app.h"
-
 #include "ln_app_callback.h"
 #include "ln_gatt_callback.h"
 #if (TRACE_ENABLE)

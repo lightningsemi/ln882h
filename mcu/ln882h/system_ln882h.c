@@ -96,6 +96,7 @@ void SetSysClock(void)
     clock_init.clk_pllclk_mul   = CLK_PLL_CLK_4_MUL;
 
     //1. xtal40m config
+    hal_misc_awo_set_r_vtrim(2); //set Vbandgap 1.21V
     //hal_misc_awo_set_ldo18_2_vset(5);       // tx_rx_filter LDO18_2 vol set
     hal_misc_awo_set_r_xtal40m_ldo_vbit(1);   //5 xtal40m LDO (1.2V ~ )
     hal_misc_awo_set_r_xtal40m_cap_bit(0);    // xtal40m Cap (pf)
@@ -105,6 +106,7 @@ void SetSysClock(void)
     hal_misc_awo_set_ldo15_1_vset(6);
 
     hal_misc_awo_set_o_cpu_sleep_counter_bp(0); //32K RCO cal
+    hal_misc_awo_set_bod_vth(0x03);             //0x03=2.0V BOD
 
     //2. clock
     hal_clock_init(&clock_init);
