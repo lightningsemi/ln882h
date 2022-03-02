@@ -14,6 +14,13 @@
 
 void hal_gpio_init(uint32_t gpio_base, gpio_init_t_def *gpio_init)
 {
+    sysc_cmp_gpioa_gate_en_setf(1);
+    for(volatile int i = 0; i < 20; i++)
+        __NOP();
+    sysc_cmp_gpiob_gate_en_setf(1);
+    for(volatile int i = 0; i < 20; i++)
+        __NOP();
+
     gpio_pin_t pin = gpio_init->pin;
     
     hal_gpio_pin_pull_set(gpio_base, pin, gpio_init->pull);
@@ -22,13 +29,18 @@ void hal_gpio_init(uint32_t gpio_base, gpio_init_t_def *gpio_init)
     hal_gpio_pin_direction_set(gpio_base, pin, gpio_init->dir);
 }
 
-void hal_gpio_deinit(void)
+void hal_gpio_deinit(uint32_t gpio_base)
 {
-    sysc_cmp_srstn_gpioa_setf(0);
-    sysc_cmp_srstn_gpioa_setf(1);
-
-    sysc_cmp_srstn_gpiob_setf(0);
-    sysc_cmp_srstn_gpiob_setf(1);
+    if(gpio_base ==  GPIOA_BASE)
+    {
+        sysc_cmp_srstn_gpioa_setf(0);
+        sysc_cmp_srstn_gpioa_setf(1);
+    }
+    else if(gpio_base ==  GPIOB_BASE)
+    {
+        sysc_cmp_srstn_gpiob_setf(0);
+        sysc_cmp_srstn_gpiob_setf(1);
+    }
 }
 
 void hal_gpio_pin_pull_set(uint32_t gpio_base, gpio_pin_t pin, gpio_pull_t pull)

@@ -3,9 +3,9 @@
  * @author   BSP Team 
  * @brief 
  * @version  0.0.0.1
- * @date     2021-08-17
+ * @date     2022-01-19
  * 
- * @copyright Copyright (c) 2021 Shanghai Lightning Semiconductor Technology Co. Ltd
+ * @copyright Copyright (c) 2022 Shanghai Lightning Semiconductor Technology Co. Ltd
  * 
  */
 
@@ -128,7 +128,8 @@ void        hal_clock_select_clk_src(clk_src_t clk_src);
 void        hal_clock_set_pll_clk_mul(clk_pllclk_mul_t clk_pllclk_mul);
 void        hal_clock_set_apb0_clk_div(clk_pclk0_div_t clk_pclk0_div);
 void        hal_clock_set_ahb_clk_div(clk_hclk_div_t clk_hclk_div);
-uint32_t    hal_clock_get_src_clk(void);
+clk_src_t   hal_clock_get_clk_src(void);
+uint32_t    hal_clock_get_core_clk(void);
 uint32_t    hal_clock_get_apb0_clk(void);
 uint32_t    hal_clock_get_ahb_clk(void);
 

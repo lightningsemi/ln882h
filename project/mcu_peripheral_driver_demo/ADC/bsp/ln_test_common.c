@@ -20,7 +20,7 @@ void ln_delay_ms(unsigned int time)
     unsigned int timetout = 0;
     unsigned int time_1ms = 0;
     //40M
-    if(hal_clock_get_src_clk() == 40000000)
+    if(hal_clock_get_core_clk() == 40000000)
     {
         time_1ms = 490;
     }

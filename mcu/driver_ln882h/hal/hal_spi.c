@@ -31,7 +31,18 @@ void hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init)
     hal_assert(IS_SPI_CRC_POLYNOMIAL(spi_init->spi_crc_polynomial));
 
     /* Enable the spi clock */
-    //awo_clk_sen_spi_setf();
+    if(spi_x_base == SPI0_BASE)
+    {
+        sysc_cmp_spi0_gate_en_setf(1);
+        for(volatile int i = 0; i < 20; i++)
+            __NOP();
+    }
+    else if(spi_x_base == SPI1_BASE)
+    {
+        sysc_cmp_spi1_gate_en_setf(1);
+        for(volatile int i = 0; i < 20; i++)
+            __NOP();
+    }
 
     /*---------------------------- SPIx CR1 Configuration ------------------------*/
 
@@ -172,13 +183,20 @@ void hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init)
     }
 }
 
-void hal_spi_deinit(void)
+void hal_spi_deinit(uint32_t spi_x_base)
 {   
-    sysc_cmp_srstn_spi0_setf(0);
-    sysc_cmp_srstn_spi0_setf(1);
-
-    sysc_cmp_srstn_spi1_setf(0);
-    sysc_cmp_srstn_spi1_setf(1);
+    if(spi_x_base == SPI0_BASE)
+    {
+        sysc_cmp_srstn_spi0_setf(0);
+        sysc_cmp_srstn_spi0_setf(1);
+        sysc_cmp_spi0_gate_en_setf(0);
+    }
+    else if(spi_x_base == SPI1_BASE)
+    {
+        sysc_cmp_srstn_spi1_setf(0);
+        sysc_cmp_srstn_spi1_setf(1);
+        sysc_cmp_spi1_gate_en_setf(0);
+    }
 }
 
 void hal_spi_set_nss(uint32_t spi_x_base,spi_nss_model_t software_config)

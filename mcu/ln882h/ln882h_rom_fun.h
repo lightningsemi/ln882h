@@ -42,8 +42,4 @@
 #define ROM_FUN_RAND                0x00000191   //    rand,     T rand            
 #define ROM_FUN_SRAND               0x000001a5   //    srand,    T srand       
 
-
-    
-    
 #endif /* __LN882H_ROM_FUN_H__ */
-    

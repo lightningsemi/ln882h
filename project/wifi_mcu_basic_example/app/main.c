@@ -1,6 +1,7 @@
 #include "proj_config.h"
 #include "osal/osal.h"
 #include "wifi.h"
+#include "wifi_port.h"
 #include "netif/ethernetif.h"
 #include "usr_app.h"
 #include "utils/system_parameter.h"

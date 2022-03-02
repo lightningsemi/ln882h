@@ -7,9 +7,51 @@
         <td>摘要</td>
     </tr>
     <tr>
-        <td>2022-01-14 15:54:00</td>
-        <td>v1.2</td>
-        <td>76f51138</td>
+        <td>
+            2022-03-02 11:19:00
+        </td>
+        <td>
+            v1.3_rc2
+        </td>
+        <td>
+            7648678c
+        </td>
+        <td>
+            1. wifi 更新版本为 v1.0.7_rc2 <br />
+            2. sdk 版本更新为 v1.3_rc2 <br />
+            <br /><b>SDK changelog:</b> <br />
+            1. 修复 ate 错误 <br />
+            2. 修复 WiFi 高速率丢包问题 <br />
+            3. 修复 rx 饱和门限 <br />
+            4. 修复 xtal_cap tx_power 指令问题 <br />
+            5. 修复发射功率补偿逻辑错误 <br />
+            6. 增加 autorate 功能，增强抗干扰能力 <br />
+            7. 更新 WiFi RF PHY 寄存器参数，优化 WiFi 性能，杂散测试 <br />
+            8. 外设时钟初始化方式修改为按需初始化 <br />
+            9. 修复 reboot 组件 reboot 原因获取问题 <br />
+            10. 修复 adc bug <br />
+            11. 移除 power_up_phy 和 power_down_phy <br />
+            12. 更新 lwip 为 2.1.3 版本 <br />
+            13. 默认使用 ROM function（AES, CRC, SHA1, MD5） <br />
+            14. 修复 gcc 下 浮点 输入输出问题 <br />
+            15. WiFi 优化 monitor 模式 <br />
+            16. 修复 wifi_sta_get_powersave 接口错误 <br />
+            17. 完善 AT 指令 <br />
+            18. 增加 ota demo <br />
+            19. 统一串口：日志串口为 B9:TX B8:RX; 命令串口 A2:TX A3:RX <br />
+            20. 修复 hal_timer 驱动 hal_tim_get_current_cnt_value 接口错误 <br />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2022-01-14 15:54:00
+        </td>
+        <td>
+            v1.2
+        </td>
+        <td>
+            76f51138
+        </td>
         <td>
             <b>SDK changelog:</b> <br />
             1. ble 禁用 ke_msg_send lock，该 lock 在使用不当的时候会导致死锁 <br />

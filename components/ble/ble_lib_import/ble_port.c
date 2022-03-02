@@ -154,6 +154,7 @@ void blib_modem_init(void)
 {
     *(uint32_t*)0x4000D108 = 0x3FE7FFCF;
     *(uint32_t*)0x4000D20c = 0x10001;     //rx startup delay
+    *(uint32_t*)0x4000D210 = 0x10004;
     *(uint32_t*)0x4000D368 = 0x80000300;  //sync threshold enable and set
     *(uint32_t*)0x4000D214 = 0x0;         //disable fm tx
     *(uint32_t*)0x4000D3bc = 0x41003FF;   //lr_search_08_30

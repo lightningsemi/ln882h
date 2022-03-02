@@ -21,6 +21,10 @@ void hal_wdt_init(uint32_t wdt_base,wdt_init_t_def *wdt_init)
     hal_assert(IS_WDT_RMOD(wdt_init->wdt_rmod));
     hal_assert(IS_WDT_TOP_VALUE(wdt_init->top));
 
+    sysc_cmp_wdt_gate_en_setf(1);
+    for(volatile int i = 0; i < 20; i++)
+        __NOP();
+
     if (wdt_init->wdt_rmod == WDT_RMOD_0) {
         wdt_rmod_setf(wdt_base,0);
     }
@@ -65,6 +69,8 @@ void hal_wdt_deinit(void)
 {
     sysc_cmp_srstn_wdt_setf(0);
     sysc_cmp_srstn_wdt_setf(1);
+
+    sysc_cmp_wdt_gate_en_setf(0);
 }
 
 void hal_wdt_en(uint32_t wdt_base,hal_en_t en)

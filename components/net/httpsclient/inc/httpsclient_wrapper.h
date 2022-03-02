@@ -13,7 +13,7 @@
 
     typedef unsigned char u_char;
     typedef int socklen_t;
-#elif defined(__CC_ARM)
+#elif defined(__ICCARM__) || defined(__CC_ARM) || defined(__GNUC__)
     #include "osal/osal.h"
     #include "utils/debug/log.h"
 

@@ -32,7 +32,7 @@
 
 static int wsa_init_done = 0;
 
-#elif defined(__CC_ARM)
+#elif defined(__ICCARM__) || defined(__CC_ARM) || defined(__GNUC__)
 
     #include "lwip/sockets.h"
     #include "lwip/errno.h"
@@ -212,7 +212,7 @@ static int http_parse_header_field(HTTP_INFO *hi, char *param)
     char t1[256], t2[256];
     int  len;
 
-    LOG_D("\n* header: %s \n", param);
+    LOG_D("\r\n* header: %s \r\n", param);
 
     token = param;
 
@@ -1232,12 +1232,12 @@ int http_get(HTTP_INFO *hi, char *url_str, char *response, int maxSize)
             hi->recv_buf[hi->recv_buf_len] = 0;
             hi->parse_ptr = hi->recv_buf;
         } else if((mode & HTTP_PARSE_CHUNK) == HTTP_PARSE_CHUNK) {
-            LOG_I("return: HTTP_PARSE_CHUNK: chunk_size: %ld \n", hi->chunk_size);
+            LOG_I("return: HTTP_PARSE_CHUNK: chunk_size: %ld \r\n", hi->chunk_size);
         } else if((mode & HTTP_PARSE_END) == HTTP_PARSE_END) {
-            LOG_I("return: HTTP_PARSE_END: content_length: %ld \n", hi->response->content_length);
+            LOG_I("return: HTTP_PARSE_END: content_length: %ld \r\n", hi->response->content_length);
             break;
         } else if((mode & HTTP_PARSE_ERROR) == HTTP_PARSE_ERROR) {
-            LOG_EMSG("http_get() parse error.");
+            LOG_EMSG("http_get() parse error.\r\n");
             errCode = -1;
             goto flag_release_all;
         }
@@ -1377,7 +1377,14 @@ int  http_get_with_callback(HTTP_INFO* hi, char* url_str, http_get_cb cbFunc)
             // NOTE: fetch data from HTTP.
             is_recv_finished = 0;
             if (cbFunc) {
-                recv_len += (*cbFunc) (hi->body, hi->body_len, hi->response->content_length, is_recv_finished);
+                int32_t ret = 0;
+                ret = (*cbFunc) (hi->body, hi->body_len, hi->response->content_length, is_recv_finished);
+                if (ret < 0) {
+                    errCode = -1;
+                    goto flag_release_all;
+                } else {
+                    recv_len += ret;
+                }
             }
         }
 
@@ -1398,16 +1405,16 @@ int  http_get_with_callback(HTTP_INFO* hi, char* url_str, http_get_cb cbFunc)
             hi->recv_buf[hi->recv_buf_len] = 0;
             hi->parse_ptr = hi->recv_buf;
         } else if((mode & HTTP_PARSE_CHUNK) == HTTP_PARSE_CHUNK) {
-            LOG_I("return: HTTP_PARSE_CHUNK: chunk_size: %ld \n", hi->chunk_size);
+            LOG_I("return: HTTP_PARSE_CHUNK: chunk_size: %ld \r\n", hi->chunk_size);
         } else if((mode & HTTP_PARSE_END) == HTTP_PARSE_END) {
-            LOG_I("return: HTTP_PARSE_END: content_length: %ld \n", hi->response->content_length);
+            LOG_I("return: HTTP_PARSE_END: content_length: %ld \r\n", hi->response->content_length);
             if (cbFunc) {
                 is_recv_finished = 1;
                 (*cbFunc) (hi->body, hi->body_len, hi->response->content_length, is_recv_finished);
             }
             break;
         } else if((mode & HTTP_PARSE_ERROR) == HTTP_PARSE_ERROR) {
-            LOG_EMSG("http_get() parse error.");
+            LOG_EMSG("http_get() parse error.\r\n");
             errCode = -1;
             goto flag_release_all;
         }
@@ -1528,7 +1535,7 @@ int http_post(HTTP_INFO *hi, char *url, char *data, char *recvBuf, int size)
 				goto flag_exit;
             }
         } else {
-            LOG_E("socket reuse: %d \n", sock_fd);
+            LOG_E("socket reuse: %d \r\n", sock_fd);
         }
     }
 
@@ -1596,9 +1603,9 @@ int http_post(HTTP_INFO *hi, char *url, char *data, char *recvBuf, int size)
 
             hi->parse_ptr = hi->recv_buf;
         } else if((mode & HTTP_PARSE_CHUNK) == HTTP_PARSE_CHUNK) {
-            LOG_D("return: HTTP_PARSE_CHUNK: chunk_size: %ld \n", hi->chunk_size);
+            LOG_D("return: HTTP_PARSE_CHUNK: chunk_size: %ld \r\n", hi->chunk_size);
         } else if((mode & HTTP_PARSE_END) == HTTP_PARSE_END) {
-            LOG_D("return: HTTP_PARSE_END: content_length: %ld \n", hi->response->content_length);
+            LOG_D("return: HTTP_PARSE_END: content_length: %ld \r\n", hi->response->content_length);
             break;
         } else if((mode & HTTP_PARSE_ERROR) == HTTP_PARSE_ERROR) {
             LOG_EMSG("HTTP_PARSE_ERROR\r\n");
@@ -1615,12 +1622,12 @@ int http_post(HTTP_INFO *hi, char *url, char *data, char *recvBuf, int size)
         strncpy(hi->url->path, path, strlen(path));
     }
 
-    LOG_D("status_code: %d \n", hi->response->status_code);
-    LOG_D("     cookie: %s \n", hi->response->cookie);
-    LOG_D("   location: %s \n", hi->response->location);
-    LOG_D("   referrer: %s \n", hi->response->referrer);
-    LOG_D("     length: %d \n", hi->response->content_length);
-    LOG_D("   body len: %d \n", hi->body_len);
+    LOG_D("status_code: %d \r\n", hi->response->status_code);
+    LOG_D("     cookie: %s \r\n", hi->response->cookie);
+    LOG_D("   location: %s \r\n", hi->response->location);
+    LOG_D("   referrer: %s \r\n", hi->response->referrer);
+    LOG_D("     length: %d \r\n", hi->response->content_length);
+    LOG_D("   body len: %d \r\n", hi->body_len);
 
 flag_exit:
 
@@ -1649,7 +1656,7 @@ void http_dump_err_msg(void)
     char errstr[ERR_STR_MAX_SIZE];
 
     mbedtls_strerror(_error, errstr, ERR_STR_MAX_SIZE);
-    LOG_E("Error: %s\n", errstr);
+    LOG_E("Error: %s\r\n", errstr);
 }
 
 /**
@@ -1718,7 +1725,7 @@ int http_open(HTTP_INFO *hi, char *url)
                 return -1;
             }
         } else {
-         LOG_E("socket reuse: %d \n", sock_fd);
+         LOG_E("socket reuse: %d \r\n", sock_fd);
         }
     }
 
@@ -1751,7 +1758,7 @@ int http_write_header(HTTP_INFO *hi)
 
     temp_write_buffer = (char *)hc_malloc(FIELD_HTTP_HEADER_TOTAL_MAX_LEN);
     if (!temp_write_buffer) {
-        LOG_EMSG("create @temp_write_buffer failed!!!");
+        LOG_EMSG("create @temp_write_buffer failed!!!\r\n");
         return -1;
     }
 

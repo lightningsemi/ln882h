@@ -41,6 +41,10 @@ void hal_adv_tim_init(uint32_t adv_tim_x_base,adv_tim_init_t_def* adv_tim_init)
     hal_assert(IS_TIMER_DEAD_GAP(adv_tim_init->adv_tim_dead_gap_value));
     hal_assert(IS_TIMER_TRIG_VALUE(adv_tim_init->adv_tim_trig_value));
 
+    sysc_cmp_pwm_gate_en_setf(1);
+    for(volatile int i = 0; i < 20; i++)
+        __NOP();
+
     // set the adv timer parameters.
     pwm_db_setf(adv_tim_x_base,adv_tim_init->adv_tim_dead_gap_value);
     pwm_load_setf(adv_tim_x_base,adv_tim_init->adv_tim_load_value);
@@ -222,6 +226,8 @@ void hal_adv_tim_deinit(void)
 {
     sysc_cmp_srstn_pwm_setf(0);
     sysc_cmp_srstn_pwm_setf(1);
+
+    sysc_cmp_pwm_gate_en_setf(0);
 }
 
 void hal_adv_tim_cap_en(uint32_t adv_tim_x_base,hal_en_t en)

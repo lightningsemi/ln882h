@@ -48,42 +48,44 @@ ln_serial_t uart_serial[SER_PORT_NUM];
 
 static void uart_io_pin_request(struct Serial *serial)
 {
-    if (serial->port_id == SER_PORT_UART0) {
-#if 0 // pin same as uart0 of ROM
-
-#else //pin same as uart0 of LN8825 EVK
-        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_9,UART0_TX);
+    if (serial->port_id == SER_PORT_UART0)
+    {
         hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_8,UART0_RX);
-        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_9,HAL_ENABLE);
+        hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_9,UART0_TX);
         hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_8,HAL_ENABLE);
-
-#endif
-    } else if (serial->port_id == SER_PORT_UART1){
+        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_9,HAL_ENABLE);
+    } 
+    else if (serial->port_id == SER_PORT_UART1)
+    {
         hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_2,UART1_TX);
         hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_3,UART1_RX);
         hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_2,HAL_ENABLE);
         hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_3,HAL_ENABLE);
-    } else if (serial->port_id == SER_PORT_UART2){
-
+    } 
+    else if (serial->port_id == SER_PORT_UART2)
+    {
     }
 }
 
 static void uart_io_pin_release(struct Serial *serial)
 {
-    if (serial == NULL) return;
+    if (serial == NULL) 
+    {
+        return;
+    }
 
-    if (serial->port_id == SER_PORT_UART0) {
-#if 0 // pin same as uart0 of ROM
+    if (serial->port_id == SER_PORT_UART0) 
+    {
+        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_8,HAL_DISABLE);
+        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_9,HAL_DISABLE);
+    } 
+    else if (serial->port_id == SER_PORT_UART1) 
+    {
         hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_2,HAL_DISABLE);
         hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_3,HAL_DISABLE);
-#else //pin same as uart0 of LN8825 EVK
-        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_7,HAL_DISABLE);
-        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_6,HAL_DISABLE);
-#endif
-    } else if (serial->port_id == SER_PORT_UART1) {
-        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_9,HAL_DISABLE);
-        hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_8,HAL_DISABLE);
-    } else if (serial->port_id == SER_PORT_UART2) {
+    } 
+    else if (serial->port_id == SER_PORT_UART2)
+    {
     }
 }
 

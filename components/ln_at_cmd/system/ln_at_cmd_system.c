@@ -13,6 +13,7 @@
 #include "hal/hal_misc.h"
 #include "wifi.h"
 #include "ln_utils.h"
+#include "ln882h.h"
 
 /**
  * name, get, set, test, exec
@@ -38,7 +39,7 @@ ln_at_err_t ln_at_exec_gmr(const char *name)
 
     ln_at_printf("AT       version: v%d.%d.%d\r\n", LN_AT_VERSION, LN_AT_SUBVERSION, LN_AT_REVISION);
     ln_at_printf("AT CMD   version: v%d.%d.%d\r\n", LN_AT_CMD_VERSION, LN_AT_CMD_SUBVERSION, LN_AT_CMD_REVISION);
-    ln_at_printf("SDK      version: vx.x.x\r\n");
+    ln_at_printf("SDK      version: v%s\r\n", LN882H_SDK_VERSION_STRING);
     ln_at_printf("WiFi lib version: %s[build time:%s]\r\n",
             wifi_lib_version_string_get(), wifi_lib_build_time_get());
 

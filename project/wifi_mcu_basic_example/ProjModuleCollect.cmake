@@ -34,6 +34,8 @@ include_directories(${COMP_LNAT_DIR}/transfer)
 list(APPEND MODULE_SRC ${LNAT_SRC})
 
 file(GLOB_RECURSE  LNAT_CMD_SRC  ${COMP_LNAT_CMD_DIR}/*.c)
+file(GLOB_RECURSE  _NO_NEED_SRCS  ${COMP_LNAT_CMD_DIR}/ota/*.c)
+list(REMOVE_ITEM LNAT_CMD_SRC ${_NO_NEED_SRCS})
 include_directories(${COMP_LNAT_CMD_DIR})
 list(APPEND MODULE_SRC ${LNAT_CMD_SRC})
 

@@ -19,7 +19,7 @@ uint32_t SystemCoreClock = XTAL_CLOCK;  /* System Core Clock Frequency */
  *----------------------------------------------------------------------------*/
 void SystemCoreClockUpdate (void)
 {
-    SystemCoreClock = hal_clock_get_src_clk();
+    SystemCoreClock = hal_clock_get_core_clk();
 }
 uint32_t get_SystemCoreClock(void)
 {
@@ -96,20 +96,20 @@ void SetSysClock(void)
     clock_init.clk_pllclk_mul   = CLK_PLL_CLK_4_MUL;
 
     //1. xtal40m config
-    hal_misc_awo_set_r_vtrim(2); //set Vbandgap 1.21V
+    hal_misc_awo_set_r_vtrim(2);              //set Vbandgap 1.21V, Fix chip work abnormal at -30C. -- DongBao
     //hal_misc_awo_set_ldo18_2_vset(5);       // tx_rx_filter LDO18_2 vol set
     hal_misc_awo_set_r_xtal40m_ldo_vbit(1);   //5 xtal40m LDO (1.2V ~ )
     hal_misc_awo_set_r_xtal40m_cap_bit(0);    // xtal40m Cap (pf)
     hal_misc_awo_set_r_xtal40m_ibsel(0);      //1
     hal_misc_awo_set_ldo18_4_vset(7);
     hal_misc_awo_set_ldo18_2_vset(6);
-    hal_misc_awo_set_ldo15_1_vset(6);
+    hal_misc_awo_set_ldo15_1_vset(5);         // Fix OFDM package losses
 
     hal_misc_awo_set_o_cpu_sleep_counter_bp(0); //32K RCO cal
-    hal_misc_awo_set_bod_vth(0x03);             //0x03=2.0V BOD
+    hal_misc_awo_set_bod_vth(0x03);             //0x03=2.2V BOD, fix reboot problem
 
     //2. clock
     hal_clock_init(&clock_init);
-    SystemCoreClock = hal_clock_get_src_clk();
+    SystemCoreClock = hal_clock_get_core_clk();
 }
 

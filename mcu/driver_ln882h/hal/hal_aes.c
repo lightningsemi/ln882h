@@ -21,6 +21,9 @@ void hal_aes_init(uint32_t aes_base,aes_init_t_def* aes_init)
     hal_assert(IS_AES_OPCODE(aes_init->aes_opcode));
     hal_assert(IS_AES_BIG_ENDIAN(aes_init->aes_big_endian));
 
+    sysc_cmp_aes_gate_en_setf(1);
+    for(volatile int i = 0; i < 20; i++)
+        __NOP();
 
     if(aes_init->aes_cbc_mod == AES_CBC_MOD_ECB_MOD){
         aes_cbc_setf(aes_base,0);
@@ -66,6 +69,8 @@ void hal_aes_deinit(void)
 {
     sysc_cmp_srstn_aes_setf(0);
     sysc_cmp_srstn_aes_setf(1);
+
+    sysc_cmp_aes_gate_en_setf(0);
 }
 
 void hal_aes_start(uint32_t aes_base)

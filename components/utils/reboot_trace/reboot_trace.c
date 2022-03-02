@@ -27,8 +27,7 @@ static int ln_chip_set_reboot_cause(chip_reboot_cause_t cause)
     return LN_TRUE;
 }
 
-// 1.just called once. 2.Call it in the first phase of the main function.
-chip_reboot_cause_t ln_chip_get_reboot_cause(void)
+static chip_reboot_cause_t get_reboot_cause(void)
 {
     chip_reboot_cause_t cause = CHIP_REBOOT_POWER_ON;
     chip_no_init_data_t * pdata = NULL;
@@ -47,6 +46,18 @@ chip_reboot_cause_t ln_chip_get_reboot_cause(void)
     ln_chip_set_reboot_cause(CHIP_REBOOT_WATCHDOG);
 
     return cause;
+}
+
+chip_reboot_cause_t ln_chip_get_reboot_cause(void)
+{
+    static uint8_t s_power_on_env_is_init = 0;
+    static chip_reboot_cause_t s_reboot_cause = CHIP_REBOOT_POWER_ON;
+
+    if (s_power_on_env_is_init == 0) {
+        s_reboot_cause = get_reboot_cause();
+        s_power_on_env_is_init = 1;
+    }
+    return s_reboot_cause;
 }
 
 void ln_chip_reboot(void)
