@@ -21,6 +21,10 @@ void hal_trng_init(uint32_t trng_base,trng_init_t_def* trng_init)
     hal_assert(IS_TRNG_FAST_MODE_EN_STATUS(trng_init->trng_fast_mode_en_status));
     hal_assert(IS_TRNG_GAP_VALUE(trng_init->trng_gap));
 
+    sysc_cmp_trng_gate_en_setf(1);
+    for(volatile int i = 0; i < 20; i++)
+        __NOP();
+
     if (trng_init->trng_fast_mode_en_status == TRNG_FAST_MODE_DIS) {
         trng_fast_trng_setf(trng_base,0);
     }
@@ -34,6 +38,8 @@ void hal_trng_deinit(void)
 {
     sysc_cmp_srstn_trng_setf(0);
     sysc_cmp_srstn_trng_setf(1);
+
+    sysc_cmp_trng_gate_en_setf(0);
 }
 
 void hal_trng_en(uint32_t trng_base,hal_en_t en)

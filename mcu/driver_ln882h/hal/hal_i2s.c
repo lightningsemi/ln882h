@@ -22,6 +22,10 @@ void hal_i2s_init(uint32_t i2s_base,i2s_init_t_def* i2s_init)
     hal_assert(IS_I2S_REC_FIFO_CONFIG(i2s_init->rec_fifo_trig_lev));
     hal_assert(IS_I2S_TRA_FIFO_CONFIG(i2s_init->tra_fifo_trig_lev));
 
+    sysc_cmp_i2s_gate_en_setf(1);
+    for(volatile int i = 0; i < 20; i++)
+        __NOP();
+
     /* enable the i2s on the system*/
     sysc_cmp_i2s_io_en0_setf(1);
 
@@ -80,6 +84,8 @@ void hal_i2s_deinit(void)
 {
     sysc_cmp_srstn_i2s_setf(0);
     sysc_cmp_srstn_i2s_setf(1);
+
+    sysc_cmp_i2s_gate_en_setf(0);
 }
 
 void hal_i2s_rx_en(uint32_t i2s_base,hal_en_t en)     

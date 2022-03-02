@@ -143,7 +143,7 @@ typedef struct
 /**=======================================hal gpio api============================================**/
 //              gpio init
 void            hal_gpio_init(uint32_t gpio_base, gpio_init_t_def *gpio_init);
-void            hal_gpio_deinit(void);
+void            hal_gpio_deinit(uint32_t gpio_base);
 void            hal_gpio_pin_pull_set(uint32_t gpio_base, gpio_pin_t pin, gpio_pull_t pull);
 void            hal_gpio_pin_speed_set(uint32_t gpio_base, gpio_pin_t pin, gpio_speed_t speed);
 void            hal_gpio_pin_mode_set(uint32_t gpio_base, gpio_pin_t pin, gpio_mode_t mode);

@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define LN_SW_SHA1_USING_ROM_CODE (0)
+#define LN_SW_SHA1_USING_ROM_CODE (1)
 
 #if defined(LITTLE_ENDIAN)
   #define LN_SHA1_LITTLE_ENDIAN

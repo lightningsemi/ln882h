@@ -21,7 +21,7 @@ set(SPECSFLAGS  "")
 set(ASFLAGS     ${MCU})
 set(ARCHFLAGS   ${MCU})
 set(OPTFLAGS    ${OPTFLAGS})
-set(LINK_FLAGS  "${ARCHFLAGS} -Wl,--gc-sections")
+set(LINK_FLAGS  "${ARCHFLAGS} -Wl,--gc-sections -u _printf_float -u _scanf_float")
 
 
 ##################################  C Flags  ###################################

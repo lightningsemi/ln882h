@@ -30,6 +30,10 @@ void hal_dma_init(uint32_t dma_x_base,dma_init_t_def* dma_init)
     hal_assert(IS_DMA_MA_VALUE(dma_init->dma_mem_addr));
     hal_assert(IS_DMA_PA_VALUE(dma_init->dma_p_addr));
 
+    sysc_cmp_dma_gate_en_setf(1);
+    for(volatile int i = 0; i < 20; i++)
+        __NOP();
+
     //set the parameter
     if (dma_init->dma_mem_to_mem_en == DMA_MEM_TO_MEM_DIS) {
         dma_mem2mem_setf(dma_x_base,0);
@@ -115,6 +119,8 @@ void hal_dma_deinit(void)
 {
     sysc_cmp_srstn_dma_setf(0);
     sysc_cmp_srstn_dma_setf(1);
+
+    sysc_cmp_dma_gate_en_setf(0);
 }
 
 void hal_dma_en(uint32_t dma_x_base,hal_en_t en)

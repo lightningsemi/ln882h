@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 
-#define LN_SW_CRC32_USING_ROM_CODE (0)
+#define LN_SW_CRC32_USING_ROM_CODE (1)
 
 typedef struct {
     uint32_t    crc;

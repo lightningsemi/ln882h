@@ -165,13 +165,34 @@ typedef enum IRQn
  * LN882H_SDK_MINOR_V:    0-255
  */
 #define LN882H_SDK_MAJOR_V        1
-#define LN882H_SDK_MINOR_V        2
+#define LN882H_SDK_MINOR_V        3
+
+#define LN882H_SDK_RC_V           2 /* 0: development, 255: release, 1-254: release candidates */
+
+#define LN882H_SDK_RC_RELEASE     255
+#define LN882H_SDK_RC_DEVELOPMENT 0
 
 #define LN882H_SDK_VERSTR2(x)     #x
 #define LN882H_SDK_VERSTR(x)      LN882H_SDK_VERSTR2(x)
 
-#define LN882H_SDK_VERSION          ((uint32_t)(LN882H_SDK_MAJOR_V) << 24 | (uint32_t)(LN882H_SDK_MINOR_V) << 16)
-#define LN882H_SDK_VERSION_STRING   LN882H_SDK_VERSTR(LN882H_SDK_MAJOR_V) "." LN882H_SDK_VERSTR(LN882H_SDK_MINOR_V)
+#define LN882H_SDK_VERSION_IS_RELEASE     (LN882H_SDK_RC_V == LN882H_SDK_RC_RELEASE)
+#define LN882H_SDK_VERSION_IS_DEVELOPMENT (LN882H_SDK_RC_V == LN882H_SDK_RC_DEVELOPMENT)
+#define LN882H_SDK_VERSION_IS_RC          ((LN882H_SDK_RC_V != LN882H_SDK_RC_RELEASE) && (LN882H_SDK_RC_V != LN882H_SDK_RC_DEVELOPMENT))
+
+#if LN882H_SDK_VERSION_IS_RELEASE
+#define LN882H_SDK_VERSION_STRING_SUFFIX  ""
+#elif LN882H_SDK_VERSION_IS_DEVELOPMENT
+#define LN882H_SDK_VERSION_STRING_SUFFIX  "_alpha"
+#else
+#define LN882H_SDK_VERSION_STRING_SUFFIX  "_rc" LN882H_SDK_VERSTR(LN882H_SDK_RC_V)
+#endif
+
+#define LN882H_SDK_VERSION          ((uint32_t)(LN882H_SDK_MAJOR_V) << 24 |     \
+                                     (uint32_t)(LN882H_SDK_MINOR_V) << 16  |    \
+                                     (uint32_t)(LN882H_SDK_RC_V))
+#define LN882H_SDK_VERSION_STRING   LN882H_SDK_VERSTR(LN882H_SDK_MAJOR_V) "."   \
+                                    LN882H_SDK_VERSTR(LN882H_SDK_MINOR_V)       \
+                                    LN882H_SDK_VERSION_STRING_SUFFIX
 #define LN882H_SDK_BUILD_DATE_TIME  ""__DATE__" "__TIME__
 
 

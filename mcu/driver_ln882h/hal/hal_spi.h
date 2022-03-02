@@ -199,7 +199,7 @@ typedef struct
 
                 //spi init and config
 void            hal_spi_init(uint32_t spi_x_base,spi_init_type_def* spi_init);
-void            hal_spi_deinit(void);
+void            hal_spi_deinit(uint32_t spi_x_base);
 void            hal_spi_set_nss(uint32_t spi_x_base,spi_nss_model_t software_config);
 void            hal_spi_ssoe_en(uint32_t spi_x_base,hal_en_t en);
 void            hal_spi_set_data_size(uint32_t spi_x_base,spi_data_size_t data_size);

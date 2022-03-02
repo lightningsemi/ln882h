@@ -77,6 +77,9 @@ void hal_sdio_device_init(sdio_init_t *sdio_init)
     hal_assert(IS_SDIO_DEV_LSC(sdio_init->sdio_dev_lsc));
     hal_assert(IS_SDIO_DEV_4BLS(sdio_init->sdio_dev_4bls));
     
+    sysc_cmp_sdio_gate_en_setf(1);
+    for(volatile int i = 0; i < 20; i++)
+        __NOP();
     
     sdio_sdio_ior_reg1_set(SDIO_IO_READY);      //FN1 ready
     sdio_sdio_progreg_set(SDIO_DEVICE_READY | SDIO_CARD_READY | SDIO_CPU_IN_ACTIVE | SDIO_SUPPORT_FUNC_NUM);//device ready ahb and arm in active state
@@ -109,6 +112,8 @@ void hal_sdio_device_deinit(void)
 {
     sysc_cmp_srstn_sdio_setf(0);
     sysc_cmp_srstn_sdio_setf(1);
+
+    sysc_cmp_sdio_gate_en_setf(0);
 }
 
 void hal_sdio_device_clear_busy(void)

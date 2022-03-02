@@ -3,15 +3,17 @@
  * @author   BSP Team 
  * @brief 
  * @version  0.0.0.1
- * @date     2021-08-17
+ * @date     2022-01-19
  * 
- * @copyright Copyright (c) 2021 Shanghai Lightning Semiconductor Technology Co. Ltd
+ * @copyright Copyright (c) 2022 Shanghai Lightning Semiconductor Technology Co. Ltd
  * 
  */
 
 #include "hal/hal_clock.h"
 
-uint32_t hal_clock_src_clk = 0;
+clk_src_t hal_clock_clk_src;
+
+uint32_t hal_clock_core_clk = 0;
 uint32_t hal_clock_ahb_clk = 0;
 uint32_t hal_clock_apb0_clk = 0;
 
@@ -52,15 +54,17 @@ void hal_clock_init(clock_init_t *clock_init)
     
     if(clock_init->clk_src == CLK_SRC_XTAL)
     {
-        hal_clock_src_clk = XTAL_CLOCK;
-        hal_clock_ahb_clk = hal_clock_src_clk / clock_init->clk_hclk_div;
-        hal_clock_apb0_clk = hal_clock_src_clk / clock_init->clk_hclk_div / clock_init->clk_pclk0_div;
+        hal_clock_clk_src = CLK_SRC_XTAL;
+        hal_clock_ahb_clk = XTAL_CLOCK / clock_init->clk_hclk_div;
+        hal_clock_apb0_clk = XTAL_CLOCK / clock_init->clk_hclk_div / clock_init->clk_pclk0_div;
+        hal_clock_core_clk = XTAL_CLOCK;
     }
     else if(clock_init->clk_src == CLK_SRC_PLL)
     {
-        hal_clock_src_clk = PLL_CLOCK;
+        hal_clock_clk_src = CLK_SRC_PLL;
         hal_clock_ahb_clk = XTAL_CLOCK * clock_init->clk_pllclk_mul / 2 / clock_init->clk_hclk_div;
         hal_clock_apb0_clk = XTAL_CLOCK * clock_init->clk_pllclk_mul / 2 / clock_init->clk_hclk_div / clock_init->clk_pclk0_div;
+        hal_clock_core_clk = XTAL_CLOCK * clock_init->clk_pllclk_mul / 2;
     }
     
     
@@ -73,15 +77,17 @@ void hal_clock_select_clk_src(clk_src_t clk_src)
     
     if(clk_src == CLK_SRC_XTAL)
     {
-        hal_clock_src_clk = XTAL_CLOCK;
-        hal_clock_ahb_clk = hal_clock_src_clk / (sysc_awo_hclk_div_para_m1_getf() + 1);
-        hal_clock_apb0_clk = hal_clock_src_clk / (sysc_awo_hclk_div_para_m1_getf() + 1) / (sysc_cmp_pclk0_div_para_m1_getf() + 1);
+        hal_clock_clk_src = CLK_SRC_XTAL;
+        hal_clock_ahb_clk = XTAL_CLOCK / (sysc_awo_hclk_div_para_m1_getf() + 1);
+        hal_clock_apb0_clk = XTAL_CLOCK / (sysc_awo_hclk_div_para_m1_getf() + 1) / (sysc_cmp_pclk0_div_para_m1_getf() + 1);
+        hal_clock_core_clk = XTAL_CLOCK;
     }
     else if(clk_src == CLK_SRC_PLL)
     {
-        hal_clock_src_clk = PLL_CLOCK;
+        hal_clock_clk_src = CLK_SRC_PLL;
         hal_clock_ahb_clk = XTAL_CLOCK * (sysc_awo_syspll_div_getf()) / 2 / (sysc_awo_hclk_div_para_m1_getf() + 1);
         hal_clock_apb0_clk = XTAL_CLOCK * (sysc_awo_syspll_div_getf()) / 2 / (sysc_awo_hclk_div_para_m1_getf() + 1) / (sysc_cmp_pclk0_div_para_m1_getf() + 1);
+        hal_clock_core_clk = XTAL_CLOCK * (sysc_awo_syspll_div_getf()) / 2;
     }
 }
 
@@ -91,15 +97,17 @@ void hal_clock_set_pll_clk_mul(clk_pllclk_mul_t clk_pllclk_mul)
     hal_assert(IS_CLK_PLL_CLK_MUL(clk_pllclk_mul));
     sysc_awo_syspll_div_setf(clk_pllclk_mul);
     
-    if(hal_clock_src_clk == CLK_SRC_XTAL)
+    if(hal_clock_clk_src == CLK_SRC_XTAL)
     {
-        hal_clock_ahb_clk = hal_clock_src_clk / (sysc_awo_hclk_div_para_m1_getf() + 1);
-        hal_clock_apb0_clk = hal_clock_src_clk / (sysc_awo_hclk_div_para_m1_getf() + 1) / (sysc_cmp_pclk0_div_para_m1_getf() + 1);
+        hal_clock_ahb_clk = XTAL_CLOCK / (sysc_awo_hclk_div_para_m1_getf() + 1);
+        hal_clock_apb0_clk = XTAL_CLOCK / (sysc_awo_hclk_div_para_m1_getf() + 1) / (sysc_cmp_pclk0_div_para_m1_getf() + 1);
+        hal_clock_core_clk = XTAL_CLOCK;
     }
-    else if(hal_clock_src_clk == CLK_SRC_PLL)
+    else if(hal_clock_clk_src == CLK_SRC_PLL)
     {
         hal_clock_ahb_clk = XTAL_CLOCK * (sysc_awo_syspll_div_getf()) / 2 / (sysc_awo_hclk_div_para_m1_getf() + 1);
         hal_clock_apb0_clk = XTAL_CLOCK * (sysc_awo_syspll_div_getf()) / 2 / (sysc_awo_hclk_div_para_m1_getf() + 1) / (sysc_cmp_pclk0_div_para_m1_getf() + 1);
+        hal_clock_core_clk = XTAL_CLOCK * (sysc_awo_syspll_div_getf()) / 2;
     }
 }
 
@@ -110,15 +118,17 @@ void hal_clock_set_apb0_clk_div(clk_pclk0_div_t clk_pclk0_div)
     sysc_cmp_pclk0_div_para_m1_setf(clk_pclk0_div - 1);
     sysc_cmp_pclk0_div_para_up_setf(1);
     
-    if(hal_clock_src_clk == CLK_SRC_XTAL)
+    if(hal_clock_clk_src == CLK_SRC_XTAL)
     {
-        hal_clock_ahb_clk = hal_clock_src_clk / (sysc_awo_hclk_div_para_m1_getf() + 1);
-        hal_clock_apb0_clk = hal_clock_src_clk / (sysc_awo_hclk_div_para_m1_getf() + 1) / (sysc_cmp_pclk0_div_para_m1_getf() + 1);
+        hal_clock_ahb_clk = XTAL_CLOCK / (sysc_awo_hclk_div_para_m1_getf() + 1);
+        hal_clock_apb0_clk = XTAL_CLOCK / (sysc_awo_hclk_div_para_m1_getf() + 1) / (sysc_cmp_pclk0_div_para_m1_getf() + 1);
+        hal_clock_core_clk = XTAL_CLOCK;
     }
-    else if(hal_clock_src_clk == CLK_SRC_PLL)
+    else if(hal_clock_clk_src == CLK_SRC_PLL)
     {
         hal_clock_ahb_clk = XTAL_CLOCK * (sysc_awo_syspll_div_getf()) / 2 / (sysc_awo_hclk_div_para_m1_getf() + 1);
         hal_clock_apb0_clk = XTAL_CLOCK * (sysc_awo_syspll_div_getf()) / 2 / (sysc_awo_hclk_div_para_m1_getf() + 1) / (sysc_cmp_pclk0_div_para_m1_getf() + 1);
+        hal_clock_core_clk = XTAL_CLOCK * (sysc_awo_syspll_div_getf()) / 2;
     }
 }
 
@@ -129,21 +139,28 @@ void hal_clock_set_ahb_clk_div(clk_hclk_div_t clk_hclk_div)
     sysc_awo_hclk_div_para_m1_setf(clk_hclk_div - 1);
     sysc_awo_hclk_div_para_up_setf(1);
     
-    if(hal_clock_src_clk == CLK_SRC_XTAL)
+    if(hal_clock_clk_src == CLK_SRC_XTAL)
     {
-        hal_clock_ahb_clk = hal_clock_src_clk / (sysc_awo_hclk_div_para_m1_getf() + 1);
-        hal_clock_apb0_clk = hal_clock_src_clk / (sysc_awo_hclk_div_para_m1_getf() + 1) / (sysc_cmp_pclk0_div_para_m1_getf() + 1);
+        hal_clock_ahb_clk = XTAL_CLOCK / (sysc_awo_hclk_div_para_m1_getf() + 1);
+        hal_clock_apb0_clk = XTAL_CLOCK / (sysc_awo_hclk_div_para_m1_getf() + 1) / (sysc_cmp_pclk0_div_para_m1_getf() + 1);
+        hal_clock_core_clk = XTAL_CLOCK;
     }
-    else if(hal_clock_src_clk == CLK_SRC_PLL)
+    else if(hal_clock_clk_src == CLK_SRC_PLL)
     {
         hal_clock_ahb_clk = XTAL_CLOCK * (sysc_awo_syspll_div_getf()) / 2 / (sysc_awo_hclk_div_para_m1_getf() + 1);
         hal_clock_apb0_clk = XTAL_CLOCK * (sysc_awo_syspll_div_getf()) / 2 / (sysc_awo_hclk_div_para_m1_getf() + 1) / (sysc_cmp_pclk0_div_para_m1_getf() + 1);
+        hal_clock_core_clk = XTAL_CLOCK * (sysc_awo_syspll_div_getf()) / 2;
     }
 }
 
-uint32_t hal_clock_get_src_clk()
+clk_src_t hal_clock_get_clk_src()
 {
-    return hal_clock_src_clk;
+    return hal_clock_clk_src;
+}
+
+uint32_t hal_clock_get_core_clk()
+{
+    return hal_clock_core_clk;
 }
 
 uint32_t hal_clock_get_apb0_clk()

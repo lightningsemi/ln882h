@@ -135,7 +135,7 @@ typedef struct
 
 /**==================================hal uart api=================================================**/
 void          hal_uart_init(uint32_t uart_base, uart_init_t_def* uart_init);
-void          hal_uart_deinit(void);
+void          hal_uart_deinit(uint32_t uart_base);
 void          hal_uart_send_data(uint32_t uart_base, uint16_t data);
 uint16_t      hal_uart_recv_data(uint32_t uart_base);
 

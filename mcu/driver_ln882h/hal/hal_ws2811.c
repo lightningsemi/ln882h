@@ -18,6 +18,10 @@ void  hal_ws2811_init(uint32_t ws2811_base, ws2811_init_t_def *ws2811_init)
     hal_assert(IS_WS2811_ALL_PERIPH(ws2811_base));
     hal_assert(IS_WS2811_BR_VALUE(ws2811_init->br));
 
+    sysc_cmp_ws2811_gate_en_setf(1);
+    for(volatile int i = 0; i < 20; i++)
+        __NOP();
+
     ws2811_br_setf(ws2811_base,ws2811_init->br);
 }
 
@@ -25,6 +29,8 @@ void hal_ws2811_deinit(void)
 {
     sysc_cmp_srstn_ws2811_setf(0);
     sysc_cmp_srstn_ws2811_setf(1);
+
+    sysc_cmp_ws2811_gate_en_setf(0);
 }
 
 void  hal_ws2811_en(uint32_t ws2811_base,hal_en_t en)

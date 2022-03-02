@@ -263,6 +263,12 @@ void hal_ext_init(ext_int_sense_t ext_int_sense,ext_trig_mode_t ext_trig_mode,ha
     sysc_awo_pin_is_inrp_src_setf(pin_status);
 }
 
+void hal_ext_deinit(void)
+{
+    sysc_awo_ext_intr_sence_set(0);
+    sysc_awo_ext_intr_en_set(0);
+}
+
 uint8_t hal_ext_get_it_flag(ext_it_flag_t ext_it_flag)
 {
     /* check the parameters */

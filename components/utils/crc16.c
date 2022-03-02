@@ -52,7 +52,7 @@ typedef uint16_t (*rom_func_crc16_ccitt)(const char *, int);
 uint16_t crc16_ccitt(const char *buf, int len)
 {
     rom_func_crc16_ccitt ccitt = (rom_func_crc16_ccitt)ROM_FUN_CRC16_CCITT;
-    ccitt(buf, len);
+    return ccitt(buf, len);
 }
 
 #endif /* !(LN_SW_CRC16_USING_ROM_CODE) */

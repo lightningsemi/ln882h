@@ -12,6 +12,15 @@
 
 void hal_uart_init(uint32_t uart_base, uart_init_t_def* uart_init)
 {
+    switch(uart_base)
+    {
+        case UART0_BASE:sysc_cmp_uart0_gate_en_setf(1);break;
+        case UART1_BASE:sysc_cmp_uart1_gate_en_setf(1);break;
+        case UART2_BASE:sysc_cmp_uart2_gate_en_setf(1);break;
+    }
+    for(volatile int i = 0; i < 20; i++)
+        __NOP();
+
     ln_uart_m_setf(uart_base, uart_init->word_len);
     
     ln_uart_over8_setf(uart_base, uart_init->over_sampl);
@@ -28,16 +37,26 @@ void hal_uart_init(uint32_t uart_base, uart_init_t_def* uart_init)
     hal_uart_baudrate_set(uart_base, uart_init->baudrate);
 }
 
-void hal_uart_deinit(void)
+void hal_uart_deinit(uint32_t uart_base)
 {
-    sysc_cmp_srstn_uart0_setf(0);
-    sysc_cmp_srstn_uart0_setf(1);
-
-    sysc_cmp_srstn_uart1_setf(0);
-    sysc_cmp_srstn_uart1_setf(1);
-
-    sysc_cmp_srstn_uart2_setf(0);
-    sysc_cmp_srstn_uart2_setf(1);
+    switch(uart_base)
+    {
+        case UART0_BASE:
+            sysc_cmp_srstn_uart0_setf(0);
+            sysc_cmp_srstn_uart0_setf(1);
+            sysc_cmp_uart0_gate_en_setf(0);
+            break;
+        case UART1_BASE:
+            sysc_cmp_srstn_uart1_setf(0);
+            sysc_cmp_srstn_uart1_setf(1);
+            sysc_cmp_uart1_gate_en_setf(0);
+            break;
+        case UART2_BASE:
+            sysc_cmp_srstn_uart2_setf(0);
+            sysc_cmp_srstn_uart2_setf(1);
+            sysc_cmp_uart2_gate_en_setf(0);
+            break;
+    }
 }
 
 void hal_uart_baudrate_set(uint32_t uart_base, uint32_t baudrate)

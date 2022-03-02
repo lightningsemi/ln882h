@@ -4,6 +4,7 @@
 #include "utils/system_parameter.h"
 #include "utils/ln_psk_calc.h"
 #include "utils/power_mgmt/ln_pm.h"
+#include "utils/sysparam_factory_setting.h"
 #include "wifi.h"
 #include "wifi_port.h"
 #include "netif/ethernetif.h"
@@ -14,6 +15,7 @@
 #include "ln_nvds.h"
 #include "ln_wifi_err.h"
 #include "ln_misc.h"
+#include "ln882h.h"
 #include "usr_app.h"
 
 #include "rwip_config.h"
@@ -115,6 +117,21 @@ static void wifi_scan_complete_cb(void * arg)
 static void wifi_init_sta(void)
 {
     // ln_generate_random_mac(mac_addr);
+    //1. sta mac get
+     if (SYSPARAM_ERR_NONE != sysparam_sta_mac_get(mac_addr)) {
+        LOG(LOG_LVL_ERROR, "[%s]sta mac get filed!!!\r\n", __func__);
+        return;
+    }
+
+    if (mac_addr[0] == STA_MAC_ADDR0 &&
+        mac_addr[1] == STA_MAC_ADDR1 &&
+        mac_addr[2] == STA_MAC_ADDR2 &&
+        mac_addr[3] == STA_MAC_ADDR3 &&
+        mac_addr[4] == STA_MAC_ADDR4 &&
+        mac_addr[5] == STA_MAC_ADDR5) {
+        ln_generate_random_mac(mac_addr);
+        sysparam_sta_mac_update((const uint8_t *)mac_addr);
+    }
 
     //1. net device(lwip)
     netdev_set_mac_addr(NETIF_IDX_STA, mac_addr);
@@ -470,4 +487,10 @@ void creat_usr_app_task(void)
         LN_ASSERT(1);
     }
 #endif
+
+    /* print sdk version */
+    {
+        LOG(LOG_LVL_INFO, "LN882H SDK Ver: %s [build time:%s][0x%08x]\r\n",
+                LN882H_SDK_VERSION_STRING, LN882H_SDK_BUILD_DATE_TIME, LN882H_SDK_VERSION);
+    }
 }

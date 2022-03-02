@@ -36,9 +36,6 @@ typedef enum
  * @brief get the cause of chip reboot.
  * get the cause of chip reboot.
  *
- * @attention 1. just called once. 
- *            2. call it in the first phase of the main function.
- *
  * @return  the cause of chip reboot.
  * @retval  #CHIP_REBOOT_POWER_ON    reboot by power on.
  * @retval  #CHIP_REBOOT_SOFTWARE    reboot by software reset.
@@ -55,28 +52,6 @@ chip_reboot_cause_t  ln_chip_get_reboot_cause(void);
  * @return  none
  */
 void  ln_chip_reboot(void);
-
-/**
- * @brief start watchdog on chip.
- * initialize watchdog,start it!
- *
- * @attention None.
- * 
- * @param[in]    level    indicating the watchdog timeout time, see WDT_TIMEOUT_LEVEL*.
- *
- * @return  none
- */
-void  ln_chip_watchdog_start(watchdog_timeout_level_t level);
-
-/**
- * @brief chip watchdog keepalive.
- * it will reset watchdog counter.
- *
- * @attention It must be called before the watchdog timeout.
- *
- * @return  none
- */
-void  ln_chip_watchdog_keepalive(void);
 
 #endif /* __LN_CHIP_REBOOT_TRACE_H__ */
 

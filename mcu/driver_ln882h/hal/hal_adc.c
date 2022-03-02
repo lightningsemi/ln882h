@@ -20,7 +20,7 @@ static int8_t adc_cal_param_2 = 0;
 static int8_t adc_cal_param_3 = 0;
 static int8_t adc_cal_param_4 = 0;
 static float  adc_cal_param_5 = 0;
-static float  adc_cal_param_6 = 0;
+//static float  adc_cal_param_6 = 0;
 void hal_adc_init(uint32_t adc_base,adc_init_t_def* adc_init)
 {
     uint8_t reg_value = 0;
@@ -51,6 +51,9 @@ void hal_adc_init(uint32_t adc_base,adc_init_t_def* adc_init)
     hal_assert(IS_ADC_PRESCALE_VALUE(adc_init->adc_presc));
     hal_assert(IS_ADC_VREF_VALUE(adc_init->adc_vref_set));
     
+    sysc_cmp_adcc_gate_en_setf(1);
+    for(volatile int i = 0; i < 20; i++)
+        __NOP();
     
     /*get efuse data*/
     tem_val_3 = hal_efuse_read_corrent_reg(EFUSE_REG_1);
@@ -64,16 +67,16 @@ void hal_adc_init(uint32_t adc_base,adc_init_t_def* adc_init)
 
     tem_val_1 = (int8_t)(tem_val_3 & 0xFF);
     if (tem_val_1 & 0x80) {
-        adc_cal_param_2 = - (tem_val_1 & 0x3F);
+        adc_cal_param_2 = - (tem_val_1 & 0x7F);
     } else {
-        adc_cal_param_2 = tem_val_1 & 0x3F;
+        adc_cal_param_2 = tem_val_1 & 0x7F;
     }
 
     tem_val_1 = (int8_t)((tem_val_3 >> 8) & 0xFF);
     if (tem_val_1 & 0x80) {
-        adc_cal_param_3 = - (tem_val_1 & 0x3F);
+        adc_cal_param_3 = - (tem_val_1 & 0x7F);
     } else {
-        adc_cal_param_3 = tem_val_1 & 0x3F;
+        adc_cal_param_3 = tem_val_1 & 0x7F;
     }
     adc_cal_param_5 = 1 - 1.0f * adc_cal_param_3 / 512;                      //modify by liushanbiao
     //adc_cal_param_6 = adc_cal_param_2 * adc_cal_param_5;
@@ -276,6 +279,8 @@ void hal_adc_deinit(void)
 {
     sysc_cmp_srstn_adcc_setf(0);
     sysc_cmp_srstn_adcc_setf(1);
+
+    sysc_cmp_adcc_gate_en_setf(0);
 }
 
 void hal_adc_dma_en(uint32_t adc_base,hal_en_t en)

@@ -32,21 +32,19 @@ typedef struct
 } ln_serial_t;
 ln_serial_t uart_serial[1];
 
-
 static void uart0_io_pin_request(struct Serial *serial)
 {
     //TODO: 
-    hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_3,UART0_TX);
-    hal_gpio_pin_afio_select(GPIOA_BASE,GPIO_PIN_4,UART0_RX);
-
-    hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_3,HAL_ENABLE);
-    hal_gpio_pin_afio_en(GPIOA_BASE,GPIO_PIN_4,HAL_ENABLE);
+    hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_8,UART0_RX);
+    hal_gpio_pin_afio_select(GPIOB_BASE,GPIO_PIN_9,UART0_TX);
+    hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_8,HAL_ENABLE);
+    hal_gpio_pin_afio_en(GPIOB_BASE,GPIO_PIN_9,HAL_ENABLE);
 }
 
-static void uart_io_pin_release(struct Serial *serial)
+static void uart0_io_pin_release(struct Serial *serial)
 {
-    hal_gpio_pin_afio_en(GPIOA_BASE, GPIO_PIN_3, HAL_DISABLE);
-    hal_gpio_pin_afio_en(GPIOA_BASE, GPIO_PIN_4, HAL_DISABLE);
+    hal_gpio_pin_afio_en(GPIOB_BASE, GPIO_PIN_8, HAL_DISABLE);
+    hal_gpio_pin_afio_en(GPIOB_BASE, GPIO_PIN_9, HAL_DISABLE);
 }
 
 static void hw_uart0_init(struct SerialHardware *_hw, struct Serial *serial, uint32_t baudrate)
@@ -87,7 +85,7 @@ static void hw_uart0_cleanup(struct SerialHardware *_hw)
     NVIC_DisableIRQ(UART0_IRQn);
 
     hw = (ln_serial_t *)_hw;
-    uart_io_pin_release(hw->serial);
+    uart0_io_pin_release(hw->serial);
     hw->serial = NULL;                                                          // must be reset to NULL
 }
 

@@ -23,6 +23,7 @@
 #include "dhcpd.h"
 #include "wifi.h"
 #include "wifi_port.h"
+#include "dhcpd.h"
 
 #include "ln_at.h"
 
@@ -1325,7 +1326,60 @@ static ln_at_err_t ln_at_set_ap_start_def(uint8_t para_num, const char *name)
     return _ln_at_cwsap_set_parse(LN_AT_CMD_TYPE_DEF, para_num, name);
 }
 
-#if 0
+static ln_at_err_t ln_at_get_psmode(const char *name)
+{
+    int ret;
+    sta_ps_mode_t ps_mode;
+
+    ret = wifi_sta_get_powersave(&ps_mode);
+    if (ret == WIFI_ERR_NONE)
+    {
+        ln_at_printf("%s:%d\r\n", name, (int)ps_mode);
+        ln_at_printf(LN_AT_RET_OK_STR);
+        return LN_AT_ERR_NONE;
+    }
+    else
+    {
+        ln_at_printf("%s\r\n", name);
+        ln_at_printf(LN_AT_RET_ERR_STR);
+        return LN_AT_ERR_COMMON;
+    }
+}
+
+static ln_at_err_t ln_at_set_psmode(uint8_t para_num, const char *name)
+{
+    int ret;
+    bool is_default = false;
+    int ps_mode = WIFI_NO_POWERSAVE;
+
+    if (para_num == 1)
+    {
+        if (LN_AT_PSR_ERR_NONE == ln_at_parser_get_int_param(1, &is_default, &ps_mode))
+        {
+            if (is_default)
+            {
+                ps_mode = WIFI_NO_POWERSAVE;
+            }
+
+            if (ps_mode >= WIFI_NO_POWERSAVE && ps_mode <= WIFI_MAX_POWERSAVE)
+            {
+                ret = wifi_sta_set_powersave((int)ps_mode);
+                if (ret == WIFI_ERR_NONE)
+                {
+                    ln_at_printf(LN_AT_RET_OK_STR);
+                    return LN_AT_ERR_NONE;
+                }
+            }
+        }
+    }
+
+    ln_at_printf("%s\r\n", name);
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+
+#if 1
 /**
  * AT+CIPSTAMAC?
  * AT+CIPSTAMAC=<mac>
@@ -1500,11 +1554,35 @@ static ln_at_err_t ln_at_set_ap_mac_def(uint8_t para_num, const char *name)
 */
 static ln_at_err_t ln_at_exec_ap_query_sta_list(const char *name)
 {
-    /* TODO */
+    wifi_mode_t curr_mode = wifi_current_mode_get();
+    dhcpd_ip_item_t * ip_pool = dhcpd_get_ip_pool();
+    uint8_t dhcp_client_max = dhcpd_get_client_max();
+    dhcpd_ip_item_t *ip_item;
+    int i = 0;
+    
+    if ( curr_mode == WIFI_MODE_AP && ip_pool!=NULL)
+    {
+        ln_at_printf("%s:\r\n", name);
+        
+        for (i = 0; i < MIN(DHCPD_IP_POOL_SIZE, dhcp_client_max); i++)
+        {
+            ip_item = &(ip_pool[i]);
+            if(ip_item->allocted == 1)
+            {
+                ln_at_printf("ip=%d.%d.%d.%d,mac="MACSTR"\r\n",ip4_addr1(&ip_item->ip), ip4_addr2(&ip_item->ip), ip4_addr3(&ip_item->ip), ip4_addr4(&ip_item->ip), MAC2STR(ip_item->mac));
+            }
+        }
+        
+        ln_at_printf(LN_AT_RET_OK_STR);
+        return LN_AT_ERR_NONE;
+    }
+    
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
 
-    ln_at_printf("+CWLIF:TODO\r\n");
-    ln_at_printf(LN_AT_RET_OK_STR);
-    return LN_AT_ERR_NONE;
+    
+    
+
 }
 
 /**
@@ -1885,7 +1963,7 @@ __exit:
 static ln_at_err_t _ln_at_cipsta_get_parser(ln_at_cmd_type_e cmd_type, wifi_mode_t mode, const char *name)
 {
     wifi_mode_t cur_mode;
-    wifi_sta_description_t sta;
+    wifi_sta_status_t sta_status = WIFI_STA_STATUS_STARTUP;
     tcpip_ip_info_t ip_info;
     char ip[16] = {0};
     char netmask[16] = {0};
@@ -1899,13 +1977,8 @@ static ln_at_err_t _ln_at_cipsta_get_parser(ln_at_cmd_type_e cmd_type, wifi_mode
 
     if (mode == WIFI_MODE_STATION)
     {
-        if (wifi_sta_description_get(&sta) != 0)
-        {
-            goto __exit;
-        }
-
-        /* Check that the STA is connected to the AP */
-        if (sta.is_connected != 1) /* sta is not connected */
+        wifi_get_sta_status(&sta_status);
+        if(sta_status != WIFI_STA_STATUS_CONNECTED)
         {
             goto __exit;
         }
@@ -1959,9 +2032,9 @@ static ln_at_err_t _ln_at_cipsta_get_parser(ln_at_cmd_type_e cmd_type, wifi_mode
         goto __exit;
     }
 
-    ln_at_printf("%s:ip:\"%s\"\r\n", name, ip);
-    ln_at_printf("%s:gateway:\"%s\"\r\n", name, gw);
-    ln_at_printf("%s:netmask:\"%s\"\r\n", name, netmask);
+    ln_at_printf("%s:\"%s\"\r\n", name, ip);
+    ln_at_printf("%s:\"%s\"\r\n", name, gw);
+    ln_at_printf("%s:\"%s\"\r\n", name, netmask);
 
     ln_at_printf(LN_AT_RET_OK_STR);
     return LN_AT_ERR_NONE;
@@ -2703,7 +2776,10 @@ LN_AT_CMD_REG(CWSAP_DEF, ln_at_get_ap_start_def, ln_at_set_ap_start_def, NULL, N
 
 LN_AT_CMD_REG(PVTCMD, NULL, ln_at_set_pvtcmd, NULL, NULL);
 
-#if 0
+LN_AT_CMD_REG(CWSLEEP, ln_at_get_psmode, ln_at_set_psmode, NULL, NULL);
+
+
+#if 1
 LN_AT_CMD_REG(CIPSTAMAC,     ln_at_get_sta_mac,     ln_at_set_sta_mac,     NULL, NULL);
 LN_AT_CMD_REG(CIPSTAMAC_CUR, ln_at_get_sta_mac_cur, ln_at_set_sta_mac_cur, NULL, NULL);
 LN_AT_CMD_REG(CIPSTAMAC_DEF, ln_at_get_sta_mac_def, ln_at_set_sta_mac_def, NULL, NULL);
@@ -2729,18 +2805,18 @@ LN_AT_CMD_REG(CWAUTOCONN,  NULL, ln_at_set_auto_conn, NULL, NULL);
  *
  * AT+CIPSTA
 */
-// LN_AT_CMD_ITEM_DEF("CIPSTA",     ln_at_get_cipsta,     ln_at_set_cipsta,     NULL, NULL)
-// LN_AT_CMD_ITEM_DEF("CIPSTA_CUR", ln_at_get_cipsta_cur, ln_at_set_cipsta_cur, NULL, NULL)
-// LN_AT_CMD_ITEM_DEF("CIPSTA_DEF", ln_at_get_cipsta_def, ln_at_set_cipsta_def, NULL, NULL)
+LN_AT_CMD_REG(CIPSTA,     ln_at_get_cipsta,     ln_at_set_cipsta,     NULL, NULL);
+LN_AT_CMD_REG(CIPSTA_CUR, ln_at_get_cipsta_cur, ln_at_set_cipsta_cur, NULL, NULL);
+LN_AT_CMD_REG(CIPSTA_DEF, ln_at_get_cipsta_def, ln_at_set_cipsta_def, NULL, NULL);
 
 /**
  * Set/Get ip:
  *
  * AT+CIPSTA
 */
-// LN_AT_CMD_ITEM_DEF("CIPAP",     ln_at_get_cipap,     ln_at_set_cipap,     NULL, NULL)
-// LN_AT_CMD_ITEM_DEF("CIPAP_CUR", ln_at_get_cipap_cur, ln_at_set_cipap_cur, NULL, NULL)
-// LN_AT_CMD_ITEM_DEF("CIPAP_DEF", ln_at_get_cipap_def, ln_at_set_cipap_def, NULL, NULL)
+LN_AT_CMD_REG(CIPAP,     ln_at_get_cipap,     ln_at_set_cipap,     NULL, NULL);
+LN_AT_CMD_REG(CIPAP_CUR, ln_at_get_cipap_cur, ln_at_set_cipap_cur, NULL, NULL);
+LN_AT_CMD_REG(CIPAP_DEF, ln_at_get_cipap_def, ln_at_set_cipap_def, NULL, NULL);
 
 /**
  * Set/Exec

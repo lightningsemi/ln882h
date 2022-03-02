@@ -34,6 +34,10 @@ void hal_i2c_init(uint32_t i2c_x_base,i2c_init_t_def* i2c_init)
     hal_assert(IS_I2C_FM_MODE_DUTY_CYCLE(i2c_init->i2c_fm_mode_duty_cycle));
     hal_assert(IS_I2C_CCR(i2c_init->i2c_ccr));
     hal_assert(IS_I2C_TRISE(i2c_init->i2c_trise));
+
+    sysc_cmp_i2c0_gate_en_setf(1);
+    for(volatile int i = 0; i < 20; i++)
+        __NOP();
    
     /* set the  peripheral clock freq*/
     i2c_freq_setf(i2c_x_base,i2c_init->i2c_peripheral_clock_freq);
@@ -140,6 +144,8 @@ void hal_i2c_deinit(void)
 {
     sysc_cmp_srstn_i2c0_setf(0);
     sysc_cmp_srstn_i2c0_setf(1);
+
+    sysc_cmp_i2c0_gate_en_setf(0);
 }
 
 void hal_i2c_set_peripheral_clock_freq(uint32_t i2c_x_base, uint32_t peripheral_clock_freq)

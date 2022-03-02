@@ -86,7 +86,7 @@ typedef enum
 
 //          init the ext 
 void        hal_ext_init(ext_int_sense_t ext_int_sense,ext_trig_mode_t ext_trig_mode,hal_en_t en);
-
+void        hal_ext_deinit(void);
 //          ext interrupt configuration
 uint8_t     hal_ext_get_it_flag(ext_it_flag_t ext_it_flag);
 uint8_t     hal_ext_get_raw_it_flag(ext_it_raw_flag_t ext_raw_it_flag);

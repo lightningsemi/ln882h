@@ -105,8 +105,8 @@ uint32_t ln_crc32_signle_cal(uint8_t *ptr, int len)
 
 typedef void (*rom_func_crc32_init)(crc32_ctx_t *);
 typedef void (*rom_func_crc32_update)(crc32_ctx_t *, uint8_t *, uint32_t);
-typedef void (*rom_func_crc32_final)(crc32_ctx_t *);
-typedef void (*rom_func_crc32_signle_cal)(uint8_t *, int);
+typedef uint32_t (*rom_func_crc32_final)(crc32_ctx_t *);
+typedef uint32_t (*rom_func_crc32_signle_cal)(uint8_t *, int);
 
 void ln_crc32_init(crc32_ctx_t *ctx)
 {
@@ -123,12 +123,12 @@ void ln_crc32_update(crc32_ctx_t *ctx, uint8_t *data, uint32_t len)
 uint32_t ln_crc32_final(crc32_ctx_t *ctx)
 {
     rom_func_crc32_final final = (rom_func_crc32_final)ROM_FUN_CRC32_FINAL;
-    final(ctx);
+    return final(ctx);
 }
 
 uint32_t ln_crc32_signle_cal(uint8_t *ptr, int len)
 {
     rom_func_crc32_signle_cal signle_cal = (rom_func_crc32_signle_cal)ROM_FUN_CRC32_SIGNLE_CAL;
-    signle_cal(ptr, len);
+    return signle_cal(ptr, len);
 }
 #endif /* !(LN_SW_CRC32_USING_ROM_CODE) */
