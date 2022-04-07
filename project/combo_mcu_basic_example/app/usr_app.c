@@ -232,6 +232,8 @@ static void temp_cal_app_task_entry(void *params)
 
     int8_t cap_comp = 0;
     uint16_t adc_val = 0;
+    int16_t curr_adc = 0;
+    uint8_t cnt = 0;
 
     if (NVDS_ERR_OK == ln_nvds_get_tx_power_comp((uint8_t *)&cap_comp)) {
         if ((uint8_t)cap_comp == 0xFF) {
@@ -249,6 +251,14 @@ static void temp_cal_app_task_entry(void *params)
 
         adc_val = drv_adc_read(ADC_CH0);
         wifi_do_temp_cal_period(adc_val);
+
+        curr_adc = (adc_val & 0xFFF);
+
+        cnt++;
+        if ((cnt % 60) == 0) {
+            LOG(LOG_LVL_INFO, "adc raw: %4d, temp_IC: %4d\r\n",
+                    curr_adc, (int16_t)(25 + (curr_adc - 770) / 2.54f));
+        }
     }
 }
 
@@ -357,7 +367,6 @@ static void start_init(void)
 }
 
 static OS_Queue_t ble_usr_queue;
-static OS_Semaphore_t usr_semaphore;
 
 void usr_creat_queue(void)
 {
@@ -448,8 +457,8 @@ static void ble_app_task_entry(void *params)
 
                 case BLE_MSG_SVR_DIS:
                 {
-                    struct ln_gattc_disc_svc *p_param = (struct ln_gattc_disc_svc *)usr_msg.msg;
 #if (CLIENT)
+                    struct ln_gattc_disc_svc *p_param = (struct ln_gattc_disc_svc *)usr_msg.msg;
                     uint8_t data[] = {0x12,0x78,0x85};
                     struct ln_gattc_write_cmd param_wr;
                     param_wr.operation    = GATTC_WRITE;

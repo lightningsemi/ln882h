@@ -59,6 +59,8 @@ int           ln_pm_obj_register(const char * name, int(*veto)(void), int(*pre_p
 void          ln_pm_rtos_pre_sleep_proc(uint32_t *expect_ms);
 int           ln_pm_rtos_post_sleep_proc(uint32_t *expect_ms);
 
+void          ln_pm_sleep_frozen(void);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

@@ -65,7 +65,7 @@ static ln_at_ctrl_t *g_ln_at_ctrl_p = &g_ln_at_ctrl;
 static void * sem_scan = NULL;
 static ln_at_store_mode_e g_at_store_mode = LN_AT_STORE_M_W_F;
 
-static void ln_at_cache_wifi_mode_set(wifi_mode_t mode);
+//static void ln_at_cache_wifi_mode_set(wifi_mode_t mode);
 static ln_at_err_t ln_at_set_wifi_mode_def(uint8_t para_num, const char *name);
 
 // private command
@@ -109,10 +109,10 @@ err:
 /**
  * need to be called by user when power-on
 */
-void ln_at_cache_wifi_mode_set(wifi_mode_t mode)
-{
-    g_ln_at_ctrl_p->mode = mode;
-}
+//void ln_at_cache_wifi_mode_set(wifi_mode_t mode)
+//{
+//    g_ln_at_ctrl_p->mode = mode;
+//}
 
 /**
  * default: get from RAM
@@ -1363,7 +1363,7 @@ static ln_at_err_t ln_at_set_psmode(uint8_t para_num, const char *name)
 
             if (ps_mode >= WIFI_NO_POWERSAVE && ps_mode <= WIFI_MAX_POWERSAVE)
             {
-                ret = wifi_sta_set_powersave((int)ps_mode);
+                ret = wifi_sta_set_powersave((sta_ps_mode_t)ps_mode);
                 if (ret == WIFI_ERR_NONE)
                 {
                     ln_at_printf(LN_AT_RET_OK_STR);
@@ -1378,8 +1378,6 @@ static ln_at_err_t ln_at_set_psmode(uint8_t para_num, const char *name)
     return LN_AT_ERR_COMMON;
 }
 
-
-#if 1
 /**
  * AT+CIPSTAMAC?
  * AT+CIPSTAMAC=<mac>
@@ -2271,6 +2269,7 @@ static ln_at_err_t ln_at_set_cipap_def(uint8_t para_num, const char *name)
     return _ln_at_cipsta_set_parser(LN_AT_CMD_TYPE_DEF, WIFI_MODE_AP, para_num, name);
 }
 
+#if 0
 /**
  * set/exec
  *
@@ -2285,7 +2284,7 @@ static ln_at_err_t ln_at_set_start_smartconfig(uint8_t para_num, const char *nam
     uint8_t para_index = 1;
 
     int type;
-    wifi_mode_t mode = WIFI_MODE_STATION;
+//    wifi_mode_t mode = WIFI_MODE_STATION;
 
     if (para_num != 1)
     {
@@ -2306,7 +2305,7 @@ static ln_at_err_t ln_at_set_start_smartconfig(uint8_t para_num, const char *nam
         goto __exit;
     }
 
-    mode = g_ln_at_ctrl_p->mode;
+//    mode = g_ln_at_ctrl_p->mode;
 
     ln_at_printf("\r\nTODO!!!\r\n");
 
@@ -2790,13 +2789,13 @@ LN_AT_CMD_REG(CIPAPMAC_DEF, ln_at_get_ap_mac_def, ln_at_set_ap_mac_def, NULL, NU
 
 LN_AT_CMD_REG(CWLIF, NULL, NULL, NULL, ln_at_exec_ap_query_sta_list);
 
-// LN_AT_CMD_ITEM_DEF("CWDHCP",     ln_at_get_dhcp,     ln_at_set_dhcp,     NULL, NULL)
-// LN_AT_CMD_ITEM_DEF("CWDHCP_CUR", ln_at_get_dhcp_cur, ln_at_set_dhcp_cur, NULL, NULL)
-// LN_AT_CMD_ITEM_DEF("CWDHCP_DEF", ln_at_get_dhcp_def, ln_at_set_dhcp_def, NULL, NULL)
+LN_AT_CMD_REG(CWDHCP,     ln_at_get_dhcp,     ln_at_set_dhcp,     NULL, NULL);
+LN_AT_CMD_REG(CWDHCP_CUR, ln_at_get_dhcp_cur, ln_at_set_dhcp_cur, NULL, NULL);
+LN_AT_CMD_REG(CWDHCP_DEF, ln_at_get_dhcp_def, ln_at_set_dhcp_def, NULL, NULL);
 
-// LN_AT_CMD_ITEM_DEF("CWDHCPS",     ln_at_get_dhcp_cfg,     ln_at_set_dhcp_cfg,     NULL, NULL)
-// LN_AT_CMD_ITEM_DEF("CWDHCPS_CUR", ln_at_get_dhcp_cfg_cur, ln_at_set_dhcp_cfg_cur, NULL, NULL)
-// LN_AT_CMD_ITEM_DEF("CWDHCPS_DEF", ln_at_get_dhcp_cfg_def, ln_at_set_dhcp_cfg_def, NULL, NULL)
+LN_AT_CMD_REG(CWDHCPS,     ln_at_get_dhcp_cfg,     ln_at_set_dhcp_cfg,     NULL, NULL);
+LN_AT_CMD_REG(CWDHCPS_CUR, ln_at_get_dhcp_cfg_cur, ln_at_set_dhcp_cfg_cur, NULL, NULL);
+LN_AT_CMD_REG(CWDHCPS_DEF, ln_at_get_dhcp_cfg_def, ln_at_set_dhcp_cfg_def, NULL, NULL);
 
 LN_AT_CMD_REG(CWAUTOCONN,  NULL, ln_at_set_auto_conn, NULL, NULL);
 

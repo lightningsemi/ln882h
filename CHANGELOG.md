@@ -8,6 +8,27 @@
     </tr>
     <tr>
         <td>
+            2022-04-07 21:21:00
+        </td>
+        <td>
+            no version
+        </td>
+        <td>
+            b75ed3f9
+        </td>
+        <td>
+            1. 更新 AT 指令，增加 AT+RST 的实现，增加 WiFi AT 指令 <br />
+            2. 同步 powersave 组件，增加 frozen 模式 <br />
+            3. wifi lib 修复 vtrim adc 匹配问题 <br />
+            4. 更新 autorate，修复逻辑问题 <br />
+            5. 优化发射功率调整 <br />
+            6. 优化 get_tx_pow 接口 <br />
+            7. 修复 pr_to_ur 11b long prem 处理错误 <br />
+            8. 优化 WiFi ble 共存 <br />
+        </td>
+    </tr>
+    <tr>
+        <td>
             2022-03-02 11:19:00
         </td>
         <td>
