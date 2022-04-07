@@ -14,6 +14,7 @@
 #include "wifi.h"
 #include "ln_utils.h"
 #include "ln882h.h"
+#include "utils/reboot_trace/reboot_trace.h"
 
 /**
  * name, get, set, test, exec
@@ -26,7 +27,7 @@ ln_at_err_t ln_at_exec_gmr(const char *name);
 ln_at_err_t ln_at_exec_sys_rst(const char *name)
 {
     LN_UNUSED(name);
-    //HAL_SYSCON_SoftwareResetCore(SW_RST_CORE_ALL);
+    ln_chip_reboot();
 
     ln_at_printf(LN_AT_RET_OK_STR);
     return LN_AT_ERR_NONE;

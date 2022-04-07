@@ -206,7 +206,7 @@ void usr_app_task_entry(void *params)
 void temp_cal_app_task_entry(void *params)
 {
     LN_UNUSED(params);
-    volatile uint8_t cnt = 0;
+    uint8_t cnt = 0;
     int8_t cap_comp = 0;
     uint16_t adc_val = 0;
     int16_t curr_adc = 0;
@@ -233,7 +233,7 @@ void temp_cal_app_task_entry(void *params)
         cnt++;
         if ((cnt % 60) == 0) {
             LOG(LOG_LVL_INFO, "adc raw: %4d, temp_IC: %4d\r\n",
-                    curr_adc, (int16_t)(25 + (curr_adc - 750) / 2.54f));
+                    curr_adc, (int16_t)(25 + (curr_adc - 770) / 2.54f));
         }
     }
 }

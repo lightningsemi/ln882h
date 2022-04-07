@@ -247,7 +247,7 @@ void ln_pm_rtos_pre_sleep_proc(uint32_t *expect_ms)
     pm_ctrl->flag     = LN_TRUE;
     pm_ctrl->sleep_ms = *expect_ms;
 
-    if(pm_ctrl->slp_mode >= DEEP_SLEEP) /* DEEP_SLEEP, FROZEN_SLEEP */
+    if(pm_ctrl->slp_mode == DEEP_SLEEP) /* DEEP_SLEEP */
     {
         if(((uint64_t)*expect_ms * 1000000) > STOP_OS_TICK_MISSED_NS) {
             u64val = (((uint64_t)*expect_ms * 1000000) - STOP_OS_TICK_MISSED_NS);
@@ -355,3 +355,8 @@ int ln_pm_obj_register(const char *name, int(*veto)(void), int(*pre_proc)(void),
     return ret;
 }
 
+void ln_pm_sleep_frozen(void)
+{
+    ln_pm_sleep_mode_set(FROZEN_SLEEP);
+    pmu_pre_sleep_update(&sg_pm_ctrl);
+}
