@@ -211,7 +211,7 @@ void temp_cal_app_task_entry(void *params)
     uint16_t adc_val = 0;
     int16_t curr_adc = 0;
 
-    if (NVDS_ERR_OK == ln_nvds_get_tx_power_comp((uint8_t *)&cap_comp)) {
+    if (NVDS_ERR_OK == ln_nvds_get_xtal_comp_val((uint8_t *)&cap_comp)) {
         if ((uint8_t)cap_comp == 0xFF) {
             cap_comp = 0;
         }

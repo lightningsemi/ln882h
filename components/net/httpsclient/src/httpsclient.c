@@ -463,6 +463,7 @@ int http_parse(HTTP_INFO *hi)
  */
 static int https_init(HTTP_INFO **hi, bool is_https, bool verify)
 {
+    LOG_D("https_init\r\n");
     if(is_https == TRUE) {
         mbedtls_ssl_init( &(*hi)->tls.ssl );
         mbedtls_ssl_config_init( &(*hi)->tls.conf );
@@ -1646,6 +1647,196 @@ flag_release_tempBuffer:
 
     return len;
 }
+
+int http_post_request(HTTP_INFO *hi, char *url, char *request, char *recvBuf, int size)
+{
+    int         sock_fd, is_https, verify;
+    int         ret, mode, opt, len;
+    socklen_t   slen;
+    int         retCode = 0; // record error code.
+    char        * tempBuffer = NULL, * host = NULL, * path = NULL;
+    const int   tempBufferSize = FIELD_URL_HOST_MAX_LEN + FIELD_URL_PATH_MAX_LEN + 4;
+    char        port[FIELD_HTTP_HEADER_PORT_MAX_LEN] = { 0 };
+
+    if(NULL == hi) {
+        retCode = -1;
+        return retCode;
+    }
+#if 0
+    tempBuffer = (char*)hc_malloc(tempBufferSize);
+    if (NULL == tempBuffer) {
+        retCode = -2;
+        return retCode;
+    }
+    memset(tempBuffer, 0, tempBufferSize);
+#endif
+    host = (char*)hc_malloc(FIELD_URL_HOST_MAX_LEN);
+    if (NULL == host) {
+        retCode = -3;
+        goto flag_release_tempBuffer;
+    }
+    memset(host, 0, FIELD_URL_HOST_MAX_LEN);
+
+    path = (char*)hc_malloc(FIELD_URL_PATH_MAX_LEN);
+    if (NULL == path) {
+        retCode = -4;
+        goto flag_release_host;
+    }
+    memset(path, 0, FIELD_URL_PATH_MAX_LEN);
+
+    verify = hi->tls.verify;
+
+    if ( parse_url(url, &is_https, host, port, path) != 0) {
+        retCode = -5;
+        goto flag_exit;
+    }
+
+    if( (hi->tls.ssl_fd.fd == -1) || (hi->url->is_https != is_https) ||
+        (strcmp(hi->url->host, host) != 0) || (strcmp(hi->url->port, port) != 0) ) {
+
+        if(hi->tls.ssl_fd.fd != -1)
+            https_close(&hi);
+
+        https_init(&hi, is_https, verify);
+
+        if((ret=https_connect(hi, host, port)) < 0) {
+            https_close(&hi);
+
+            http_dump_err_msg();
+            retCode = -6;
+            goto flag_exit;
+        }
+    } else {
+        sock_fd = hi->tls.ssl_fd.fd;
+
+        slen = sizeof(int);
+
+        if((getsockopt(sock_fd, SOL_SOCKET, SO_ERROR, (void *)&opt, &slen) < 0) || (opt > 0)) {
+            https_close(&hi);
+            https_init(&hi, is_https, verify);
+
+            if((ret=https_connect(hi, host, port)) < 0) {
+                https_close(&hi);
+				http_dump_err_msg();
+				retCode = -7;
+				goto flag_exit;
+            }
+        } else {
+            LOG_E("socket reuse: %d \r\n", sock_fd);
+        }
+    }
+
+    /* Send HTTP request */
+#if 0    
+    len = snprintf(tempBuffer, tempBufferSize,
+            "POST %s HTTP/1.1\r\n"
+            "User-Agent: Mozilla/4.0\r\n"
+            "Host: %s:%s\r\n"
+            "Connection: Keep-Alive\r\n"
+            "Accept: */*\r\n"
+            "Content-Type: application/json; charset=utf-8\r\n"
+            "Content-Length: %d\r\n"
+            "%s\r\n"
+            "%s",
+            path, host, port,
+            (int)strlen(data),
+            hi->request->cookie,
+            data);
+#endif
+    len = strlen(request);
+    if((ret = https_write(hi, request, len)) != len) {
+        https_close(&hi);
+
+		http_dump_err_msg();
+		retCode = -8;
+		goto flag_exit;
+    }
+
+//    LOG_D("tempBuffer: \r\n[\r\n%s\r\n]\r\n", tempBuffer);
+
+    http_read_init(hi);
+
+    len = 0;
+
+    while(1) {
+        mode = http_parse(hi);
+        if((mode & HTTP_PARSE_WRITE) == HTTP_PARSE_WRITE) {
+            if(len < size - 1) {
+                if (len + hi->body_len > size) {
+                    strncpy(&recvBuf[len], hi->body, size - len - 1);
+                    len = size - 1;
+                    recvBuf[len] = 0;
+                } else {
+                    strncpy(&recvBuf[len], hi->body, hi->body_len);
+                    len += hi->body_len;
+                    recvBuf[len] = 0;
+                }
+            }
+        }
+
+        if((mode & HTTP_PARSE_READ) == HTTP_PARSE_READ) {
+            ret = https_read(hi, &hi->recv_buf[hi->recv_buf_len], (int) (FIELD_HTTP_RECV_BUF_MAX_LEN - hi->recv_buf_len));
+            if (ret < 0) {
+                https_close(&hi);
+
+				http_dump_err_msg();
+				retCode = -9;
+				goto flag_exit;
+            } else if (ret == 0) {
+                https_close(&hi);
+                break;
+            }
+
+            hi->recv_buf_len += ret;
+            hi->recv_buf[hi->recv_buf_len] = 0;
+
+            hi->parse_ptr = hi->recv_buf;
+        } else if((mode & HTTP_PARSE_CHUNK) == HTTP_PARSE_CHUNK) {
+            LOG_D("return: HTTP_PARSE_CHUNK: chunk_size: %ld \r\n", hi->chunk_size);
+        } else if((mode & HTTP_PARSE_END) == HTTP_PARSE_END) {
+            LOG_D("return: HTTP_PARSE_END: content_length: %ld \r\n", hi->response->content_length);
+            break;
+        } else if((mode & HTTP_PARSE_ERROR) == HTTP_PARSE_ERROR) {
+            LOG_EMSG("HTTP_PARSE_ERROR\r\n");
+            retCode = -10;
+            goto flag_exit;
+        }
+    }
+
+    if(hi->response->close == TRUE) {
+        https_close(&hi);
+    } else {
+        strncpy(hi->url->host, host, strlen(host));
+        strncpy(hi->url->port, port, strlen(port));
+        strncpy(hi->url->path, path, strlen(path));
+    }
+
+    LOG_D("status_code: %d \r\n", hi->response->status_code);
+    LOG_D("     cookie: %s \r\n", hi->response->cookie);
+    LOG_D("   location: %s \r\n", hi->response->location);
+    LOG_D("   referrer: %s \r\n", hi->response->referrer);
+    LOG_D("     length: %d \r\n", hi->response->content_length);
+    LOG_D("   body len: %d \r\n", hi->body_len);
+
+flag_exit:
+
+flag_release_path:
+    hc_free(path);
+
+flag_release_host:
+    hc_free(host);
+
+flag_release_tempBuffer:
+    //hc_free(tempBuffer);
+
+    if (retCode != 0) {
+        return retCode;
+    }
+
+    return len;
+}
+
+
 
 /**
  * @brief Print error msg here

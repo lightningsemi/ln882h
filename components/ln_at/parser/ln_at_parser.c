@@ -110,6 +110,7 @@ ln_at_parser_err_t ln_at_cmd_parse(char *intact_line, size_t len)
     bool is_int_param    = false;
     size_t backslash_num = 0;
     bool is_backslash    = false;
+    bool is_negative_number = false;
 
     ln_at_parser_err_t result = LN_AT_PSR_ERR_COMMON;
     ln_at_parser_t    *at_cmd = &g_ln_at_cmd_context;
@@ -357,17 +358,34 @@ ln_at_parser_err_t ln_at_cmd_parse(char *intact_line, size_t len)
                 if (!is_int_param)
                 {
                     is_int_param = !is_int_param;
-                    at_cmd->para[at_cmd->total_para_num - 1].para_start_pos = start_pos_bak - 1;
+                    if (is_negative_number)
+                    {
+                        at_cmd->para[at_cmd->total_para_num - 1].para_start_pos = start_pos_bak - 2;
+                    }
+                    else
+                    {
+                        at_cmd->para[at_cmd->total_para_num - 1].para_start_pos = start_pos_bak - 1;
+                    }
+
                     at_cmd->para[at_cmd->total_para_num - 1].para_type = LN_AT_PARA_TYPE_INIT;
 
                     LN_AT_PARSER_LOG_D("set int param start");
                 }
+            }
+            else if (ch == '-')
+            {
+                is_negative_number = true;
+            }
+            else if (ch == '+')
+            {
+                is_negative_number = false;
             }
             else if (ch == ',' || ch == '\0')
             {
                 if (is_int_param)
                 {
                     is_int_param = !is_int_param;
+                    is_negative_number = false;
                     at_cmd->para[at_cmd->total_para_num - 1].para_end_pos = start_pos_bak - 1; /* [start,end) */
 
                     LN_AT_PARSER_LOG_D("set int param end");

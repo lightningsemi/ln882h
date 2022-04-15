@@ -8,6 +8,24 @@
     </tr>
     <tr>
         <td>
+            2022-04-15 12:09:00
+        </td>
+        <td>
+            no version
+        </td>
+        <td>
+            d2089b6a
+        </td>
+        <td>
+            1. 增加 JD joylink 组件和工程 <br />
+            2. 修复 NVDS 频偏补偿和功率补偿 <br />
+            3. 修复 AT 解析器对有符号整数解析的问题 <br />
+            4. 增加 ATE AT 指令 <br />
+            5. http client 增加 http_post_request 接口 <br />
+        </td>
+    </tr>
+    <tr>
+        <td>
             2022-04-07 21:21:00
         </td>
         <td>

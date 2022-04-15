@@ -26,6 +26,8 @@
 #include "dhcpd.h"
 
 #include "ln_at.h"
+#include "ln_nvds.h"
+
 
 #define LN_AT_DEFAULT_MAX_CONN  (4U)
 
@@ -2842,3 +2844,72 @@ LN_AT_CMD_REG(CIPAP_DEF, ln_at_get_cipap_def, ln_at_set_cipap_def, NULL, NULL);
 // LN_AT_CMD_ITEM_DEF("CWCOUNTRY_CUR", ln_at_get_country_cfg_cur, ln_at_set_country_cfg_cur, NULL, NULL)
 // LN_AT_CMD_ITEM_DEF("CWCOUNTRY_DEF", ln_at_get_country_cfg_def, ln_at_set_country_cfg_def, NULL, NULL)
 #endif /* 0 */
+
+
+/**
+ * Set/Get ATE_OK
+ *
+ * AT+ATE_OK=1
+ * AT+ATE_OK?
+*/  
+
+static ln_at_err_t ln_at_get_ate_ok(const char *name)
+{
+    int8_t val = 0;
+
+    ln_nvds_get_xtal_comp_val((uint8_t *)&val);
+    ln_at_printf("+XTAL_COMP:%d\r\n", val);
+
+    ln_nvds_get_tx_power_comp((uint8_t *)&val);
+    ln_at_printf("+TXPOWER_COMP:%d\r\n", val);
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+}
+
+static ln_at_err_t ln_at_set_ate_ok(uint8_t para_num, const char *name)
+{
+    bool is_default = false;
+    int val = 0;
+    int8_t xtal_cap = 0, tx_power = 0;
+
+    if (para_num != 1) {
+        goto __exit;
+    }
+
+    if (LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(1, &is_default, &val)) {
+        goto __exit;
+    }
+
+    if (val == 0) {
+        ln_nvds_set_ate_result('F');
+    } 
+    else if (val == 1) {
+        extern int ate_get_xtalcap_txpower_offset (int8_t *xtal_cap, int8_t *tx_power);
+        ate_get_xtalcap_txpower_offset(&xtal_cap, &tx_power);
+
+        /* 1. save to nvds(flash) */
+        //1.1 save XTAL_CAP
+        ln_nvds_set_xtal_comp_val(xtal_cap);
+
+        //1.2 save TX_POWER
+        ln_nvds_set_tx_power_comp(tx_power);
+
+        //1.3 save ATE result
+        //('S'=ate_successful, 'F'=ate_failed)
+        ln_nvds_set_ate_result('S');
+    }
+    else {
+        goto __exit;
+    }
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+LN_AT_CMD_REG(ATE_OK, ln_at_get_ate_ok, ln_at_set_ate_ok, NULL, NULL);
+
