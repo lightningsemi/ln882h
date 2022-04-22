@@ -205,3 +205,37 @@ include_directories(${COMP_WIFI_DIR}/wifi_manager)
 include_directories(${COMP_WIFI_DIR}/wifi_lib_import)
 include_directories(${COMP_WIFI_DIR}/wifi_lib_export)
 list(APPEND MODULE_SRC ${MISC_SRC})
+
+###################################  wolfssl    ################################
+# set(WOLFSSL_SRC
+#     ${COMP_WOLFSSL_DIR}/wolfcrypt/src/aes.c
+#     ${COMP_WOLFSSL_DIR}/wolfcrypt/src/cmac.c
+#     ${COMP_WOLFSSL_DIR}/wolfcrypt/src/ecc.c
+#     ${COMP_WOLFSSL_DIR}/wolfcrypt/src/hmac.c
+#     ${COMP_WOLFSSL_DIR}/wolfcrypt/src/integer.c
+#     ${COMP_WOLFSSL_DIR}/wolfcrypt/src/md5.c
+#     ${COMP_WOLFSSL_DIR}/wolfcrypt/src/random.c
+#     ${COMP_WOLFSSL_DIR}/wolfcrypt/src/sha.c
+#     ${COMP_WOLFSSL_DIR}/wolfcrypt/src/sha256.c
+#     ${COMP_WOLFSSL_DIR}/wolfcrypt/src/wolfmath.c
+#     ${COMP_WOLFSSL_DIR}/port/ln_osal/wolfssl_port.c
+# )
+# include_directories(${COMP_WOLFSSL_DIR})
+# include_directories(${COMP_WOLFSSL_DIR}/port/ln_osal)
+# list(APPEND MODULE_SRC ${WOLFSSL_SRC})
+
+###################################  wpa_supplicant ############################
+# set(WPA_SUPPLICANT_SRC
+#     ${COMP_WPA_SUPPLICANT_DIR}/src/crypto/crypto_wolfssl.c
+#     ${COMP_WPA_SUPPLICANT_DIR}/src/crypto/sha256-prf.c
+# )
+# include_directories(${COMP_WPA_SUPPLICANT_DIR}/src)
+# list(APPEND MODULE_SRC ${WPA_SUPPLICANT_SRC})
+
+###################################  wifi ######################################
+set(WIFI_SRC
+    ${COMP_WIFI_DIR}/wpa_sae/ln_wpa_dragonfly.c
+    ${COMP_WIFI_DIR}/wpa_sae/ln_wpa_sae.c
+)
+include_directories(${COMP_WIFI_DIR}/wpa_sae)
+list(APPEND MODULE_SRC ${WIFI_SRC})

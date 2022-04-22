@@ -22,6 +22,12 @@
 #define PM_WIFI_DEFAULT_PS_MODE           (WIFI_NO_POWERSAVE)
 #define WIFI_TEMP_CALIBRATE               (1)
 
+#define WIFI_USER_USE_WPA3                (1) /* 0: Not use; 1: Use */
+
+#if (WIFI_USER_USE_WPA3 == 1)
+#include "ln_wpa_sae.h"
+#endif
+
 #define USR_APP_TASK_STACK_SIZE           (6*256) //Byte
 
 #if WIFI_TEMP_CALIBRATE
@@ -119,6 +125,10 @@ void wifi_init_sta(void)
 
     //3. wifi start
     wifi_manager_reg_event_callback(WIFI_MGR_EVENT_STA_SCAN_COMPLETE, &wifi_scan_complete_cb);
+
+#if (WIFI_USER_USE_WPA3 == 1)
+    ln_wpa_sae_enable();
+#endif
 
     if(WIFI_ERR_NONE != wifi_sta_start(mac_addr, ps_mode)){
         LOG(LOG_LVL_ERROR, "[%s]wifi sta start filed!!!\r\n", __func__);

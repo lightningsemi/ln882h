@@ -114,6 +114,8 @@ set(COMP_UTILS_DIR              ${LN_SDK_ROOT}/components/utils)
 set(COMP_LIBC_STUB_DIR          ${LN_SDK_ROOT}/components/libc)
 set(COMP_WIFI_DIR               ${LN_SDK_ROOT}/components/wifi)
 set(COMP_JOYLINKS_DIR           ${LN_SDK_ROOT}/components/joylink)
+set(COMP_WOLFSSL_DIR            ${LN_SDK_ROOT}/components/net/wolfssl)
+set(COMP_WPA_SUPPLICANT_DIR     ${LN_SDK_ROOT}/components/wpa_supplicant)
 
 if(DEFINED THIRD_PARTY_LWIP AND (THIRD_PARTY_LWIP))
     message(STATUS "LwIP: third-party provided.")

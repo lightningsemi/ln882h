@@ -33,6 +33,12 @@
 #define DEVICE_NAME_LEN              (sizeof(DEVICE_NAME))
 #define ADV_DATA_MAX_LENGTH          (28)
 
+#define WIFI_USER_USE_WPA3                (1) /* 0: Not use; 1: Use */
+
+#if (WIFI_USER_USE_WPA3 == 1)
+#include "ln_wpa_sae.h"
+#endif
+
 extern uint8_t svc_uuid[16];
 extern uint8_t con_num;
 static OS_Thread_t ble_g_usr_app_thread;
@@ -140,6 +146,10 @@ static void wifi_init_sta(void)
 
     //2. wifi start
     wifi_manager_reg_event_callback(WIFI_MGR_EVENT_STA_SCAN_COMPLETE, &wifi_scan_complete_cb);
+
+#if (WIFI_USER_USE_WPA3 == 1)
+    ln_wpa_sae_enable();
+#endif
 
     if(WIFI_ERR_NONE != wifi_sta_start(mac_addr, WIFI_NO_POWERSAVE)){
         LOG(LOG_LVL_ERROR, "[%s]wifi sta start filed!!!\r\n", __func__);

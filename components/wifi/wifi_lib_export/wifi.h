@@ -60,6 +60,7 @@ typedef enum {
     WIFI_AUTH_WPA2_PSK            = 3,   /**<  authenticate mode : WPA2_PSK */
     WIFI_AUTH_WPA_WPA2_PSK        = 4,   /**<  authenticate mode : WPA_WPA2_PSK */
     WIFI_AUTH_WPA2_ENTERPRISE     = 5,   /**<  authenticate mode : WPA2_ENTERPRISE */
+    WIFI_AUTH_WPA3_SAE            = 6,   /**<  authenticate mode : WPA3 SAE ECC */
     WIFI_AUTH_MAX
 } wifi_auth_mode_t;
 
@@ -123,13 +124,38 @@ typedef struct {
     int8_t                       rssi;
     int16_t                      freq_offset;
     uint8_t                      bgn;
-    uint8_t                      wps_en;
-    uint8_t                      is_hidden;
+    uint8_t                      wps_en:1;
+    uint8_t                      is_hidden:1;
+    uint8_t                      rsn_mfpr:1;
+    uint8_t                      rsn_mfpc:1;
+    uint8_t                      set_wpa_sae_support:1;
 } ap_info_t;
 
 typedef struct {
     uint8_t  mac_addr[6];
 } sta_info_t;
+
+typedef struct {
+    uint8_t *own_mac;
+    uint8_t *peer_mac;
+    uint8_t *password;
+    int password_len;
+    int group_id;
+} ln_wpa_sae_in_param_t;
+
+typedef struct {
+    int16_t auth_seq_num;
+    int16_t status_code;
+    const uint8_t *scalar;
+    const uint8_t *commit_element;
+} ln_wpa_sae_commit_info_t;
+
+typedef struct {
+    int16_t auth_seq_num;
+    int16_t status_code;
+    int16_t send_confirm;
+    uint8_t *confirm;
+} ln_wpa_sae_confirm_info_t;
 
 
 typedef void (*sta_startup_cb_t)(void);

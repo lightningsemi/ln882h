@@ -2,6 +2,8 @@ string(TOUPPER ${CHIP_SERIAL}  DEF_CHIP_SERIAL)
 add_compile_definitions(${DEF_CHIP_SERIAL})
 add_compile_definitions(ARM_MATH_CM4)
 add_compile_definitions("MBEDTLS_CONFIG_FILE=<mbedtls_config.h>")
+# add_compile_definitions(WOLFSSL_USER_SETTINGS)
+# add_compile_definitions(LN_WPA_SAE_SUPPORTED)
 
 set(CPU         "-mcpu=cortex-m4")
 set(FPU         "-mfpu=fpv4-sp-d16")

@@ -7,6 +7,7 @@
 
 #define WRAP_STDOUT_BUF_SIZE	(256)
 static char stdout_buf[WRAP_STDOUT_BUF_SIZE];
+static stdio_write_fn s_write_fn = NULL;
 
 #ifdef __CONFIG_OS_KERNEL
   #include "osal/osal.h"
@@ -57,6 +58,7 @@ void __sprintf(const char *tag, stdio_write_fn write, const char *format, va_lis
 
     if(write)
     {
+        s_write_fn = write;
         if (tag) {
             write(tag, strlen(tag));
         }
@@ -64,6 +66,25 @@ void __sprintf(const char *tag, stdio_write_fn write, const char *format, va_lis
     }
 
     printf_mutex_unlock();
+}
+
+int fputc(int ch, FILE *p)
+{
+    char c = (char)ch;
+    char ch_cr = '\r';
+
+    (void)p;
+    printf_mutex_lock();
+    if(s_write_fn)
+    {
+        if (c == '\n') {
+            s_write_fn((const char*)(&ch_cr), 1);
+        }
+        s_write_fn((const char*)(&c), 1);
+    }
+    printf_mutex_unlock();
+
+    return ch;
 }
 
 void __wrap_sprintf(stdio_write_fn write, const char *format, ...)

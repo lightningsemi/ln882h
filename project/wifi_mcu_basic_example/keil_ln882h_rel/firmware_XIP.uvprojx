@@ -337,9 +337,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>LN882H, ARM_MATH_CM4</Define>
+              <Define>LN882H, ARM_MATH_CM4,WOLFSSL_USER_SETTINGS,LN_WPA_SAE_SUPPORTED</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\components\net\lwip-2.1.3\src\include;..\..\..\components\net\lwip-2.1.3\src\port\ln_osal\include;..\cfg;..\bsp;..\app;..\..\..\components\fs\nvds;..\..\..\components\fs\partition_mgr;..\..\..\components\fs\kv\kv_port;..\..\..\components\fs\kv\kv;..\..\..\components\serial;..\..\..\components\net\dhcpd;..\..\..\components\net\iperf;..\..\..\components\net\ping;..\..\..\components\kernel;..\..\..\components\kernel\FreeRTOS\Source\include;..\..\..\components\kernel\FreeRTOS_Adapter;..\..\..\components\kernel\FreeRTOS\Source\portable\RVDS\ARM_CM4F;..\..\..\components;..\..\..\components\utils;..\..\..\components\utils\debug\runtime;..\..\..\components\utils\debug\reboot_trace;..\..\..\mcu\driver_ln882h;..\..\..\mcu\driver_ln882h\reg;..\..\..\mcu\CMSIS_5.3.0;..\..\..\mcu\ln882h;..\..\..\components\ln_at;..\..\..\components\ln_at\adapter;..\..\..\components\ln_at\cmd;..\..\..\components\ln_at\parser;..\..\..\components\ln_at\transfer;..\..\..\components\ln_at_cmd\system;..\..\..\components\wifi\wifi_lib_export;..\..\..\components\wifi\wifi_lib_import;..\..\..\components\wifi\wifi_manager</IncludePath>
+              <IncludePath>..\..\..\components\net\lwip-2.1.3\src\include;..\..\..\components\net\lwip-2.1.3\src\port\ln_osal\include;..\cfg;..\bsp;..\app;..\..\..\components\fs\nvds;..\..\..\components\fs\partition_mgr;..\..\..\components\fs\kv\kv_port;..\..\..\components\fs\kv\kv;..\..\..\components\serial;..\..\..\components\net\dhcpd;..\..\..\components\net\iperf;..\..\..\components\net\ping;..\..\..\components\kernel;..\..\..\components\kernel\FreeRTOS\Source\include;..\..\..\components\kernel\FreeRTOS_Adapter;..\..\..\components\kernel\FreeRTOS\Source\portable\RVDS\ARM_CM4F;..\..\..\components;..\..\..\components\utils;..\..\..\components\utils\debug\runtime;..\..\..\components\utils\debug\reboot_trace;..\..\..\mcu\driver_ln882h;..\..\..\mcu\driver_ln882h\reg;..\..\..\mcu\CMSIS_5.3.0;..\..\..\mcu\ln882h;..\..\..\components\ln_at;..\..\..\components\ln_at\adapter;..\..\..\components\ln_at\cmd;..\..\..\components\ln_at\parser;..\..\..\components\ln_at\transfer;..\..\..\components\ln_at_cmd\system;..\..\..\components\wifi\wifi_lib_export;..\..\..\components\wifi\wifi_lib_import;..\..\..\components\wifi\wifi_manager;..\..\..\components\net\wolfssl;..\..\..\components\net\wolfssl\port\ln_osal;..\..\..\components\wpa_supplicant\src;..\..\..\components\wifi\wpa_sae</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1173,6 +1173,101 @@
               <FileName>lwipopts.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\components\net\lwip-2.1.3\src\port\ln_osal\include\lwipopts.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>wolfssl/wolfcrypt/src</GroupName>
+          <Files>
+            <File>
+              <FileName>aes.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\net\wolfssl\wolfcrypt\src\aes.c</FilePath>
+            </File>
+            <File>
+              <FileName>cmac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\net\wolfssl\wolfcrypt\src\cmac.c</FilePath>
+            </File>
+            <File>
+              <FileName>ecc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\net\wolfssl\wolfcrypt\src\ecc.c</FilePath>
+            </File>
+            <File>
+              <FileName>hmac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\net\wolfssl\wolfcrypt\src\hmac.c</FilePath>
+            </File>
+            <File>
+              <FileName>integer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\net\wolfssl\wolfcrypt\src\integer.c</FilePath>
+            </File>
+            <File>
+              <FileName>md5.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\net\wolfssl\wolfcrypt\src\md5.c</FilePath>
+            </File>
+            <File>
+              <FileName>random.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\net\wolfssl\wolfcrypt\src\random.c</FilePath>
+            </File>
+            <File>
+              <FileName>sha.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\net\wolfssl\wolfcrypt\src\sha.c</FilePath>
+            </File>
+            <File>
+              <FileName>sha256.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\net\wolfssl\wolfcrypt\src\sha256.c</FilePath>
+            </File>
+            <File>
+              <FileName>wolfmath.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\net\wolfssl\wolfcrypt\src\wolfmath.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>wolfssl/port</GroupName>
+          <Files>
+            <File>
+              <FileName>wolfssl_port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\net\wolfssl\port\ln_osal\wolfssl_port.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>wpa_supplicant/src/crypto</GroupName>
+          <Files>
+            <File>
+              <FileName>crypto_wolfssl.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\wpa_supplicant\src\crypto\crypto_wolfssl.c</FilePath>
+            </File>
+            <File>
+              <FileName>sha256-prf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\wpa_supplicant\src\crypto\sha256-prf.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>ln_wpa_sae</GroupName>
+          <Files>
+            <File>
+              <FileName>ln_wpa_dragonfly.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\wifi\wpa_sae\ln_wpa_dragonfly.c</FilePath>
+            </File>
+            <File>
+              <FileName>ln_wpa_sae.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\wifi\wpa_sae\ln_wpa_sae.c</FilePath>
             </File>
           </Files>
         </Group>
