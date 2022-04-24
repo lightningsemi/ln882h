@@ -81,7 +81,7 @@ a lot of data that needs to be copied, this should be set high. */
 /*  TCP_SND_QUEUELEN: TCP sender buffer space (pbufs). This must be at least as much as (2 * TCP_SND_BUF/TCP_MSS) for things to work. */
 #define TCP_SND_QUEUELEN        (5 * TCP_SND_BUF/TCP_MSS)
 /* TCP receive window. */
-#define TCP_WND                 (6 * TCP_MSS)
+#define TCP_WND                 (3 * TCP_MSS)
 /* Maximum number of retransmissions of data segments. */
 #define TCP_MAXRTX              (12)
 /* Maximum number of retransmissions of SYN segments. */
@@ -107,6 +107,7 @@ a lot of data that needs to be copied, this should be set high. */
 /* ---------- UDP options ---------- */
 #define LWIP_UDP                1
 #define UDP_TTL                 255
+#define LWIP_NETBUF_RECVINFO    1
 
 /* -----Support netif api------------*/
 #define LWIP_NETIF_API          1

@@ -13,14 +13,14 @@
 /****************************  Data types and Macros  ************************/
 #define FLASH_QUAD_READ_DUMMY_CLOCKS    8
 
-#define FLASH_SECURITY_SIZE_MAX  (4*256)
-#define FLASH_SECURITY_PAGE_SIZE (256)
-        
-#define FLASH_PAGE_SIZE         (256)
-#define FALSH_SIZE_4K           (4 *1024)
-#define FALSH_SIZE_BLOCK_32K    (32*1024)
-#define FALSH_SIZE_BLOCK_64K    (64*1024)
-#define FALSH_SIZE_MAX		    (4 *1024*1024)
+#define FLASH_SECURITY_SIZE_MAX         (4*256)
+#define FLASH_SECURITY_PAGE_SIZE        (256)
+
+#define FLASH_PAGE_SIZE                 (256)
+#define FLASH_SECTOR_4K                 (1024 * 4)
+#define FLASH_SECTOR_32K                (1024 * 32)
+#define FLASH_SECTOR_64K                (1024 * 64)
+#define FLASH_SIZE_MAX		            (1024 * 1024 * 4)
 
 
 typedef enum

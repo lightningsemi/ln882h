@@ -288,7 +288,7 @@ void wlib_assert(int expr, const char *fun, int line)
 #include "utils/ln_mem_pool.h"
 #define SNIFFER_MEM_POOL_USE_DYNAMIC_MEM   (1)
 #define SNIFFER_MEM_POOL_CHUNK_CNT         (50) // Office environment maximum use 32
-#define SNIFFER_MEM_POOL_CHUNK_BUF_SIZE    (30)
+#define SNIFFER_MEM_POOL_CHUNK_BUF_SIZE    (32)
 #define SNIFFER_MEM_POOL_CHUNK_SIZE        (MEM_POOL_CHUNK_INFO_SIZE + SNIFFER_MEM_POOL_CHUNK_BUF_SIZE)
 static ln_mem_pool_t sniffer_mem_pool = {0};
 

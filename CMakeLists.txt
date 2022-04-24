@@ -31,9 +31,10 @@ if(NOT DEFINED VENDOR_SDK_ADAPTED)
     #######################   NOTE: select user project here  ##################
     ############################################################################
     if(NOT DEFINED USER_PROJECT)
+	    set(USER_PROJECT wifi_smartliving_demo)
         # set(USER_PROJECT  wifi_mcu_basic_example)
         # set(USER_PROJECT  ble_mcu_data_trans)
-        set(USER_PROJECT  combo_mcu_basic_example)
+        # set(USER_PROJECT  combo_mcu_basic_example)
         # set(USER_PROJECT  mcu_peripheral_driver_test)
         message(STATUS "<SET> USER_PROJECT = ${USER_PROJECT}")
     else()
@@ -89,13 +90,16 @@ option(COMP_WIFI_SUPPORT        "LN WiFi firmware."                         OFF)
 option(COMP_BLE_SUPPORT         "LN BLE  firmware."                         OFF)
 
 #----------------------------  library  choosen by customer  -------------------
-option(COMP_DHCPD_SUPPORT       "DHCP client."                              OFF)
-option(COMP_LWIP_SUPPORT        "Light weight TCP/IP stack."                OFF)
+option(COMP_DHCPD_SUPPORT           "DHCP client."                          OFF)
+option(COMP_LWIP_SUPPORT            "Light weight TCP/IP stack."            OFF)
+option(COMP_MBEDTLS_SUPPORT         "MbedTLS library."                      ON)
+option(COM_SMARTLIVING_SUPPORT      "Alibaba Smartliving SDk"               ON)
 
 ################################################################################
 ###########################   define module top dir   ##########################
 ################################################################################
 set(MCU_LN882X_DIR              ${LN_SDK_ROOT}/mcu)
+set(COMP_TOP_DIR                ${LN_SDK_ROOT}/components)
 set(COMP_BLE_DIR                ${LN_SDK_ROOT}/components/ble)
 set(COMP_FOTA_DIR               ${LN_SDK_ROOT}/components/fota)
 set(COMP_KV_DIR                 ${LN_SDK_ROOT}/components/fs/kv)
@@ -105,10 +109,12 @@ set(COMP_KERNEL_DIR             ${LN_SDK_ROOT}/components/kernel)
 set(COMP_LNAT_DIR               ${LN_SDK_ROOT}/components/ln_at)
 set(COMP_LNAT_CMD_DIR           ${LN_SDK_ROOT}/components/ln_at_cmd)
 set(COMP_DHCPD_DIR              ${LN_SDK_ROOT}/components/net/dhcpd)
+set(COMP_MBEDTLS_DIR            ${LN_SDK_ROOT}/components/net/mbedtls)
 set(COMP_IPERF_DIR              ${LN_SDK_ROOT}/components/net/iperf)
 set(COMP_PING_DIR               ${LN_SDK_ROOT}/components/net/ping)
 set(COMP_HTTPSCLIENT_DIR        ${LN_SDK_ROOT}/components/net/httpsclient)
 set(COMP_MBEDTLS_DIR            ${LN_SDK_ROOT}/components/net/mbedtls)
+set(COMP_SMARTLIVING_DIR        ${LN_SDK_ROOT}/components/cloud_kit/smartliving_sdk)
 set(COMP_SERIAL_DIR             ${LN_SDK_ROOT}/components/serial)
 set(COMP_UTILS_DIR              ${LN_SDK_ROOT}/components/utils)
 set(COMP_LIBC_STUB_DIR          ${LN_SDK_ROOT}/components/libc)

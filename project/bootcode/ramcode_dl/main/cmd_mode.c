@@ -252,8 +252,8 @@ int cmd_flash_erase(bootram_cmd_tbl_t* cmdtbl, int argc, char* argv[])
     if (argv[2]) {
         size = strtoul(argv[2], NULL, 0);
     }
-    size = MIN(FALSH_SIZE_MAX - flash_offset, size);
-    if (size != 0 && (flash_offset + size) < FALSH_SIZE_MAX) {
+    size = MIN(FLASH_SIZE_MAX - flash_offset, size);
+    if (size != 0 && (flash_offset + size) < FLASH_SIZE_MAX) {
         bootram_flash_erase(flash_offset, size);
 
         echo_result(1);
@@ -367,7 +367,7 @@ int cmd_flash_dump(bootram_cmd_tbl_t* cmdtbl, int argc, char* argv[])
     if (argv[2]) {
         size = strtoul(argv[2], NULL, 0);
     }
-    size = MIN(FALSH_SIZE_MAX - flash_offset, size);
+    size = MIN(FLASH_SIZE_MAX - flash_offset, size);
     if (size > 0) {
         page_num = size / FLASH_PAGE_SIZE;
         for (i = 0; i < page_num; i++) {
@@ -405,9 +405,9 @@ int cmd_flash_dump(bootram_cmd_tbl_t* cmdtbl, int argc, char* argv[])
 #if (defined(DEBUG_FLASH_ROBUST) && (DEBUG_FLASH_ROBUST == 1))
 static int flash_robust(bootram_cmd_tbl_t* cmdtbl, int argc, char* argv[])
 {
-    const uint32_t FLASH_ERASE_SIZE_MIN = FALSH_SIZE_4K;
+    const uint32_t FLASH_ERASE_SIZE_MIN = FLASH_SECTOR_4K;
     const uint32_t FLASH_START_ADDRESS  = FLASH_BASE_OFFSET;
-    const uint32_t FLASH_STOP_ADDRESS = FLASH_START_ADDRESS + FALSH_SIZE_MAX - FLASH_ERASE_SIZE_MIN;
+    const uint32_t FLASH_STOP_ADDRESS = FLASH_START_ADDRESS + FLASH_SIZE_MAX - FLASH_ERASE_SIZE_MIN;
 
     uint8_t  page_data[FLASH_PAGE_SIZE] = {0};
     uint8_t  read_back[FLASH_PAGE_SIZE] = {0};

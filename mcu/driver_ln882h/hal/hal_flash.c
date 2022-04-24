@@ -75,7 +75,7 @@ uint8_t hal_flash_read(uint32_t offset, uint32_t length, uint8_t *buffer)
     uint8_t remainder = (length - shift) % sizeof(uint32_t);
     uint8_t read_cmd_buf[4];
 
-    hal_assert( (offset+length) <= FALSH_SIZE_MAX );
+    hal_assert( (offset+length) <= FLASH_SIZE_MAX );
 #if (FLASH_XIP == 1)
     GLOBAL_INT_DISABLE();
     flash_cache_disable();
@@ -118,7 +118,7 @@ uint8_t hal_flash_read_by_cache(uint32_t offset, uint32_t length, uint8_t *buffe
 {
     uint32_t addr = 0;
     uint32_t i = 0;
-    hal_assert( (offset+length) <= FALSH_SIZE_MAX );
+    hal_assert( (offset+length) <= FLASH_SIZE_MAX );
 
     addr = CACHE_FLASH_BASE + offset;
     for(i = 0; i < length; i++){
@@ -212,8 +212,8 @@ static uint8_t hal_flash_erase_block(uint32_t offset, flash_erase_type_t type)
  */
 void hal_flash_erase(uint32_t offset, uint32_t length)
 {
-    hal_assert((offset%FALSH_SIZE_4K == 0));
-    hal_assert((length%FALSH_SIZE_4K == 0));
+    hal_assert((offset%FLASH_SECTOR_4K == 0));
+    hal_assert((length%FLASH_SECTOR_4K == 0));
 
     uint16_t num_32k = 0, num_4k = 0, i;
 
@@ -223,34 +223,34 @@ void hal_flash_erase(uint32_t offset, uint32_t length)
     uint32_t remainder_len  = 0;
 
     tmpoffset = offset;
-    if(length >= FALSH_SIZE_BLOCK_32K){
-        tailing_length = ((offset&(~(FALSH_SIZE_BLOCK_32K-1))) + FALSH_SIZE_BLOCK_32K) - offset;
-        tailing_4k_num = tailing_length / FALSH_SIZE_4K;
+    if(length >= FLASH_SECTOR_32K){
+        tailing_length = ((offset&(~(FLASH_SECTOR_32K-1))) + FLASH_SECTOR_32K) - offset;
+        tailing_4k_num = tailing_length / FLASH_SECTOR_4K;
 
         for(i = 0; i < tailing_4k_num; i++){
             hal_flash_erase_block(tmpoffset, ERASE_SECTOR_4KB);
-            tmpoffset += FALSH_SIZE_4K;
+            tmpoffset += FLASH_SECTOR_4K;
         }
 
         remainder_len = length - tailing_length;
-        num_32k       = remainder_len / FALSH_SIZE_BLOCK_32K;
-        remainder_len = remainder_len % FALSH_SIZE_BLOCK_32K;
-        num_4k        = remainder_len / FALSH_SIZE_4K + ((remainder_len % FALSH_SIZE_4K) ? 1:0);
+        num_32k       = remainder_len / FLASH_SECTOR_32K;
+        remainder_len = remainder_len % FLASH_SECTOR_32K;
+        num_4k        = remainder_len / FLASH_SECTOR_4K + ((remainder_len % FLASH_SECTOR_4K) ? 1:0);
 
         for(i = 0; i < num_32k; i++){
             hal_flash_erase_block(tmpoffset, ERASE_BLOCK_32KB);
-            tmpoffset += FALSH_SIZE_BLOCK_32K;
+            tmpoffset += FLASH_SECTOR_32K;
         }
 
         for(i = 0; i < num_4k; i++){
             hal_flash_erase_block(tmpoffset, ERASE_SECTOR_4KB);
-            tmpoffset += FALSH_SIZE_4K;
+            tmpoffset += FLASH_SECTOR_4K;
         }
     }else{
-        num_4k        = length / FALSH_SIZE_4K + ((length % FALSH_SIZE_4K) ? 1:0);
+        num_4k        = length / FLASH_SECTOR_4K + ((length % FLASH_SECTOR_4K) ? 1:0);
         for(i = 0; i < num_4k; i++){
             hal_flash_erase_block(tmpoffset, ERASE_SECTOR_4KB);
-            tmpoffset += FALSH_SIZE_4K;
+            tmpoffset += FLASH_SECTOR_4K;
         }
     }
 }
@@ -296,7 +296,7 @@ static void hal_flash_page_program_general(flash_area_t type, uint32_t offset, u
 
 static uint8_t hal_flash_program_general(flash_area_t type, uint32_t offset, uint32_t length, uint8_t *buffer)
 {
-    hal_assert(offset < FALSH_SIZE_MAX);
+    hal_assert(offset < FLASH_SIZE_MAX);
 
     uint32_t page_base = offset&(~(FLASH_PAGE_SIZE-1));
     uint16_t cycles = 0;

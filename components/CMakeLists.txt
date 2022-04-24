@@ -18,3 +18,12 @@ endif()
 if(COMP_DHCPD_SUPPORT)
   add_subdirectory(${COMP_DHCPD_DIR})
 endif()
+
+if(COMP_MBEDTLS_SUPPORT)
+  add_subdirectory(${COMP_MBEDTLS_DIR})
+endif()
+
+add_subdirectory(cloud_kit)
+if(COM_SMARTLIVING_SUPPORT)
+  add_subdirectory(${COMP_SMARTLIVING_DIR})
+endif()

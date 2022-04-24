@@ -39,7 +39,7 @@ set(src_crypto
     md.c
     md2.c
     md4.c
-    md5.c
+    md5_mbedtls.c
     md_wrap.c
     memory_buffer_alloc.c
     nist_kw.c
@@ -144,7 +144,7 @@ elseif(USE_STATIC_MBEDTLS_LIBRARY)
 endif()
 
 # NOTE: external lib from lightningsemi
-set(libs  ${libs}  components::net::lwip  components::kernel)
+set(libs  ${libs}  lwip)
 
 if(USE_STATIC_MBEDTLS_LIBRARY)
     add_library(${mbedcrypto_static_target} STATIC ${src_crypto})
