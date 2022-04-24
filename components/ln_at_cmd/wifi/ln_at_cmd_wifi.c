@@ -594,14 +594,6 @@ static ln_at_err_t _ln_at_parse_cwjap(uint8_t para_num, const char *name)
         goto __exit;
     }
 
-    // wifi_sta_disconnect();
-    wifi_stop();
-    netdev_set_state(NETIF_IDX_STA, NETDEV_DOWN);
-
-    netdev_set_mac_addr(NETIF_IDX_STA, mac_addr);
-    netdev_set_active(NETIF_IDX_STA);
-    wifi_sta_start(mac_addr, ps_mode);
-
     conn.ssid = ssid_p;
     conn.pwd = pwd_p;
     conn.bssid = ((bssid_p != NULL) ? bssid_hex : NULL);
@@ -623,10 +615,13 @@ static ln_at_err_t _ln_at_parse_cwjap(uint8_t para_num, const char *name)
         }
     }
 
-    // if (0 != wifi_stop())
-    // {
-    //     goto __exit;
-    // }
+    wifi_sta_disconnect();
+    wifi_stop();
+    netdev_set_state(NETIF_IDX_STA, NETDEV_DOWN);
+
+    netdev_set_mac_addr(NETIF_IDX_STA, mac_addr);
+    netdev_set_active(NETIF_IDX_STA);
+    wifi_sta_start(mac_addr, ps_mode);
 
     if (wifi_sta_connect(&conn, &scan_cfg) != 0)
     {
