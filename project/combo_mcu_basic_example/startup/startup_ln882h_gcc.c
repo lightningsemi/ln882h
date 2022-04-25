@@ -81,15 +81,20 @@ __WEAK__ void AES_IRQHandler         (void);
 __WEAK__ void TRNG_IRQHandler        (void);
 __WEAK__ void PAOTD_IRQHandler       (void);
 
-
 /*----------------------------------------------------------------------------
   User Initial Stack & Heap
  *----------------------------------------------------------------------------*/
 //<h> Stack Configuration
 //  <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
 //</h>
-#define  __STACK_SIZE  0x00000800
+#define  __STACK_SIZE  0x00000600
 static uint8_t stack[__STACK_SIZE] __attribute__ ((aligned(8), used, section(".stack")));
+
+void test_dump_main_stack(void)
+{
+    extern void hexdump(uint8_t level, const char *info, void *buff, uint32_t count);
+    hexdump(0, "main stack", stack, sizeof(stack));
+}
 
 #if 0
 //<h> Heap Configuration

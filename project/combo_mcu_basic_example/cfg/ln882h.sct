@@ -23,8 +23,6 @@ LR_FLASH CACHE_FLASH_BASE+APP_SPACE_OFFSET+IMAGE_HEADER_SIZE APP_SPACE_SIZE
         hal_qspi.o(+RO)
         hal_cache.o(+RO)
         
-        hal_sleep.o(+RO)
-        
         hal_flash.o(+RO)
         
         ;hal_rtc.o(+RO)
@@ -51,20 +49,14 @@ LR_FLASH CACHE_FLASH_BASE+APP_SPACE_OFFSET+IMAGE_HEADER_SIZE APP_SPACE_SIZE
 		.ANY (+RW +ZI)
     }
 
-    HEAP_SPACE0 +0 EMPTY RETENTION_MEM_BASE-ImageLimit(ER_DATA0)
+    HEAP_SPACE0 +0 EMPTY (RETENTION_MEM_BASE+RETENTION_MEM_SIZE-1024)-ImageLimit(ER_DATA0)
     {; Heap region
     }
 
 
-    NO_INIT_DATA RETENTION_MEM_BASE  UNINIT 0x80
+    NO_INIT_DATA (RETENTION_MEM_BASE+RETENTION_MEM_SIZE-1024) UNINIT 1024
     {
         *(.no_init_data)
     }
-
-    RETENTION RETENTION_MEM_BASE+0x80 ANY_SIZE 0x2000-0x80-16 RETENTION_MEM_SIZE
-    {
-        *(retention_data)
-    }
 }
-
 

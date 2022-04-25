@@ -185,7 +185,7 @@ a lot of data that needs to be copied, this should be set high. */
 /*----------- OS options ------------*/
 #define TCPIP_THREAD_NAME              "TCP/IP"
 #define TCPIP_THREAD_PRIO               OS_PRIORITY_ABOVE_NORMAL
-#define TCPIP_THREAD_STACKSIZE          (4*1024)
+#define TCPIP_THREAD_STACKSIZE          (3*1024)
 
 #define TCPIP_MBOX_SIZE                 32
 #define DEFAULT_RAW_RECVMBOX_SIZE       8

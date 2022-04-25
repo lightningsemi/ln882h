@@ -14,7 +14,6 @@ typedef enum {
 
 typedef struct {
     uint64_t        reboot_magic;         /*< reboot cause magic code */
-    uint8_t         res_data[120];        /*< reserved no init data, customer planning */
 } chip_no_init_data_t;
 
 typedef enum

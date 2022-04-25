@@ -69,6 +69,7 @@ __STATIC_INLINE int OS_IsISRContext(void)
 
 
 void OS_DefineHeapRegions(void);
+int OS_HeapSizeGet(void);
 
 #ifdef __cplusplus
 }

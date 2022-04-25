@@ -55,6 +55,23 @@ __STATIC_INLINE__ void ap_list_remove_life_timeout_node(ap_info_list_ctrl_t *lis
     }
 }
 
+
+void wifi_manager_cleanup_scan_results(void)
+{
+    ap_info_list_ctrl_t *list_ctrl = &ap_info_list_ctrl;
+    ap_info_node_t *pnode, *tmp;
+
+    OS_MutexLock(&list_ctrl->lock, OS_WAIT_FOREVER);
+    LN_LIST_FOR_EACH_ENTRY_SAFE(pnode, tmp, ap_info_node_t, list, &list_ctrl->list) {
+        ln_list_rm(&pnode->list);
+        OS_Free(pnode);
+        list_ctrl->node_count--;
+    }
+
+    list_ctrl->update_ticks = 0;
+    OS_MutexUnlock(&list_ctrl->lock);
+}
+
 int wifi_manager_ap_list_update_enable(int en)
 {
     ap_info_list_ctrl_t * list_ctrl = &ap_info_list_ctrl;
@@ -197,6 +214,8 @@ static void sta_connected(void)
     if (event_cb[WIFI_MGR_EVENT_STA_CONNECTED]) {
         event_cb[WIFI_MGR_EVENT_STA_CONNECTED](NULL);
     }
+    // Cleanup scan results
+    wifi_manager_cleanup_scan_results();
 }
 
 static void sta_disconnected(void)

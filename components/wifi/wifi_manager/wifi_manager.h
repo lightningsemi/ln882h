@@ -47,7 +47,7 @@ int  wifi_manager_reg_event_callback(wifi_mgr_event_t event, wifi_mgr_event_cb_t
 int  wifi_manager_get_ap_list(ln_list_t **list, uint8_t * node_count);
 int  wifi_manager_set_ap_list_sort_rule(sort_rule_t rule);
 int  wifi_manager_ap_list_update_enable(int en);
-
+void wifi_manager_cleanup_scan_results(void);
 
 
 #ifdef __cplusplus

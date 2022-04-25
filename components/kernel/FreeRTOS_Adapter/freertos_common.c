@@ -46,4 +46,7 @@ void OS_DefineHeapRegions(void)
     vPortDefineHeapRegions(xHeapRegions);
 }
 
-
+int OS_HeapSizeGet(void)
+{
+    return HEAP0_LEN;
+}

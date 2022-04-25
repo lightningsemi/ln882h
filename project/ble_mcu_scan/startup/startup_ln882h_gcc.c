@@ -88,7 +88,7 @@ __WEAK__ void PAOTD_IRQHandler       (void);
 //<h> Stack Configuration
 //  <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
 //</h>
-#define  __STACK_SIZE  0x00000800
+#define  __STACK_SIZE  0x000006800
 static uint8_t stack[__STACK_SIZE] __attribute__ ((aligned(8), used, section(".stack")));
 
 #if 0

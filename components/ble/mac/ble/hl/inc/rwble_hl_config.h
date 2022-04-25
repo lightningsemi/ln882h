@@ -72,7 +72,8 @@
 #define GAP_TMR_LECB_DISCONN_TIMEOUT                        0x0BB8
 
 /// Maximal authorized MTU value - Implementation supports up to (2^12 -1) = 4095 bytes
-#define GAP_MAX_LE_MTU                                     (2048)
+/// origin:2048; Android: 512; apple: 185;
+#define GAP_MAX_LE_MTU                                     (512)
 
 /// Maximum GAP device name size
 #define GAP_MAX_NAME_SIZE                                  (0x20)

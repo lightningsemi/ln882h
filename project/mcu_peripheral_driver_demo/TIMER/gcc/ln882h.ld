@@ -23,7 +23,6 @@ SECTIONS
 		*hal_qspi.o*(.text*)
 		*hal_cache.o*(.text*)
 		*hal_dma.o*(.text*)
-		*hal_sleep.o*(.text*)
 		*hal_rtc.o*(.text*)
 		*qspi.o*(.text*)
 		*flash.o*(.text*)

@@ -8,6 +8,24 @@
     </tr>
     <tr>
         <td>
+            2022-04-25 16:50:00
+        </td>
+        <td>
+            no version
+        </td>
+        <td>
+            acf49953
+        </td>
+        <td>
+            1. 涂鸦工程增加 ATE 业务逻辑 <br />
+            2. 更新 ble MTU 配置为 512；更新主栈为 1.5K；更新 lwip 任务栈为 3K；更新 RETENTION 区为 1K。 <br /> 用于增加可用内存 <br />
+            3. AT+CWJAP 指令优化 <br />
+            4. 修复 beacon 解析函数 ssid 匹配问题 <br />
+            5. 增加清除 scan 结果的 API wifi_manager_cleanup_scan_results() <br />
+        </td>
+    </tr>
+    <tr>
+        <td>
             2022-04-15 12:09:00
         </td>
         <td>

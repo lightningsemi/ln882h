@@ -5,12 +5,12 @@
 
 #include "hal/hal_misc.h"
 
-static uint8_t  no_init_data[128]  __attribute__((section(".no_init_data"),aligned(8))) __ZERO_INIT__;
+static chip_no_init_data_t s_chip_no_init_data __attribute__((section(".no_init_data"),aligned(8))) __ZERO_INIT__;
 
 static int ln_chip_set_reboot_cause(chip_reboot_cause_t cause)
 {
     chip_no_init_data_t * pdata = NULL;
-    pdata = (chip_no_init_data_t *) no_init_data;
+    pdata = (chip_no_init_data_t *)(&s_chip_no_init_data);
 
     switch (cause)
     {
@@ -31,7 +31,7 @@ static chip_reboot_cause_t get_reboot_cause(void)
 {
     chip_reboot_cause_t cause = CHIP_REBOOT_POWER_ON;
     chip_no_init_data_t * pdata = NULL;
-    pdata = (chip_no_init_data_t *) no_init_data;
+    pdata = (chip_no_init_data_t *)(&s_chip_no_init_data);
 
     if (pdata->reboot_magic == WATCHDOG_BOOT_MAGIC) {
         cause = CHIP_REBOOT_WATCHDOG;

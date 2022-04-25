@@ -23,9 +23,17 @@ LR_FLASH CACHE_FLASH_BASE+APP_SPACE_OFFSET+IMAGE_HEADER_SIZE APP_SPACE_SIZE
         hal_qspi.o(+RO)
         hal_cache.o(+RO)
         hal_flash.o(+RO)
+        
+        ;hal_rtc.o(+RO)
+        
         port.o(XIR)
 
         ;optional item
+        ;hal_uart.o(+RO)
+        ;log.o(+RO)
+        ;serial.o(+RO)
+        ;serial_art2000.o(+RO)
+        ;fifobuf.o(+RO)
     }
 
     ER_STACK +0
@@ -35,17 +43,19 @@ LR_FLASH CACHE_FLASH_BASE+APP_SPACE_OFFSET+IMAGE_HEADER_SIZE APP_SPACE_SIZE
 
     ER_DATA0 +0 
     {
+		*(wlan_mem_pkt)
+		*(wlan_mem_dscr)
 		.ANY (+RW +ZI)
     }
 
-    HEAP_SPACE0 +0 EMPTY ((SRAM3_2_BASE-0x80)-ImageLimit(ER_DATA0))
+    HEAP_SPACE0 +0 EMPTY (RETENTION_MEM_BASE+RETENTION_MEM_SIZE-1024)-ImageLimit(ER_DATA0)
     {; Heap region
     }
 
-    NO_INIT_DATA (SRAM3_2_BASE-0x80) UNINIT 0x80
+
+    NO_INIT_DATA (RETENTION_MEM_BASE+RETENTION_MEM_SIZE-1024) UNINIT 1024
     {
         *(.no_init_data)
     }
 }
-
 
