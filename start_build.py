@@ -169,6 +169,52 @@ def action_jflash():
     print("------  reset the chip and the code starts running...  ------")
 
 
+def do_merge_fw(fw_list, offset_list, outfile):
+    print("--> do_merge_fw")
+
+    final_file_size = os.path.getsize(os.path.join(os.getcwd(), fw_list[-1])) + int(offset_list[-1], 16)
+    max_buffer_size = final_file_size
+    final_fw_buffer = bytearray(max_buffer_size)
+    final_fw_buffer = final_fw_buffer.replace(b'\x00', b'\xFF')
+
+    for fw, offset in zip(fw_list, offset_list):
+        file = os.path.join(os.getcwd(), fw)
+        try:
+            with open(file, "rb") as fObj:
+                file_content = fObj.read()
+                file_size = os.path.getsize(file)
+                offset_oct = int(offset, 16)
+                final_fw_buffer[offset_oct:file_size] = file_content[:]
+        except Exception as err:
+            print("--> Error: open file <{}> failed: {}".format(str(file), str(err)))
+            return False
+
+    outfile_path = os.path.join(os.getcwd(), outfile)
+    if os.path.exists(outfile_path):
+        os.remove(outfile_path)
+
+    try:
+        with open(outfile_path, "wb") as fObj:
+            fObj.write(final_fw_buffer[0:final_file_size])
+            fObj.flush()
+    except Exception as err:
+        print("--> Error: open file <{}> failed: {}".format(str(outfile_path), str(err)))
+        return False
+
+    print("--> Final file <{}> size: {}".format(str(outfile), final_file_size))
+
+    # output firmware relative location
+    print("="*80)
+    i = 0
+    for fw, offset in zip(fw_list, offset_list):
+        i+=1
+        print("    %10.10s    |    %s" % (str(offset), str(fw)))
+        if (i < len(fw_list)):
+            print("-" * 80)
+    print("="*80)
+    print("--> fw merge complete")
+    print("-" * 80)
+
 def call_sdk_env_check():
     script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "python_scripts", "sdk_env_check.py")
     try:
@@ -194,32 +240,69 @@ if __name__ == "__main__":
     usage = "" \
     """
     *****************************  usage  *****************************
-    argv[1] -- build action, such as clean/config/build/rebuild/jflash.
-    Example:
+    Command Class-A:
+        argv[1] -- build action, such as clean/config/build/rebuild/jflash.
+        Example:
                 python3   {}   rebuild
+
+    Command Class-B:
+        command line arguments:
+            merge_fw --fw <A.bin> --offset <a> --fw <B.bin> --offset <b> --out <outfile.bin>
+            --fw    : Binary format file
+            --offset: The offset is the offset from zero address, hex type
+                      Offset value must be in order from smallest to largest.
+            --out   : Specify the output file name
+        Example:
+                python3  {}  merge_fw --fw A.bin --offset 0x1000 --fw B.bin --offset 0x2000 --out outfile.bin
+                ---------------------------------------------------
+                             addr     |  0    | 0x1000  | 0x2000  |
+                ---------------------------------------------------
+                outfile.bin  firmware |       | A.bin   | B.bin   |
+                ---------------------------------------------------
     *******************************************************************
-    """.format(os.path.basename(__file__))
+    """.format(os.path.basename(__file__), os.path.basename(__file__))
 
-    parser = argparse.ArgumentParser(prog=prog, description=desc, usage=usage)
-    parser.add_argument("action", help="build action MUST be provided.", type=str,
-                        choices=["clean", "config", "build", "rebuild", "jflash"])
-    args = parser.parse_args()
-    if not args.action:
-        show_usage()
-        exit(-1)
+    if sys.argv[1] == "merge_fw":
+        print("-" * 80)
+        print("--> merge_fw process started")
+        parser = argparse.ArgumentParser(prog=prog, description=desc, usage=usage)
+        subparser = parser.add_subparsers(title='subcommands', help="sub-command help")
+        merge_fw_parser = subparser.add_parser("merge_fw", help="merge_fw command")
 
-    user_action = args.action
+        merge_fw_parser.add_argument("--fw", help="firware name", type=str,
+                action='append', required=True)
+        merge_fw_parser.add_argument("--offset", help="firware offset <hex>",
+                type=lambda x: hex(int(x,0)), action='append', required=True)
+        merge_fw_parser.add_argument("--out", help="outfile name",
+                type=str, required=True)
 
-    valid_action_collection = {
-        "clean":   action_clean,
-        "config":  action_config,
-        "build":   action_build,
-        "rebuild": action_rebuild,
-        "jflash":  action_jflash
-    }
+        args = parser.parse_args()
+        do_merge_fw(args.fw, args.offset, args.out)
+        exit(0)
+    else:
+        parser = argparse.ArgumentParser(prog=prog, description=desc, usage=usage)
+        parser.add_argument("action", help="build action MUST be provided.", type=str,
+                            choices=["clean", "config", "build", "rebuild", "jflash"])
 
-    if not read_cmake_config():
-        exit(-1)
+        args = parser.parse_args()
+        print(args)
 
-    valid_action_collection.get(user_action)()
-    exit(0)
+        if not args.action:
+            show_usage()
+            exit(-1)
+
+        user_action = args.action
+
+        valid_action_collection = {
+            "clean":   action_clean,
+            "config":  action_config,
+            "build":   action_build,
+            "rebuild": action_rebuild,
+            "jflash":  action_jflash,
+        }
+
+        if not read_cmake_config():
+            exit(-1)
+
+        valid_action_collection.get(user_action)()
+        exit(0)

@@ -74,10 +74,11 @@ static int ota_download_precheck(uint32_t app_offset, image_hdr_t * ota_hdr)
         // check version
         if (((ota_hdr->ver.ver_major << 8) + ota_hdr->ver.ver_minor) == \
             ((app_hdr->ver.ver_major << 8) + app_hdr->ver.ver_minor)) {
-            LOG(LOG_LVL_ERROR, "[%s:%d] same version, do not upgrade!\r\n");
+            LOG(LOG_LVL_ERROR, "[%s:%d] same version, do not upgrade!\r\n",
+                    __func__, __LINE__);
             goto ret_err;
         }
-        
+
         // check file size
         if (((ota_hdr->img_size_orig + sizeof(image_hdr_t)) > APP_SPACE_SIZE) || \
             ((ota_hdr->img_size_orig_xz + sizeof(image_hdr_t)) > OTA_SPACE_SIZE)) {
