@@ -214,8 +214,10 @@ int     wifi_get_channel(uint8_t *channel);
 int     wifi_set_11n_enable(uint8_t ht_enable);
 int     wifi_set_allow_cpu_sleep_flag(uint8_t allow);
 
-int     wifi_sta_set_dtim_period(int period);
+int     wifi_sta_set_listen_interval(int interval);
 int     wifi_sta_get_rssi(int8_t *rssi);
+
+int     wifi_softap_set_dtim_period(int period);
 
 int     wifi_softap_deauth_all(void);
 int     wifi_softap_deauth(uint8_t * mac_addr);

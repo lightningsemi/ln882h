@@ -8,6 +8,28 @@
     </tr>
     <tr>
         <td>
+            2022-05-24 18:04:00
+        </td>
+        <td>
+            no version
+        </td>
+        <td>
+            75faa75d
+        </td>
+        <td>
+            1. 修复 log 输出参数不匹配问题及其他编译警告 <br />
+            2. 不定参使用 ##__VA_ARGS__ 来避免无参数错误 <br />
+            3. GNU 下，使用 __attribute__((format(printf, 2, 3))) 和 -Wformat=2 增强对 printf 类型的不定参函数进行 format 和 参数匹配检查 <br />
+            4. 更新 boot 程序，并添加 AT 指令 AT+BLE_START 以允许跳转到 OTA 分区执行代码 <br />
+            5. 增加 combo ble hci 认证固件 combo_ble_hci_exec_addr_0x00133100_log_B9_921600_cmd_A2A3_115200_sha1_7cd12ad9.bin <br />
+            6. start_build.py 脚本更新合并固件的功能 <br />
+            python3 start_build.py merge_fw --fw A.bin --offset 0x1000 --fw B.bin --offset 0x2000 --out outfile.bin <br />
+            7. 移除 ignore trailing bytes 相关的 dump 日志 <br />
+            8. 移除 wifi_sta_set_dtim_period 接口；增加 wifi_sta_set_listen_interval 接口；增加 wifi_softap_set_dtim_period 接口 <br />
+        </td>
+    </tr>
+    <tr>
+        <td>
             2022-04-25 16:50:00
         </td>
         <td>
