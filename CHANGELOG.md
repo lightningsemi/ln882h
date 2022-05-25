@@ -8,6 +8,21 @@
     </tr>
     <tr>
         <td>
+            2022-05-25 16:45:00
+        </td>
+        <td>
+            no version
+        </td>
+        <td>
+            75faa75d
+        </td>
+        <td>
+            1. 修复在未设置 got ip function callback 的时候 WiFi 无法进入睡眠的问题 <br />
+            2. 射频测试的功能更新，增加 s_tone_mode 命令 <br />
+        </td>
+    </tr>
+    <tr>
+        <td>
             2022-05-24 18:04:00
         </td>
         <td>

@@ -185,10 +185,10 @@ static void sta_netif_status_changed_cb(struct netif *nif)
         if (dhcp_supplied_address(nif) && (nif->flags & NETIF_FLAG_UP)
             && (netif_is_link_up(nif))) {
             print_netdev_info(nif);
+            wifi_set_allow_cpu_sleep_flag(1);
             if (g_get_ip_cb)
             {
                 g_get_ip_cb(nif);
-                wifi_set_allow_cpu_sleep_flag(1);
             }
         }
     }
