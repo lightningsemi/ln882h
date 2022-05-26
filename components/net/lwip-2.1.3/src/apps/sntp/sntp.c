@@ -62,6 +62,8 @@
 #include <string.h>
 #include <time.h>
 
+#include <ln_at_sntp.h>
+
 #if LWIP_UDP
 
 /* Handle support for more than one server via SNTP_MAX_SERVERS */
@@ -290,6 +292,9 @@ sntp_process(const struct sntp_timestamps *timestamps)
 
   sec  = (s32_t)lwip_ntohl(timestamps->xmit.sec);
   frac = lwip_ntohl(timestamps->xmit.frac);
+	
+  ln_sntp_cfg_t* p = ln_get_sntp_handle();
+  p->tim = (u32_t)((u32_t)sec + DIFF_SEC_1970_2036);
 
 #if SNTP_COMP_ROUNDTRIP
 # if SNTP_CHECK_RESPONSE >= 2
@@ -645,6 +650,7 @@ sntp_request(void *arg)
   }
 }
 
+#define SNTP_SERVER_ADDRESS "ntp.sjtu.edu.cn"
 /**
  * @ingroup sntp
  * Initialize this module.

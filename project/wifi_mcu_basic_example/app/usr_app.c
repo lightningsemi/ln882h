@@ -42,8 +42,8 @@ static uint8_t psk_value[40]      = {0x0};
 // static uint8_t target_ap_bssid[6] = {0xC0, 0xA5, 0xDD, 0x84, 0x6F, 0xA8};
 
 wifi_sta_connect_t connect = {
-    .ssid    = "A_Murphy",
-    .pwd     = "ZJT123zjt",
+    .ssid    = "LN_test01",//LN_test01
+    .pwd     = "12345678",
     .bssid   = NULL,
     .psk_value = NULL,
 };
