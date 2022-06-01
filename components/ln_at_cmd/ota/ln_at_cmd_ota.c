@@ -25,7 +25,7 @@
 
 #define SECTOR_SIZE_4KB            (1024 * 4)
 
-static char g_http_uri_buff[128] = "http://192.168.122.48:9090/ota-images/otaimage-v1.3.bin";
+static char g_http_uri_buff[512] = "http://192.168.122.48:9090/ota-images/otaimage-v1.3.bin";
 
 // a block to save http data.
 static char *temp4K_buf    = NULL;
@@ -373,7 +373,6 @@ static ln_at_err_t ln_at_set_http_ota(uint8_t para_num, const char *name)
     }
 
     LOG(LOG_LVL_INFO, "Input http url:%s; len:%d\r\n", in_uri, len);
-    LOG(LOG_LVL_INFO, "now http url:%s; len:%d\r\n", g_http_uri_buff, strlen(g_http_uri_buff));
 
     strncpy(g_http_uri_buff, in_uri, len);
 

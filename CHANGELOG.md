@@ -8,6 +8,24 @@
     </tr>
     <tr>
         <td>
+            2022-06-01 20:55:00
+        </td>
+        <td>
+            no version
+        </td>
+        <td>
+            c2382740
+        </td>
+        <td>
+            1. 增加 single tone 调试 AT+PVTCMD=s_tone_mode BLE AT+PVTCMD=s_tone_mode WIFI <br />
+            2. 修复在未设置 got ip function callback 的时候 WiFi 无法进入睡眠的问题 <br />
+            3. 增加 AT OTA 命令程序 URL 缓存大小；增加 AT CMD 缓存大小； <br />
+            4. 增加 https client path 和 CONTENT 缓冲区大小； <br />
+            5. mbedtls 移除对 MBEDTLS_SSL_IN_CONTENT_LEN 和 MBEDTLS_SSL_OUT_CONTENT_LEN 的配置，继承 MBEDTLS_SSL_MAX_CONTENT_LEN。 <br />
+        </td>
+    </tr>
+    <tr>
+        <td>
             2022-05-25 16:45:00
         </td>
         <td>

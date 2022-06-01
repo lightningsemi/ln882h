@@ -273,6 +273,7 @@ def main():
         "wifi_mcu_basic_example",
         "combo_mcu_basic_example",
         "mcu_peripheral_driver_test",
+        "http_ota_example",
     ]
 
     check_platform()
