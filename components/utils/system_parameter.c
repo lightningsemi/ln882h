@@ -362,11 +362,19 @@ int sysparam_sta_scan_cfg_update(const wifi_scan_cfg_t *cfg)
 int sysparam_sta_conn_cfg_update(const wifi_sta_connect_t *cfg)
 {
     sta_conn_param_t conn;
+    if (!cfg || !cfg->ssid) {
+        return SYSPARAM_ERR_INVALID_PARAM;
+    }
+
     memset(&conn, 0, sizeof(sta_conn_param_t));
     memcpy(&conn.ssid, cfg->ssid, strlen(cfg->ssid));
-    memcpy(&conn.pwd, cfg->pwd, strlen(cfg->pwd));
-    memcpy(&conn.bssid, cfg->bssid, BSSID_LEN);
-    
+
+    if (cfg->pwd) {
+        memcpy(&conn.pwd, cfg->pwd, strlen(cfg->pwd));
+    }
+    if (cfg->bssid) {
+        memcpy(&conn.bssid, cfg->bssid, BSSID_LEN);
+    }
     return sysparam_store(KV_SYSPARAM_STA_CONN_CFG, (void *)&conn, sizeof(sta_conn_param_t));
 }
 
