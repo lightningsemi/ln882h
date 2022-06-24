@@ -167,7 +167,7 @@ typedef enum IRQn
 #define LN882H_SDK_MAJOR_V        1
 #define LN882H_SDK_MINOR_V        3
 
-#define LN882H_SDK_RC_V           2 /* 0: development, 255: release, 1-254: release candidates */
+#define LN882H_SDK_RC_V           3 /* 0: development, 255: release, 1-254: release candidates */
 
 #define LN882H_SDK_RC_RELEASE     255
 #define LN882H_SDK_RC_DEVELOPMENT 0
