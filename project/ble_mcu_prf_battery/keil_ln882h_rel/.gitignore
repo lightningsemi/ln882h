@@ -1,0 +1,7 @@
+/Listings/
+/Objects/
+*.uvguix.*
+JLinkLog.txt
+*.bin
+*.asm
+flash_partition_table.h

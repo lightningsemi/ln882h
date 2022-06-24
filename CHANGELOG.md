@@ -8,6 +8,24 @@
     </tr>
     <tr>
         <td>
+            2022-06-24 10:50:00
+        </td>
+        <td>
+            no version
+        </td>
+        <td>
+            4ee15f60
+        </td>
+        <td>
+            1. 优化 mbedtls 内存. MBEDTLS_SSL_OUT_CONTENT_LEN 设置为4K <br />
+            2. 优化 wifi 传输速率 <br />
+            3. BLE 示例工程 sct 更新 <br />
+            4. add battery release project <br />
+            5. add mouse release project <br />
+        </td>
+    </tr>
+    <tr>
+        <td>
             2022-06-01 20:55:00
         </td>
         <td>
