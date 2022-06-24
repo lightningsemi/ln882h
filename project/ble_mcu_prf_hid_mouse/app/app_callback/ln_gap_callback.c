@@ -1,0 +1,1622 @@
+/**
+ ****************************************************************************************
+ *
+ * @file ln_gap_callback.c
+ *
+ * @brief GAP callback function  source code
+ *
+ *Copyright (C) 2021. Shanghai Lightning Semiconductor Ltd
+ *
+ *
+ ****************************************************************************************
+ */
+
+
+/**
+ ****************************************************************************************
+ * @addtogroup APP
+ * @group BLE
+ *
+ * @brief GAP callback funcion source code
+ *
+ * @{
+ ****************************************************************************************
+ */
+
+/*
+ * INCLUDE FILES
+ ****************************************************************************************
+ */
+
+#include "rwip_config.h"             // SW configuration
+#include "rwprf_config.h"
+
+#include "ln_app_gap.h"
+#include "ln_app_gatt.h"
+#include "usr_app.h"
+#include "usr_ble_app.h"
+#include <string.h>
+#include "gap.h"                     // GAP Definition
+#include "gapc.h"
+#include "gapm_task.h"               // GAP Manallger Task API
+#include "gapc_task.h"               // GAP Controller Task API
+#include "gattm_task.h"               // GAP Manallger Task API
+#include "gattc_task.h"               // GAP Controller Task API
+#include "co_math.h"                 // Common Maths Definition
+#include "co_utils.h"
+#include "basc_task.h"
+#include "bass_task.h"
+#include "hogpd_task.h"
+
+#include "rwip_task.h"      // Task definitions
+#include "ke_task.h"        // Kernel Task
+
+#include "ln_app_callback.h"
+#include "ln_gatt_callback.h"
+#include "ln_bas_callback.h"
+#include "ln_dis_callback.h"
+#include "ln_hid_callback.h"
+#include "osal/osal.h"
+
+#include "usr_ble_app.h"
+#include "ln_kv_api.h"
+#if (TRACE_ENABLE)
+#include "utils/debug/log.h"
+#endif
+
+struct app_env_tag
+{
+    /// Connection handle
+    uint16_t conhdl;
+    /// Connection Index
+    uint8_t  conidx;
+
+    /// Advertising activity index
+    uint8_t adv_actv_idx;
+    /// Current advertising state (@see enum app_adv_state)
+    uint8_t adv_state;
+    /// Next expected operation completed event
+    uint8_t adv_op;
+    /// Current advertising prop (@see enum gapm_leg_adv_prop for legacy, and enum gapm_ext_adv_prop for Extend)
+    uint8_t adv_prop;
+    /// Current advertising type. (@see enum gapm_adv_type)
+    uint8_t adv_type;
+
+    /// scaning activity index
+    uint8_t scan_actv_idx;
+    /// Current scaning state (@see enum app_scan_state)
+    uint8_t scan_state;
+    /// Next expected operation completed event
+    uint8_t scan_op;    
+
+    /// initing activity index
+    uint8_t init_actv_idx;
+    /// Current initing state (@see enum app_intt_state)
+    uint8_t init_state;
+    /// Next expected operation completed event
+    uint8_t init_op;   
+
+
+    /// Last initialized profile
+    uint8_t next_svc;
+
+    /// Bonding status
+    bool bonded;
+
+    /// Device Name length
+    uint8_t dev_name_len;
+    /// Device Name
+    uint8_t dev_name[18];
+
+    /// Local device IRK
+    uint8_t loc_irk[16];
+    uint8_t loc_irk_set;
+
+    /// Secure Connections on current link
+    bool sec_con_enabled;
+
+    /// Counter used to generate IRK
+    uint8_t rand_cnt;
+
+    /// Demonstration type length
+    uint8_t demo_type_len;
+    /// Demonstration type
+    uint8_t demo_type;
+};
+
+
+
+struct app_sec_env_tag
+{
+    // Bond status
+    bool bonded;
+};
+
+
+
+/// Application Environment Structure
+//struct app_env_info_tag app_env_info= {0};
+extern uint8_t adv_actv_idx;
+extern uint8_t init_actv_idx;
+
+uint8_t g_gap_role = GAP_ROLE_NONE;
+struct app_env_tag app_env = {0};
+struct app_sec_env_tag app_sec_env = {0};
+static uint8_t gan_rand_nb = 0;
+
+#define MAX_MTU 260
+extern uint8_t svc_uuid[16];
+uint8_t con_num=0;
+
+extern OS_Timer_t  bas_timer;
+
+#if (BLE_BATT_SERVER)
+extern struct gapm_profile_added_ind  bass_ind;
+#endif
+
+#if (BLE_BATT_CLIENT)
+extern struct gapm_profile_added_ind  basc_ind;
+#endif
+
+#if (BLE_DIS_SERVER)
+extern struct gapm_profile_added_ind  diss_ind;
+#endif
+
+#if (BLE_DIS_CLIENT)
+extern struct gapm_profile_added_ind  disc_ind;
+#endif
+#if (BLE_HID_DEVICE)
+extern struct gapm_profile_added_ind  hogpd_ind;
+#endif
+
+/*
+ * FUNCTION DEFINITIONS
+ ****************************************************************************************
+ */
+
+
+static int gapm_activity_created_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    struct gapm_activity_created_ind *p_param = (struct gapm_activity_created_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE, "gapm_activity_created_ind_handler: actv_idx=%d,actv_type=%d \r\n",p_param->actv_idx,p_param->actv_type);
+  //  LOG(LOG_LVL_TRACE, "  ##################app_env_info size   :%d \r\n",sizeof(struct app_env_info_tag));
+#endif
+    //memcpy(&(app_env_info.actv_creat_info),p_param,sizeof(struct gapm_activity_created_ind));
+    if(p_param->actv_type  ==GAPM_ACTV_TYPE_ADV)
+        adv_actv_idx =p_param->actv_idx;
+    if(p_param->actv_type  ==GAPM_ACTV_TYPE_INIT)
+        init_actv_idx =p_param->actv_idx;
+    return (KE_MSG_CONSUMED);
+}
+
+
+static int gapm_activity_stopped_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    struct gapm_activity_stopped_ind *p_param = (struct gapm_activity_stopped_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_activity_stopped_ind_handler   actv_id=%d   actv_type=%d, reason=0x%x\r\n", p_param->actv_idx, p_param->actv_type,p_param->reason);
+#endif
+    //memcpy(&(app_env_info.actv_stop_info),p_param,sizeof(struct gapm_activity_stopped_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+static int gapm_ext_adv_report_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    struct gapm_ext_adv_report_ind *p_param = (struct gapm_ext_adv_report_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE, "--------------------adv_report: addr_type=%d, addr=0x%x:0x%x:0x%x:0x%x:0x%x:0x%x, rssi=%d, tx_pwr=%d---------------------------\r\n",
+        p_param->trans_addr.addr_type,p_param->trans_addr.addr.addr[0],p_param->trans_addr.addr.addr[1],p_param->trans_addr.addr.addr[2],p_param->trans_addr.addr.addr[3],p_param->trans_addr.addr.addr[4],p_param->trans_addr.addr.addr[5],
+        p_param->rssi, p_param->tx_pwr);
+#endif
+    //memcpy(&(app_env_info.ext_adv_rep_info),p_param,sizeof(struct gapm_ext_adv_report_ind));
+    return KE_MSG_CONSUMED;
+
+}
+
+
+static int gapm_scan_request_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    //struct gapm_scan_request_ind *p_param = (struct gapm_scan_request_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_dev_version_ind_handler\r\n");
+#endif
+    //memcpy(&(app_env_info.scan_req_info),p_param,sizeof(struct gapm_scan_request_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+static int gapm_sync_established_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    //struct gapm_sync_established_ind *p_param = (struct gapm_sync_established_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_sync_established_ind_handler\r\n");
+#endif
+    //memcpy(&(app_env_info.sync_established_info),p_param,sizeof(struct gapm_sync_established_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+
+static int gapm_peer_name_ind_handler(ke_msg_id_t const msgid,
+                                      void const *param,
+                                      ke_task_id_t const dest_id,
+                                      ke_task_id_t const src_id)
+{
+    //struct gapm_peer_name_ind *p_param = (struct gapm_peer_name_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_peer_name_ind_handler\r\n");
+#endif
+    //memcpy(&(app_env_info.peer_name_info),p_param,sizeof(struct gapm_peer_name_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+static int gapm_le_test_end_ind_handler(ke_msg_id_t const msgid,
+                                        void const *param,
+                                        ke_task_id_t const dest_id,
+                                        ke_task_id_t const src_id)
+{
+    //struct gapm_le_test_end_ind *p_param = (struct gapm_le_test_end_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_le_test_end_ind_handler\r\n");
+#endif
+    //memcpy(&(app_env_info.le_test_end_info),p_param,sizeof(struct gapm_le_test_end_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+static int gapm_pub_key_ind_handler(ke_msg_id_t const msgid,
+                                    void const *param,
+                                    ke_task_id_t const dest_id,
+                                    ke_task_id_t const src_id)
+{
+    //struct gapm_pub_key_ind *p_param = (struct gapm_pub_key_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_pub_key_ind_handler\r\n");
+#endif
+    //memcpy(&(app_env_info.pub_key_info),p_param,sizeof(struct gapm_pub_key_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+static int gapm_gen_dh_key_ind_handler(ke_msg_id_t const msgid,
+                                       void const *param,
+                                       ke_task_id_t const dest_id,
+                                       ke_task_id_t const src_id)
+{
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_gen_dh_key_ind_handler\r\n");
+#endif
+
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+
+
+
+
+static int gapm_profile_added_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    struct gapm_profile_added_ind *p_param = (struct gapm_profile_added_ind *)param;
+    // Current State
+    ke_state_t state = ke_state_get(dest_id);
+
+#if (TRACE_ENABLE)
+	LOG(LOG_LVL_TRACE,"gapm_profile_added_ind_handler profile_task_id:0x%x,state=0x%x\r\n",p_param->prf_task_id,state);
+#endif
+    //memcpy(&(app_env_info.prof_add),p_param,sizeof(struct gapm_profile_added_ind));
+    switch (p_param->prf_task_id)
+{
+    case TASK_ID_BASS:
+    {
+#if (BLE_BATT_SERVER)
+        bass_ind.prf_task_id = p_param->prf_task_id;
+        bass_ind.prf_task_nb = p_param->prf_task_nb;
+        bass_ind.start_hdl = p_param->start_hdl;       
+#endif
+    }
+    break;
+    case TASK_ID_BASC:
+    {     
+#if (BLE_BATT_CLIENT)
+        basc_ind.prf_task_id = p_param->prf_task_id;
+        basc_ind.prf_task_nb = p_param->prf_task_nb;
+        basc_ind.start_hdl = p_param->start_hdl;      
+#endif
+    }
+    case TASK_ID_DISS:
+    {
+#if (BLE_DIS_SERVER)
+        diss_ind.prf_task_id = p_param->prf_task_id;
+        diss_ind.prf_task_nb = p_param->prf_task_nb;
+        diss_ind.start_hdl = p_param->start_hdl;       
+#endif
+    }
+    break;
+    case TASK_ID_DISC:
+    {       
+#if (BLE_DIS_CLIENT)
+        disc_ind.prf_task_id = p_param->prf_task_id;
+        disc_ind.prf_task_nb = p_param->prf_task_nb;
+        disc_ind.start_hdl = p_param->start_hdl;       
+#endif
+    }
+    break;
+    case TASK_ID_HOGPD:
+    {       
+#if (BLE_HID_DEVICE)
+        hogpd_ind.prf_task_id = p_param->prf_task_id;
+        hogpd_ind.prf_task_nb = p_param->prf_task_nb;
+        hogpd_ind.start_hdl = p_param->start_hdl;       
+#endif
+    }
+    break;
+
+        default:
+    break;
+        
+}
+
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+
+
+static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
+                                void const *param,
+                                ke_task_id_t const dest_id,
+                                ke_task_id_t const src_id)
+{
+    struct gapm_cmp_evt *p_param = (struct gapm_cmp_evt *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"app_gapm_cmp_evt_handler: operation=0x%x, status=0x%x\r\n", p_param->operation,p_param->status);
+#endif
+    ke_msg_sync_lock_release();
+    //memcpy(&(app_env_info.cmp_evt_info),p_param,sizeof(struct gapm_cmp_evt));
+    switch(p_param->operation)
+    {
+    // Reset completed
+    case (GAPM_RESET):
+    {
+        if(p_param->status == GAP_ERR_NO_ERROR)
+        {
+            struct ln_gapm_set_dev_config_cmd cfg_param;
+            memset(&cfg_param,0,sizeof(struct ln_gapm_set_dev_config_cmd));
+            // Set Data length parameters
+            cfg_param.sugg_max_tx_octets = BLE_MIN_OCTETS;
+            cfg_param.sugg_max_tx_time   = BLE_MIN_TIME;
+            cfg_param.att_slv_pref_conn_param_present = 1;
+
+            // Host privacy enabled by default
+            cfg_param.privacy_cfg = 0;
+            cfg_param.pairing_mode = GAPM_PAIRING_SEC_CON | GAPM_PAIRING_LEGACY;
+            memset((void *)&cfg_param.irk.key[0], 0x00, KEY_LEN);
+            cfg_param.role    = GAP_ROLE_ALL;
+            //cfg_param.max_mtu = 1200;//2048;
+            //cfg_param.max_mps = 1200;//2048;
+            ln_app_set_dev_config(&cfg_param);
+           
+        }
+        else
+        {
+            ASSERT_ERR(0);
+        }
+    }
+    break;
+
+    // Device Configuration updated
+    case (GAPM_SET_DEV_CONFIG):
+    {
+        ASSERT_INFO(p_param->status == GAP_ERR_NO_ERROR, p_param->operation, p_param->status);
+        // Go to the create db state
+        ke_state_set(TASK_APP, APP_CREATE_DB);
+        usr_queue_msg_send(BLE_MSG_SET_DEV_CONFIG,0,NULL);
+    
+    }
+    break;
+     case (GAPM_GEN_RAND_NB):
+         {
+            ke_msg_sync_lock_release();
+        	 if(gan_rand_nb == 2)
+            {
+                struct ln_gapm_set_irk_cmd param;
+                memcpy(&param.irk.key[0],&app_env.loc_irk[0],LN_GAP_KEY_LEN);
+                ln_app_set_irk(&param);
+                gan_rand_nb = 0;
+                usr_queue_msg_send(BLE_MSG_SET_IRK,0,NULL);
+                
+            } 
+    }
+	break;
+    default:
+        break;
+    }
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+static int gapm_dev_version_ind_handler(ke_msg_id_t const msgid,
+                                        void const *param,
+                                        ke_task_id_t const dest_id,
+                                        ke_task_id_t const src_id)
+{
+    //struct gapm_dev_version_ind *p_param = (struct gapm_dev_version_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_dev_version_ind_handler\r\n");
+#endif
+    //memcpy(&(app_env_info.dev_version_info),p_param,sizeof(struct gapm_dev_version_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+
+
+
+
+static int gapm_dev_bdaddr_ind_handler(ke_msg_id_t const msgid,
+                                       void const *param,
+                                       ke_task_id_t const dest_id,
+                                       ke_task_id_t const src_id)
+{
+    //struct gapm_dev_bdaddr_ind *p_param = (struct gapm_dev_bdaddr_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"app_gapm_dev_bdaddr_ind_handler \r\n");
+#endif
+    //memcpy(&(app_env_info.dev_bdadr_info),p_param,sizeof(struct gapm_dev_bdaddr_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+
+static int gapm_dev_adv_tx_power_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    //struct gapm_dev_adv_tx_power_ind *p_param = (struct gapm_dev_adv_tx_power_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_dev_adv_tx_power_ind_handler \r\n");
+#endif
+    //memcpy(&(app_env_info.adv_tx_power),p_param,sizeof(struct gapm_dev_adv_tx_power_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+
+
+static int gapm_sugg_dflt_data_len_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    //struct gapm_sugg_dflt_data_len_ind *p_param = (struct gapm_sugg_dflt_data_len_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_sugg_dflt_data_len_ind_handler \r\n");
+#endif
+    //memcpy(&(app_env_info.dflt_data_len),p_param,sizeof(struct gapm_sugg_dflt_data_len_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+
+static int gapm_max_data_len_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    //struct gapm_max_data_len_ind *p_param = (struct gapm_max_data_len_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_max_data_len_ind_handler \r\n");
+#endif
+    //memcpy(&(app_env_info.max_data_len),p_param,sizeof(struct gapm_max_data_len_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+
+
+static int gapm_list_size_ind_handler(ke_msg_id_t const msgid,
+                                      void const *param,
+                                      ke_task_id_t const dest_id,
+                                      ke_task_id_t const src_id)
+{
+    //struct gapm_list_size_ind *p_param = (struct gapm_list_size_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_list_size_ind_handler \r\n");
+#endif
+    //memcpy(&(app_env_info.list_size),p_param,sizeof(struct gapm_list_size_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+static int gapm_nb_adv_sets_ind_handler(ke_msg_id_t const msgid,
+                                        void const *param,
+                                        ke_task_id_t const dest_id,
+                                        ke_task_id_t const src_id)
+{
+    //struct gapm_nb_adv_sets_ind *p_param = (struct gapm_nb_adv_sets_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_nb_adv_sets_ind_handler \r\n");
+#endif
+    //memcpy(&(app_env_info.nb_adv_sets),p_param,sizeof(struct gapm_nb_adv_sets_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+static int gapm_max_adv_data_len_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    //struct gapm_max_adv_data_len_ind *p_param = (struct gapm_max_adv_data_len_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_max_adv_data_len_ind_handler \r\n");
+#endif
+    //memcpy(&(app_env_info.max_adv_data_len),p_param,sizeof(struct gapm_max_adv_data_len_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+static int gapm_dev_tx_pwr_ind_handler(ke_msg_id_t const msgid,
+                                       void const *param,
+                                       ke_task_id_t const dest_id,
+                                       ke_task_id_t const src_id)
+{
+    //struct gapm_dev_tx_pwr_ind *p_param = (struct gapm_dev_tx_pwr_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_dev_tx_pwr_ind_handler \r\n");
+#endif
+    //memcpy(&(app_env_info.dev_tx_pwr),p_param,sizeof(struct gapm_dev_tx_pwr_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+
+static int gapm_addr_solved_ind_handler(ke_msg_id_t const msgid,
+                                        void const *param,
+                                        ke_task_id_t const dest_id,
+                                        ke_task_id_t const src_id)
+{
+    //struct gapm_addr_solved_ind *p_param = (struct gapm_addr_solved_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_addr_solved_ind_handler \r\n");
+#endif
+    //memcpy(&(app_env_info.addr_solv_info),p_param,sizeof(struct gapm_addr_solved_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+
+static int gapm_use_enc_block_handler(ke_msg_id_t const msgid,
+                                      void const *param,
+                                      ke_task_id_t const dest_id,
+                                      ke_task_id_t const src_id)
+{
+    //struct gapm_use_enc_block_ind *p_param = (struct gapm_use_enc_block_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_use_enc_block_handler \r\n");
+#endif
+    //memcpy(&(app_env_info.use_enc_block),p_param,sizeof(struct gapm_use_enc_block_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+
+
+static int gapm_gen_rand_nb_ind_handler(ke_msg_id_t const msgid,
+                                        void const *param,
+                                        ke_task_id_t const dest_id, ke_task_id_t const src_id)
+{
+    struct gapm_gen_rand_nb_ind *p_param = (struct gapm_gen_rand_nb_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_gen_rand_nb_ind_handler\r\n");
+#endif
+    //memcpy(&(app_env_info.gen_rand),p_param,sizeof(struct gapm_gen_rand_nb_ind));
+    if (gan_rand_nb == 0)      // First part of IRK
+	{
+		memcpy(&app_env.loc_irk[0], &p_param->randnb.nb[0], 8);
+	}
+	else if (gan_rand_nb == 1) // Second part of IRK
+	{
+		memcpy(&app_env.loc_irk[8], &p_param->randnb.nb[0], 8);
+	}
+    gan_rand_nb++;
+
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+
+
+static int gapm_ral_addr_ind_handler(ke_msg_id_t const msgid,
+                                     void const *param,
+                                     ke_task_id_t const dest_id, ke_task_id_t const src_id)
+{
+    //struct gapm_ral_addr_ind *p_param = (struct gapm_ral_addr_ind *)param;
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapm_ral_addr_ind_handler\r\n");
+#endif
+    //memcpy(&(app_env_info.ral_addr_info),p_param,sizeof(struct gapm_ral_addr_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+static int gapc_get_dev_info_req_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    struct gapc_get_dev_info_req_ind *p_param = (struct gapc_get_dev_info_req_ind *)param;
+    uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapc_get_dev_info_req_ind_handler param->req=0x%x,conidx=0x%x\r\n",p_param->req,conidx);
+#endif
+    //memcpy(&(app_env_info.get_dev_info_req_info),p_param,sizeof(struct gapc_get_dev_info_req_ind));
+    switch(p_param->req)
+    {
+    case GAPC_DEV_NAME:
+    {
+        struct gapc_get_dev_info_cfm * cfm = KE_MSG_ALLOC_DYN(GAPC_GET_DEV_INFO_CFM,
+                                             src_id, dest_id,
+                                             gapc_get_dev_info_cfm, APP_DEVICE_NAME_MAX_LEN);
+        cfm->req = p_param->req;
+        //zhongbo
+        //cfm->info.name.length = app_get_dev_name(cfm->info.name.value);
+
+        // Send message
+        ke_msg_send(cfm);
+    }
+    break;
+
+    case GAPC_DEV_APPEARANCE:
+    {
+        // Allocate message
+        struct gapc_get_dev_info_cfm *cfm = KE_MSG_ALLOC(GAPC_GET_DEV_INFO_CFM,
+                                            src_id, dest_id,
+                                            gapc_get_dev_info_cfm);
+        cfm->req = p_param->req;
+        cfm->info.appearance = 962;
+        // Set the device appearance
+        // Send message
+        ke_msg_send(cfm);
+    }
+    break;
+
+    case GAPC_DEV_SLV_PREF_PARAMS:
+    {
+        // Allocate message
+        struct gapc_get_dev_info_cfm *cfm = KE_MSG_ALLOC(GAPC_GET_DEV_INFO_CFM,
+                                            src_id, dest_id,
+                                            gapc_get_dev_info_cfm);
+        cfm->req = p_param->req;
+        // Slave preferred Connection interval Min
+        cfm->info.slv_pref_params.con_intv_min = 8;
+        // Slave preferred Connection interval Max
+        cfm->info.slv_pref_params.con_intv_max = 10;
+        // Slave preferred Connection latency
+        cfm->info.slv_pref_params.slave_latency  = 0;
+        // Slave preferred Link supervision timeout
+        cfm->info.slv_pref_params.conn_timeout    = 200;  // 2s (500*10ms)
+
+        // Send message
+        ke_msg_send(cfm);
+    }
+    break;
+
+    default: /* Do Nothing */
+        break;
+    }
+
+    return (KE_MSG_CONSUMED);
+}
+
+
+static int gapc_set_dev_info_req_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    struct gapc_set_dev_info_req_ind *p_param = (struct gapc_set_dev_info_req_ind *)param;
+    uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapc_set_dev_info_req_ind_handler  param->req=0x%x,conidx=0x%x\r\n",p_param->req,conidx);
+#endif
+    //memcpy(&(app_env_info.set_dev_info_req_info),p_param,sizeof(struct gapc_set_dev_info_req_ind));
+    // Set Device configuration
+    struct gapc_set_dev_info_cfm* cfm = KE_MSG_ALLOC(GAPC_SET_DEV_INFO_CFM, src_id, dest_id,
+                                        gapc_set_dev_info_cfm);
+    // Reject to change parameters
+    cfm->status = 0;
+    cfm->req = p_param->req;
+    // Send message  //zhongbo
+    ke_msg_send(cfm);
+
+    return (KE_MSG_CONSUMED);
+}
+
+
+static int gapc_connection_req_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+
+
+    struct gapc_connection_req_ind *p_param = (struct gapc_connection_req_ind *)param;
+    uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE," #######    gapc_connection_req_ind_handler conhdl=0x%x,  conidx=0x%x , conn_intv:%d, role=%d    addr: 0x%x,0x%x,0x%x,0x%x,0x%x,0x%x  ###########\r\n",p_param->conhdl,conidx,p_param->con_interval,p_param->role,p_param->peer_addr.addr[0],p_param->peer_addr.addr[1],p_param->peer_addr.addr[2],p_param->peer_addr.addr[3],p_param->peer_addr.addr[4],p_param->peer_addr.addr[5]);
+#endif
+    // Check if the received connection index is valid
+    if (conidx != GAP_INVALID_CONIDX)
+    {
+        // Allocate connection confirmation
+        struct gapc_connection_cfm *cfm = KE_MSG_ALLOC(GAPC_CONNECTION_CFM,
+                                          KE_BUILD_ID(TASK_GAPC,conidx), TASK_APP,
+                                          gapc_connection_cfm);
+        //app_env_info.conn_req_info.clk_accuracy=p_param->clk_accuracy;
+        //app_env_info.conn_req_info.conhdl=p_param->conhdl;
+        //app_env_info.conn_req_info.conidx=conidx;
+        //app_env_info.conn_req_info.con_interval=p_param->con_interval;
+        //app_env_info.conn_req_info.con_latency=p_param->con_latency;
+        //memcpy(app_env_info.conn_req_info.peer_addr.addr,p_param->peer_addr.addr,GAP_BD_ADDR_LEN);
+        //app_env_info.conn_req_info.peer_addr_type=p_param->peer_addr_type;
+        //app_env_info.conn_req_info.role=p_param->role;
+        //app_env_info.conn_req_info.sup_to=p_param->sup_to;
+        // Send the message
+        ke_msg_send(cfm);
+    }
+    con_num++;
+    struct ln_gapc_connection_req_info *data = blib_malloc(sizeof(struct ln_gapc_connection_req_info ));
+    LN_MALLOC_CHECK(data != NULL);
+    if(data != NULL)
+    {
+        data->conidx=conidx;
+        usr_queue_msg_send(BLE_MSG_CONN_IND,sizeof(struct ln_gapc_connection_req_info ),data);
+    }
+ return (KE_MSG_CONSUMED);
+}
+
+
+static int gapc_param_update_req_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    struct gapc_param_update_req_ind *p_param = (struct gapc_param_update_req_ind *)param;
+    uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapc_param_update_req_ind_handler  conidx=0x%x,intv_max=0x%x,intv_min=0x%x,latency=0x%x,time_out=0x%x\r\n",conidx,p_param->intv_max,p_param->intv_min,p_param->latency,p_param->time_out);
+#endif
+    // Check if the received Connection Handle was valid
+    if (conidx != GAP_INVALID_CONIDX)
+    {
+        // Send connection confirmation
+        struct gapc_param_update_cfm *cfm = KE_MSG_ALLOC(GAPC_PARAM_UPDATE_CFM,
+                                            KE_BUILD_ID(TASK_GAPC,conidx), TASK_APP,
+                                            gapc_param_update_cfm);
+        cfm->accept = true;
+        cfm->ce_len_min = 0;
+        cfm->ce_len_max = 0xFFFF;
+        //memcpy(&(app_env_info.param_upd_info),p_param,sizeof(struct gapc_param_update_req_ind));
+        // Send message
+        ke_msg_send(cfm);
+    }
+    return (KE_MSG_CONSUMED);
+}
+
+
+static int gapc_param_updated_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    struct gapc_param_updated_ind *p_param = (struct gapc_param_updated_ind *)param;
+    uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapc_param_updated_ind_handler conidx=0x%x,con_interval=0x%x,con_latency=0x%x,sup_to=0x%x\r\n",conidx,p_param->con_interval,p_param->con_latency,p_param->sup_to);
+#endif
+    //memcpy(&(app_env_info.param_updated_info),p_param,sizeof(struct gapc_param_updated_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+
+
+static int gapc_cmp_evt_handler(ke_msg_id_t const msgid,
+                                void const *param,
+                                ke_task_id_t const dest_id,
+                                ke_task_id_t const src_id)
+{
+    struct gapc_cmp_evt const *p_param = (struct gapc_cmp_evt const *)param;
+    uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapc_cmp_evt_handler   operation=0x%x, status=0x%x   conidx=0x%x\r\n",p_param->operation,p_param->status,conidx);
+#endif
+    //memcpy(&(app_env_info.gapc_cmp_info),p_param,sizeof(struct gapc_cmp_evt));
+    ke_msg_sync_lock_release();
+    return (KE_MSG_CONSUMED);
+}
+
+static int gapc_disconnect_ind_handler(ke_msg_id_t const msgid,
+                                       void const *param,
+                                       ke_task_id_t const dest_id,
+                                       ke_task_id_t const src_id)
+{
+    struct gapc_disconnect_ind *p_param = (struct gapc_disconnect_ind *)param;
+    uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapc_disconnect_ind_handler conidx=0x%x, reason=0x%x\r\n",conidx,p_param->reason);
+#endif
+    //app_env_info.dis_conn_info.conhdl=p_param->conhdl;
+    //app_env_info.dis_conn_info.reason=p_param->reason;
+    //app_env_info.dis_conn_info.conidx=conidx;
+    con_num--;
+    ke_msg_sync_lock_release();
+#if (SLAVE)
+    app_restart_adv();
+#endif
+#if (MASTER)
+    app_restart_init();
+#endif
+#if (BLE_BATT_SERVER)
+    stop_batt_ntf_timer(&bas_timer);
+#endif
+    usr_queue_msg_send(BLE_MSG_DIS_CONN_IND,0,NULL);
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+static int gapc_peer_att_info_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    struct gapc_peer_att_info_ind *p_param = (struct gapc_peer_att_info_ind *)param;
+    uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"app_gapc_peer_att_info_ind_handler handle=0x%x, req=0x%x,conidx=0x%x\r\n",p_param->handle,p_param->req,conidx);
+#endif
+
+    //memcpy(&(app_env_info.peer_att_info),p_param,sizeof(struct gapc_peer_att_info_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+static int gapc_peer_version_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    //struct gapc_peer_version_ind *p_param = (struct gapc_peer_version_ind *)param;
+    uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapc_peer_version_ind_handler conidx=0x%x\r\n",conidx);
+#endif
+    //memcpy(&(app_env_info.peer_version_info),p_param,sizeof(struct gapc_peer_version_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+static int gapc_peer_features_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    //struct gapc_peer_features_ind *p_param = (struct gapc_peer_features_ind *)param;
+    uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapc_peer_features_ind_handler conidx=0x%x\r\n",conidx);
+#endif
+    //memcpy(&(app_env_info.peer_features_info),p_param,sizeof(struct gapc_peer_features_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+static int gapc_con_rssi_ind_handler(ke_msg_id_t const msgid,
+                                     void const *param,
+                                     ke_task_id_t const dest_id,
+                                     ke_task_id_t const src_id)
+{
+    //struct gapc_con_rssi_ind *p_param = (struct gapc_con_rssi_ind *)param;
+    uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapc_con_rssi_ind_handler conidx=0x%x\r\n",conidx);
+#endif
+    //memcpy(&(app_env_info.con_rssi_info),p_param,sizeof( struct gapc_con_rssi_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+static int gapc_con_channel_map_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    //struct gapc_con_channel_map_ind *p_param = (struct gapc_con_channel_map_ind *)param;
+    uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapc_con_channel_map_ind_handler conidx=0x%x\r\n",conidx);
+#endif
+    //memcpy(&(app_env_info.con_channel_map_info),p_param,sizeof( struct gapc_con_channel_map_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+static int gapc_le_ping_to_val_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    //struct gapc_le_ping_to_val_ind *p_param = (struct gapc_le_ping_to_val_ind *)param;
+    uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapc_le_ping_to_val_ind_handler conidx=0x%x\r\n",conidx);
+#endif
+    //memcpy(&(app_env_info.le_ping_to_val_info),p_param,sizeof( struct gapc_le_ping_to_val_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+
+static int gapc_le_phy_ind_handler(ke_msg_id_t const msgid,
+                                   void const *param,
+                                   ke_task_id_t const dest_id,
+                                   ke_task_id_t const src_id)
+{
+    //struct gapc_le_phy_ind *p_param = (struct gapc_le_phy_ind *)param;
+    uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapc_le_phy_ind_handler conidx=0x%x\r\n",conidx);
+#endif
+    //memcpy(&(app_env_info.le_phy_info),p_param,sizeof( struct gapc_le_phy_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+
+
+static int gapc_chan_sel_algo_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+    //struct gapc_chan_sel_algo_ind *p_param = (struct gapc_chan_sel_algo_ind *)param;
+    uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_TRACE,"gapc_chan_sel_algo_ind_handler conidx=0x%x\r\n",conidx);
+#endif
+    //memcpy(&(app_env_info.chan_sel_algo_info),p_param,sizeof( struct gapc_chan_sel_algo_ind));
+    return (KE_MSG_CONSUMED);
+}
+
+static int gapc_key_press_notification_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+	//struct gapc_key_press_notif_ind *p_param = (struct gapc_key_press_notif_ind *)param;
+	uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+	LOG(LOG_LVL_INFO,"gapc_key_press_notification_ind_handler conidx=0x%x\r\n",conidx);
+#endif
+	//memcpy(&(app_env_info.key_press_notif_info),p_param,sizeof( struct gapc_key_press_notif_ind));
+	return (KE_MSG_CONSUMED);
+}
+
+
+static int gapc_bond_req_ind_handler(ke_msg_id_t const msgid,
+                                     void const * p_param,
+                                     ke_task_id_t const dest_id,
+                                     ke_task_id_t const src_id)
+{
+    struct gapc_bond_req_ind *param = (struct gapc_bond_req_ind *)p_param;
+    LOG(LOG_LVL_INFO," [debug] gapc_bond_req_ind_handler,request:0x%x \r\n",param->request);
+    // Prepare the GAPC_BOND_CFM message
+    struct gapc_bond_cfm *cfm = KE_MSG_ALLOC(GAPC_BOND_CFM,
+                                             src_id, TASK_APP,
+                                             gapc_bond_cfm);                                          
+    switch (param->request)
+    {
+        case (GAPC_PAIRING_REQ):
+        {
+            cfm->request = GAPC_PAIRING_RSP;
+            {
+                cfm->accept  = true;
+                cfm->data.pairing_feat.auth      = GAP_AUTH_REQ_NO_MITM_BOND;//GAP_AUTH_REQ_MITM_BOND;//GAP_AUTH_REQ_MITM_BOND;
+                app_env.sec_con_enabled = true;
+                cfm->data.pairing_feat.iocap     = GAP_IO_CAP_NO_INPUT_NO_OUTPUT;//GAP_IO_CAP_KB_ONLY;//GAP_IO_CAP_DISPLAY_ONLY;//GAP_IO_CAP_NO_INPUT_NO_OUTPUT;
+                cfm->data.pairing_feat.key_size  = 16;
+                cfm->data.pairing_feat.oob       = GAP_OOB_AUTH_DATA_NOT_PRESENT;
+                cfm->data.pairing_feat.sec_req   = GAP_SEC1_NOAUTH_PAIR_ENC;//GAP_SEC1_AUTH_PAIR_ENC;//GAP_NO_SEC;
+                cfm->data.pairing_feat.rkey_dist = GAP_KDIST_ENCKEY | GAP_KDIST_IDKEY;
+                cfm->data.pairing_feat.ikey_dist = GAP_KDIST_ENCKEY | GAP_KDIST_IDKEY;
+
+#if (TRACE_ENABLE)
+                LOG(LOG_LVL_INFO,"GAPC_PAIRING_REQ pairing_feat.auth=0x%x\r\n",cfm->data.pairing_feat.auth);
+#endif  
+            }
+        } break;
+
+        case (GAPC_LTK_EXCH):
+        {
+            // Counter
+            uint8_t counter;
+
+            cfm->accept  = true;
+            cfm->request = GAPC_LTK_EXCH;
+
+            // Generate all the values
+            cfm->data.ltk.ediv = (uint16_t)co_rand_word();
+
+            for (counter = 0; counter < RAND_NB_LEN; counter++)
+            {
+                cfm->data.ltk.ltk.key[counter]    = (uint8_t)co_rand_word();
+                cfm->data.ltk.randnb.nb[counter] = (uint8_t)co_rand_word();
+            }
+
+            for (counter = RAND_NB_LEN; counter < KEY_LEN; counter++)
+            {
+                cfm->data.ltk.ltk.key[counter]    = (uint8_t)co_rand_word();
+            }
+
+#if (TRACE_ENABLE)
+            LOG(LOG_LVL_INFO, "KV_put cfm->ediv=0x%x\r\nparam_randnb:",cfm->data.ltk.ediv);
+            for(uint8_t i=0;i<GAP_RAND_NB_LEN;i++)
+                LOG(LOG_LVL_INFO, "%x",cfm->data.ltk.randnb.nb[i]);  
+            LOG(LOG_LVL_INFO,"\r\nltk:");
+            for(uint8_t i=0;i<GAP_KEY_LEN;i++)
+                LOG(LOG_LVL_INFO, "%x",cfm->data.ltk.ltk.key[i]);  
+            LOG(LOG_LVL_INFO,"\r\n");
+#endif             
+            // Store the generated value in KV
+            if (ln_kv_set(KV_BLE_LTK, (void *)&cfm->data.ltk,KV_BLE_LEN_LTK) != KV_ERR_NONE)
+            {
+                ASSERT_ERR(0);
+            }        
+        } break;
+
+
+        case (GAPC_IRK_EXCH):
+        {
+            uint8_t addr_len = BD_ADDR_LEN;
+            cfm->accept  = true;
+            cfm->request = GAPC_IRK_EXCH;
+            // Load IRK
+            memcpy(cfm->data.irk.irk.key, app_env.loc_irk, KEY_LEN);
+            size_t v_len = 0;
+            if (ln_kv_get(KV_BLE_ADDRESS,(void *)cfm->data.irk.addr.addr.addr,addr_len,&v_len) != KV_ERR_NONE)         
+            {
+                ASSERT_ERR(0);
+            }
+            // load device address
+            cfm->data.irk.addr.addr_type = (cfm->data.irk.addr.addr.addr[5] & 0xC0) ? ADDR_RAND : ADDR_PUBLIC;
+        } break;
+
+
+        //#if (BLE_APP_HT)
+        case (GAPC_TK_EXCH):
+        {
+            // Generate a PIN Code- (Between 100000 and 999999)
+            uint32_t pin_code = (100000 + (co_rand_word()%900000));
+#if (TRACE_ENABLE)
+            LOG(LOG_LVL_INFO,"app_sec GAPC_TK_EXCH: tk_type=%d\r\n",param->data.tk_type);
+#endif
+
+
+            cfm->accept  = true;
+            cfm->request = GAPC_TK_EXCH;
+
+            // Set the TK value
+            memset(cfm->data.tk.key, 0, KEY_LEN);
+
+            cfm->data.tk.key[0] = (uint8_t)((pin_code & 0x000000FF) >>  0);
+            cfm->data.tk.key[1] = (uint8_t)((pin_code & 0x0000FF00) >>  8);
+            cfm->data.tk.key[2] = (uint8_t)((pin_code & 0x00FF0000) >> 16);
+            cfm->data.tk.key[3] = (uint8_t)((pin_code & 0xFF000000) >> 24);
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_INFO,"###GAPC_TK_EXCH pincode=%d\r\n", pin_code);
+#endif
+        } break;
+        //#endif //(BLE_APP_HT)
+
+        default:
+        {
+            ASSERT_ERR(0);
+        } break;
+    }
+
+    // Send the message
+    ke_msg_send(cfm);
+
+    return (KE_MSG_CONSUMED);
+}
+
+static int gapc_bond_ind_handler(ke_msg_id_t const msgid,
+                                 void const *p_param,
+                                 ke_task_id_t const dest_id,
+                                 ke_task_id_t const src_id)
+{
+    struct gapc_bond_ind const *param = (struct gapc_bond_ind const *)p_param;
+
+    LOG(LOG_LVL_INFO," [debug] gapc_bond_ind_handler : info=%d\r\n", param->info);
+    switch (param->info)
+    {
+        case (GAPC_PAIRING_SUCCEED):
+        {
+            // Update the bonding status in the environment
+            app_sec_env.bonded = true;
+            
+#if (TRACE_ENABLE)
+            LOG(LOG_LVL_INFO,"GAPC_PAIRING_SUCCEED auth=%d,ltk_present=%d\r\n", 
+                                param->data.auth.info,param->data.auth.ltk_present);
+#endif
+            // Update the bonding status in the environment
+            if (ln_kv_set(KV_BLE_PERIPH_BONDED, (void *)&app_sec_env.bonded,KV_BLE_LEN_PERIPH_BONDED) != KV_ERR_NONE)
+            {
+                // An error has occurred during access to the KV
+                ASSERT_ERR(0);
+            }
+
+            // Set the BD Address of the peer device in KV
+            if (ln_kv_set(KV_BLE_PEER_BD_ADDRESS, (void *)gapc_get_bdaddr(0, GAPC_SMP_INFO_PEER), KV_BLE_LEN_PEER_BD_ADDRESS) != KV_ERR_NONE)
+            {
+                // An error has occurred during access to the KV
+                ASSERT_ERR(0);
+            }
+
+           
+
+        } break;
+
+        case (GAPC_REPEATED_ATTEMPT):
+        {
+           // app_disconnect();
+        } break;
+
+        case (GAPC_IRK_EXCH):
+        {
+           // Store peer identity in KV
+           if (ln_kv_set(KV_BLE_PEER_IRK, (void *)&param->data.irk, KV_BLE_LEN_PEER_IRK) != KV_ERR_NONE)
+           {
+               ASSERT_ERR(0);
+           }
+           
+        } break;
+
+        case (GAPC_PAIRING_FAILED):
+        {
+           // app_sec_send_security_req(0);
+        } break;
+
+        // In Secure Connections we get BOND_IND with SMPC calculated LTK
+        case (GAPC_LTK_EXCH) :
+        {
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_INFO, "GAPC_LTK_EXCH sec_con_enabled=%d\r\n",app_env.sec_con_enabled);
+#endif 
+
+#if (TRACE_ENABLE)
+            LOG(LOG_LVL_INFO, " param->ediv=0x%x\r\nparam_randnb:",param->data.ltk.ediv);
+            for(uint8_t i=0;i<GAP_RAND_NB_LEN;i++)
+                LOG(LOG_LVL_INFO, "%x",param->data.ltk.randnb.nb[i]);  
+            LOG(LOG_LVL_INFO,"\r\nltk:");
+            for(uint8_t i=0;i<GAP_KEY_LEN;i++)
+                LOG(LOG_LVL_INFO, "%x",param->data.ltk.ltk.key[i]);  
+            LOG(LOG_LVL_INFO,"\r\n");
+#endif  
+        }
+        break;
+
+        default:
+        {
+            ASSERT_ERR(0);
+        } break;
+    }
+
+    return (KE_MSG_CONSUMED);
+}
+
+static int gapc_encrypt_req_ind_handler(ke_msg_id_t const msgid,
+                                        void const *p_param,
+                                        ke_task_id_t const dest_id,
+                                        ke_task_id_t const src_id)
+{
+    struct gapc_encrypt_req_ind const *param = (struct gapc_encrypt_req_ind const *)p_param;
+    LOG(LOG_LVL_INFO," [debug] gapc_encrypt_req_ind_handler \r\n");
+
+   
+    // LTK value
+    struct gapc_ltk ltk;
+   
+
+    // Prepare the GAPC_ENCRYPT_CFM message
+    struct gapc_encrypt_cfm *cfm = KE_MSG_ALLOC(GAPC_ENCRYPT_CFM,
+                                                src_id, TASK_APP,
+                                                gapc_encrypt_cfm);
+
+    cfm->found    = false;
+    
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_INFO,"app_sec gapc_encrypt_req_ind_handler: bonded=%d\r\n", app_sec_env.bonded);
+#endif
+
+   // if (app_sec_env.bonded)
+    {
+        
+        size_t v_len = 0;
+        // Retrieve the required informations from KV
+        if (ln_kv_get(KV_BLE_LTK, (void *)&ltk, KV_BLE_LEN_LTK, &v_len) == KV_ERR_NONE)
+        {
+        
+#if (TRACE_ENABLE)
+            LOG(LOG_LVL_INFO, "KV_get param->ediv=0x%x,ltk.ediv=0x%x\r\nparam_randnb:",param->ediv,ltk.ediv);
+            for(uint8_t i=0;i<GAP_RAND_NB_LEN;i++)
+                LOG(LOG_LVL_INFO, "%x",param->rand_nb.nb[i]);  
+            LOG(LOG_LVL_INFO,"\r\nltk.randnb.nb:");
+            for(uint8_t i=0;i<GAP_RAND_NB_LEN;i++)
+                LOG(LOG_LVL_INFO, "%x",ltk.randnb.nb[i]);  
+            LOG(LOG_LVL_INFO,"\r\n");
+#endif             
+        
+            // Check if the provided EDIV and Rand Nb values match with the stored values
+            if ((param->ediv == ltk.ediv) &&
+                !memcmp(&param->rand_nb.nb[0], &ltk.randnb.nb[0], sizeof(struct rand_nb)))
+            {
+#if (TRACE_ENABLE)
+                LOG(LOG_LVL_INFO,"EDIV and randnb are same!!!\r\n");
+#endif
+                cfm->found    = true;
+                cfm->key_size = 16;
+                memcpy(&cfm->ltk, &ltk.ltk, sizeof(struct gap_sec_key));
+            }
+            else
+            {
+#if (TRACE_ENABLE)
+                LOG(LOG_LVL_INFO,"EDIV and randnb not same!!!\r\n");
+#endif
+            }
+            /*
+             * else we are bonded with another device, disconnect the link
+             */
+        }
+        else
+        {
+            ASSERT_ERR(0);
+        }
+       
+    }
+    /*
+     * else the peer device is not known, an error should trigger a new pairing procedure.
+     */
+
+    // Send the message
+    ke_msg_send(cfm);
+
+    return (KE_MSG_CONSUMED);
+}
+
+
+static int gapc_encrypt_ind_handler(ke_msg_id_t const msgid,
+                                    void const *p_param,
+                                    ke_task_id_t const dest_id,
+                                    ke_task_id_t const src_id)
+{
+    struct gapc_encrypt_ind const *param = (struct gapc_encrypt_ind const *)p_param;
+    LOG(LOG_LVL_INFO," [debug] gapc_encrypt_ind_handler \r\n");
+
+    // encryption/ re-encryption succeeded
+
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_INFO,"app_sec gapc_encrypt_ind_handler: auth=%d\r\n", param->auth);
+#endif
+
+
+    struct gapc_set_le_pkt_size_cmd *req = KE_MSG_ALLOC(GAPC_SET_LE_PKT_SIZE_CMD,
+                                                        KE_BUILD_ID(TASK_GAPC, KE_IDX_GET(src_id)), TASK_APP,
+                                                        gapc_set_le_pkt_size_cmd);
+
+    req->operation = GAPC_SET_LE_PKT_SIZE;
+    req->tx_octets = 0xFB;
+    req->tx_time = 2120;
+
+    // Send the message
+    ke_msg_send(req);
+
+
+    
+    
+    return (KE_MSG_CONSUMED);
+}
+
+bool app_sec_get_bond_status(void)
+{
+#if 0//(TRACE_ENABLE)
+    LOG(LOG_LVL_INFO,"app_sec_get_bond_status bonded=%d\r\n",app_sec_env.bonded);
+#endif
+
+    return app_sec_env.bonded;
+}
+
+
+static int gapc_security_ind_handler(ke_msg_id_t const msgid,
+                                    void const *p_param,
+                                    ke_task_id_t const dest_id,
+                                    ke_task_id_t const src_id)
+{
+    struct gapc_security_ind const *param =(struct gapc_security_ind const *)p_param;
+    LOG(LOG_LVL_INFO," [debug]  gapc_security_ind_handler \r\n");
+
+#if (TRACE_ENABLE)
+    LOG(LOG_LVL_INFO,"app_sec gapc_security_ind_handler: auth=%d\r\n", param->auth);
+#endif
+
+    if(app_sec_get_bond_status())//if bonded,start encrypt. Core SPEC P1713 slave security request, master init link layer encryption.
+    {
+        // generate a local encrypt command
+        struct gapc_encrypt_cmd *cmd = KE_MSG_ALLOC(GAPC_ENCRYPT_CMD,
+                                                    src_id, dest_id,
+                                                    gapc_encrypt_cmd);
+
+        if (app_env.sec_con_enabled == true)
+        {
+            struct gapc_ltk ltk;
+            size_t v_len = 0;
+            // Get LTK from KV
+            if (ln_kv_get(KV_BLE_LTK, (uint8_t *)&ltk.ltk.key[0],KV_BLE_LEN_LTK,&v_len) != KV_ERR_NONE)
+            {
+                ASSERT_ERR(0);
+            }
+            cmd->operation = GAPC_ENCRYPT;
+            cmd->ltk.ediv = ltk.ediv;
+            memcpy(&cmd->ltk.randnb, &ltk.randnb, sizeof(struct rand_nb));
+            ke_msg_send(cmd);
+        }
+
+    }
+    return (KE_MSG_CONSUMED);
+}
+
+static int gapc_le_pkt_size_ind_handler(ke_msg_id_t const msgid,
+                                        void const *param,
+                                        ke_task_id_t const dest_id,
+                                        ke_task_id_t const src_id)
+{
+	struct gapc_le_pkt_size_ind *p_param = (struct gapc_le_pkt_size_ind *)param;
+	uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+	LOG(LOG_LVL_INFO,"gapc_le_pkt_size_ind_handler conidx=0x%x,max_rx_octets:%d,max_rx_time:%d,max_tx_octets:%d, max_tx_time :%d\r\n",conidx,p_param->max_rx_octets,p_param->max_rx_time,p_param->max_tx_octets,p_param->max_tx_time);
+#endif
+	//memcpy(&(app_env_info.le_pkt_size_info),p_param,sizeof( struct gapc_le_pkt_size_ind));
+	return (KE_MSG_CONSUMED);
+}
+
+
+
+
+
+
+static int gapc_le_ping_to_handler(ke_msg_id_t const msgid,
+                                   void const *param,
+                                   ke_task_id_t const dest_id,
+                                   ke_task_id_t const src_id)
+{
+	uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+	LOG(LOG_LVL_INFO,"gapc_le_ping_to_handler conidx=0x%x\r\n",conidx);
+#endif
+	return (KE_MSG_CONSUMED);
+}
+
+
+
+static int gapc_sign_counter_ind_handler(ke_msg_id_t const msgid,
+        void const *param,
+        ke_task_id_t const dest_id,
+        ke_task_id_t const src_id)
+{
+	struct gapc_sign_counter_ind *p_param = (struct gapc_sign_counter_ind *)param;
+	uint8_t conidx = KE_IDX_GET(src_id);
+#if (TRACE_ENABLE)
+	LOG(LOG_LVL_INFO,"gapc_sign_counter_ind_handler conidx=0x%x\r\n",conidx);
+#endif
+	//memcpy(&(app_env_info.sign_counter_info),p_param,sizeof( struct gapc_sign_counter_ind));
+	return (KE_MSG_CONSUMED);
+}
+
+
+
+
+
+static int app_msg_handler(ke_msg_id_t const msgid,
+                           void const *param,
+                           ke_task_id_t const dest_id,
+                           ke_task_id_t const src_id)
+{
+	// Retrieve identifier of the task from received message
+	ke_task_id_t src_task_id = MSG_T(msgid);
+	
+#if (TRACE_ENABLE)
+	LOG(LOG_LVL_INFO,"app_msg_handler src_task_id=%d, msgid=0x%x\r\n",src_task_id,msgid);
+#endif
+	return (KE_MSG_CONSUMED);
+}
+
+
+
+KE_MSG_HANDLER_TAB(app)
+{
+    // Note: first message is latest message checked by kernel so default is put on top.
+    {KE_MSG_DEFAULT_HANDLER,    (ke_msg_func_t)app_msg_handler},
+    //GAPM
+    {GAPM_CMP_EVT, gapm_cmp_evt_handler},
+    {GAPM_DEV_VERSION_IND, gapm_dev_version_ind_handler},
+    {GAPM_DEV_BDADDR_IND, gapm_dev_bdaddr_ind_handler},
+    {GAPM_DEV_ADV_TX_POWER_IND, gapm_dev_adv_tx_power_ind_handler},
+    {GAPM_ADDR_SOLVED_IND, gapm_addr_solved_ind_handler},
+    {GAPM_USE_ENC_BLOCK_IND, gapm_use_enc_block_handler},
+    {GAPM_GEN_RAND_NB_IND, gapm_gen_rand_nb_ind_handler},
+    {GAPM_SUGG_DFLT_DATA_LEN_IND, gapm_sugg_dflt_data_len_ind_handler},
+    {GAPM_MAX_DATA_LEN_IND, gapm_max_data_len_ind_handler},
+    {GAPM_LIST_SIZE_IND, gapm_list_size_ind_handler},
+    {GAPM_NB_ADV_SETS_IND, gapm_nb_adv_sets_ind_handler},
+    {GAPM_MAX_ADV_DATA_LEN_IND, gapm_max_adv_data_len_ind_handler},
+    {GAPM_DEV_TX_PWR_IND, gapm_dev_tx_pwr_ind_handler},
+    {GAPM_RAL_ADDR_IND, gapm_ral_addr_ind_handler},
+    {GAPM_ACTIVITY_CREATED_IND, gapm_activity_created_ind_handler},
+    {GAPM_ACTIVITY_STOPPED_IND, gapm_activity_stopped_ind_handler},
+    {GAPM_EXT_ADV_REPORT_IND,  gapm_ext_adv_report_ind_handler},
+    {GAPM_SCAN_REQUEST_IND, gapm_scan_request_ind_handler},
+    {GAPM_SYNC_ESTABLISHED_IND, gapm_sync_established_ind_handler},
+    {GAPM_PEER_NAME_IND, gapm_peer_name_ind_handler},
+    {GAPM_PROFILE_ADDED_IND, gapm_profile_added_ind_handler},
+    {GAPM_LE_TEST_END_IND, gapm_le_test_end_ind_handler},
+    {GAPM_PUB_KEY_IND, gapm_pub_key_ind_handler},
+    {GAPM_GEN_DH_KEY_IND, gapm_gen_dh_key_ind_handler},
+    //GAPC
+    {GAPC_CMP_EVT, gapc_cmp_evt_handler },
+    {GAPC_CONNECTION_REQ_IND, gapc_connection_req_ind_handler},
+    {GAPC_DISCONNECT_IND, gapc_disconnect_ind_handler},
+    {GAPC_PEER_ATT_INFO_IND, gapc_peer_att_info_ind_handler},
+    {GAPC_PEER_VERSION_IND, gapc_peer_version_ind_handler},
+    {GAPC_PEER_FEATURES_IND, gapc_peer_features_ind_handler},
+    {GAPC_CON_RSSI_IND, gapc_con_rssi_ind_handler},
+    {GAPC_CON_CHANNEL_MAP_IND, gapc_con_channel_map_ind_handler},
+    {GAPC_LE_PING_TO_VAL_IND, gapc_le_ping_to_val_ind_handler},
+    {GAPC_LE_PHY_IND, gapc_le_phy_ind_handler},
+    {GAPC_CHAN_SEL_ALGO_IND, gapc_chan_sel_algo_ind_handler},
+    {GAPC_PARAM_UPDATED_IND, gapc_param_updated_ind_handler},
+    {GAPC_BOND_IND, gapc_bond_ind_handler},
+    {GAPC_LE_PKT_SIZE_IND, gapc_le_pkt_size_ind_handler},
+    {GAPC_SECURITY_IND, gapc_security_ind_handler},
+    {GAPC_ENCRYPT_IND, gapc_encrypt_ind_handler},
+    {GAPC_LE_PING_TO_IND, gapc_le_ping_to_handler},
+    {GAPC_GET_DEV_INFO_REQ_IND, gapc_get_dev_info_req_ind_handler},
+    {GAPC_SET_DEV_INFO_REQ_IND, gapc_set_dev_info_req_ind_handler},
+    {GAPC_PARAM_UPDATE_REQ_IND, gapc_param_update_req_ind_handler},
+    {GAPC_BOND_REQ_IND, gapc_bond_req_ind_handler},
+    {GAPC_ENCRYPT_REQ_IND, gapc_encrypt_req_ind_handler},
+    {GAPC_KEY_PRESS_NOTIFICATION_IND, gapc_key_press_notification_ind_handler},
+    {GAPC_SIGN_COUNTER_IND, gapc_sign_counter_ind_handler},
+    //GATTM
+    {GATTM_ADD_SVC_RSP, gattm_add_svc_rsp_handler },
+    {GATTM_SVC_GET_PERMISSION_RSP, gattm_svc_get_permission_rsp_handler},
+    {GATTM_SVC_SET_PERMISSION_RSP, gattm_svc_set_permission_rsp_handler},
+    {GATTM_ATT_GET_PERMISSION_RSP, gattm_att_get_permission_rsp_handler},
+    {GATTM_ATT_SET_PERMISSION_RSP, gattm_att_set_permission_rsp_handler},
+    {GATTM_ATT_GET_VALUE_RSP, gattm_att_get_value_rsp_handler},
+    {GATTM_ATT_SET_VALUE_RSP, gattm_att_set_value_rsp_handler},
+    {GATTM_UNKNOWN_MSG_IND, gattm_unknown_msg_ind_handler},
+    {GATTM_DESTROY_DB_RSP, gattm_destroy_db_rsp_handler},
+    {GATTM_SVC_GET_LIST_RSP, gattm_svc_get_list_rsp_handler},
+    {GATTM_ATT_GET_INFO_RSP, gattm_att_get_info_rsp_handler},
+    {GATTM_ATT_DB_HASH_COMP_RSP, gattm_att_db_hash_comp_rsp_handler},
+    //GATTC
+    {GATTC_CMP_EVT, gattc_cmp_evt_handler },
+    {GATTC_MTU_CHANGED_IND, gattc_mtu_changed_ind_handler},
+    {GATTC_DISC_SVC_IND, gattc_app_disc_svc_ind_handler},
+    {GATTC_DISC_SVC_INCL_IND, gattc_app_disc_svc_incl_ind_handler},
+    {GATTC_DISC_CHAR_IND, gattc_app_disc_char_ind_handler},
+    {GATTC_DISC_CHAR_DESC_IND, gattc_app_disc_char_desc_ind_handler},
+    {GATTC_READ_IND, gattc_read_ind_handler},
+    {GATTC_EVENT_IND, gattc_event_ind_handler},
+    {GATTC_EVENT_REQ_IND, gattc_event_req_ind_handler},
+    {GATTC_READ_REQ_IND, gattc_read_req_ind_handler},
+    {GATTC_WRITE_REQ_IND, gattc_write_req_ind_handler},
+    {GATTC_ATT_INFO_REQ_IND, gattc_att_info_req_ind_handler},
+    {GATTC_SDP_SVC_IND, gattc_sdp_svc_ind_handler},
+    {GATTC_TRANSACTION_TO_ERROR_IND, gattc_transaction_to_error_ind_handler},
+    	//BATTC
+#if (BLE_BATT_CLIENT)
+	{BASC_ENABLE_RSP, basc_enable_rsp_handler },
+	{BASC_READ_INFO_RSP, basc_read_info_rsp_handler},
+	{BASC_BATT_LEVEL_NTF_CFG_RSP, basc_batt_level_ntf_cfg_rsp_handler},
+	{BASC_BATT_LEVEL_IND, basc_batt_level_ind_handler},
+#endif
+	//BATTS
+#if (BLE_BATT_SERVER)
+	{BASS_ENABLE_RSP, bass_enable_rsp_handler },
+	{BASS_BATT_LEVEL_UPD_RSP, bass_batt_level_upd_rsp_handler},
+	{BASS_BATT_LEVEL_NTF_CFG_IND, bass_batt_level_ntf_cfg_ind_handler},
+#endif
+   //DISC    
+#if (BLE_DIS_CLIENT)
+    {DISC_ENABLE_RSP,disc_enable_rsp_handler},
+    {DISC_RD_CHAR_IND,disc_rd_char_ind_handler},
+    {DISC_CMP_EVT, disc_cmp_event_handler},
+#endif
+    //DISS
+#if (BLE_DIS_SERVER) 
+    {DISS_SET_VALUE_RSP,diss_set_value_rsp_handler},
+    {DISS_VALUE_REQ_IND,diss_value_req_ind_handler},
+#endif
+    //HOGPD
+#if (BLE_HID_DEVICE)
+    {HOGPD_ENABLE_RSP,hogpd_enable_rsp_handler},
+    {HOGPD_NTF_CFG_IND,hogpd_ntf_cfg_ind_handler},
+    {HOGPD_REPORT_REQ_IND,hogpd_report_req_ind_handler},
+//    {HOGPD_HID_INFO_REQ_IND,hogpd_hid_info_req_ind_handler},
+    {HOGPD_CTNL_PT_IND,hogpd_ctnl_pt_ind_handler},
+    {HOGPD_REPORT_UPD_RSP,hogpd_report_upd_rsp_handler},
+    {HOGPD_PROTO_MODE_REQ_IND,hogpd_proto_mode_req_ind_handler},
+   // {HOGPD_CMP_EVT,hogpd_cmp_evt_handler},
+   // {HOGPD_CONNECT_IND,hogpd_connect_ind_handler},
+   // {HOGPD_DISCONNECT_IND,hogpd_disconnect_ind_handler},
+   // {HOGPD_DFU_IMG_ID_IND,hogpd_dfu_img_id_ind_handler},
+#endif
+     //HOGPD_PROTO_MODE_CFM,
+};
+
+
+/// Number of APP Task Instances
+#define APP_IDX_MAX                 (1)
+
+ke_state_t app_state[APP_IDX_MAX];
+
+const struct ke_task_desc TASK_DESC_APP = {app_msg_handler_tab, app_state, APP_IDX_MAX, ARRAY_LEN(app_msg_handler_tab)};
+/// @} APP
+

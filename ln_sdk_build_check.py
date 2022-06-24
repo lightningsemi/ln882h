@@ -186,7 +186,7 @@ class BuildCheck:
             result_path = os.path.join(temp, "UV4", "UV4.exe")
             if os.path.exists(result_path):
                 retcode = True
-                uv4_filepath = result_path
+                uv4_filepath = '"' + result_path + '"'
 
         if retcode:
             print("----------" * 10)
@@ -242,6 +242,10 @@ def main():
         # combo_mcu_basic_example
         "project/combo_mcu_basic_example/keil_ln882h_rel",
 
+        # ble_mcu_prf_battery
+        "project/ble_mcu_prf_battery/keil_ln882h_rel",
+        # ble_mcu_prf_hid_mouse
+        "project/ble_mcu_prf_hid_mouse/keil_ln882h_rel",
         # mcu_peripheral_driver_test
         "project/mcu_peripheral_driver_test/keil_ln882h_dev",
         # mcu_peripheral_driver_demo
@@ -269,7 +273,8 @@ def main():
     gcc_proj_list = [
         "ble_mcu_data_trans",
         "ble_mcu_scan",
-
+        "ble_mcu_prf_battery",
+        "ble_mcu_prf_hid_mouse",
         "wifi_mcu_basic_example",
         "combo_mcu_basic_example",
         "mcu_peripheral_driver_test",

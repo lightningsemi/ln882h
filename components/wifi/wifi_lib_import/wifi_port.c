@@ -214,12 +214,16 @@ void wlib_aes_decrypt(void *ctx, const uint8_t *ctext, uint8_t *ptext)
 void wlib_get_tx_power_ext_comp_val(int8_t *val)
 {
     uint8_t rd_val = 0;
+    if (!val) {
+        return;
+    }
 
     if (NVDS_ERR_OK != ln_nvds_get_tx_power_comp(&rd_val)) {
         return;
     }
 
     if (rd_val == 0xFF) {
+        *val = 0;
         return;
     }
 

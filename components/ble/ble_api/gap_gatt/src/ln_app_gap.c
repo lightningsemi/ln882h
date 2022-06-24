@@ -322,7 +322,7 @@ void ln_app_set_adv_data(struct ln_gapm_set_adv_data_cmd *adv_data)
     struct gapm_set_adv_data_cmd *p_cmd = KE_MSG_ALLOC_DYN(GAPM_SET_ADV_DATA_CMD,
                                           TASK_GAPM, TASK_APP,
                                           gapm_set_adv_data_cmd,
-                                          ADV_DATA_LEN);
+                                          adv_data->length);
     // Fill the allocated kernel message
     p_cmd->operation = GAPM_SET_ADV_DATA;
     p_cmd->actv_idx = adv_data->actv_idx;
@@ -339,7 +339,7 @@ void ln_app_set_scan_rsp_data(struct ln_gapm_set_adv_data_cmd *scan_rsp_data)
     struct gapm_set_adv_data_cmd *p_cmd = KE_MSG_ALLOC_DYN(GAPM_SET_ADV_DATA_CMD,
                                           TASK_GAPM, TASK_APP,
                                           gapm_set_adv_data_cmd,
-                                          ADV_DATA_LEN);
+                                          scan_rsp_data->length);
     // Fill the allocated kernel message
     p_cmd->operation = GAPM_SET_SCAN_RSP_DATA;
     p_cmd->actv_idx = scan_rsp_data->actv_idx;
