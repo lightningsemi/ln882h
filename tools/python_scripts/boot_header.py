@@ -105,7 +105,7 @@ class BootHeader:
     @crp_flag.setter
     def crp_flag(self, crp):
         if isinstance(crp, int):
-            if (crp == 0) or (crp == 1):
+            if (crp == 0) or (crp == 1) or (crp == self.CRP_VALID_FLAG):
                 self.__crp_flag = crp
             else:
                 raise ValueError("Error: crp MUST be 0 or 1!!!")

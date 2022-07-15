@@ -24,6 +24,11 @@ static uint8_t temp_4k_buffer[SIZE_4KB] = {0};
 
 /*****************************************  functions *********************************************/
 
+int bootram_flash_info(void)
+{
+    return hal_flash_read_id();
+}
+
 int bootram_flash_read(uint32_t offset, uint32_t len, void* buf)
 {
     hal_flash_read(offset, len, buf);

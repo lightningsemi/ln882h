@@ -784,7 +784,7 @@ int iperf(char *args)
 
 __usage:
     iperf_usage();
-    return 0;
+    return -1;
 }
 
 #if 0

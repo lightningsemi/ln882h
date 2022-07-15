@@ -33,12 +33,6 @@ int main (int argc, char* argv[])
     //2. register os heap mem
     OS_DefineHeapRegions();
 
-    //3.rf preprocess,img cal
-    wifi_rf_preprocess();
-    wifi_rf_image_cal();
-    wlib_pvtcmd_output_cb_set(ln_at_vprintf);
-
-    //4.init log&AT
     log_init();
     if (LN_AT_ERR_NONE != ln_at_init()) {
         LOG(LOG_LVL_ERROR, "ln at init fail.\r\n");
@@ -56,11 +50,15 @@ int main (int argc, char* argv[])
         LOG(LOG_LVL_ERROR, "KV init filed!\r\n");
     }
 
-	//init system parameter
-	sysparam_integrity_check_all();
+    //init system parameter
+    sysparam_integrity_check_all();
+
+    //3.rf preprocess,img cal
+    wifi_rf_calibration();
 
     //Init wifi stack.
     wifi_init();
+    wlib_pvtcmd_output_cb_set(ln_at_vprintf);
 
     //Init lwip stack.
     lwip_tcpip_init();
