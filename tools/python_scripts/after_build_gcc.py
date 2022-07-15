@@ -73,13 +73,34 @@ class AfterBuildGCC(AfterBuildBase):
                         continue
                     if line.find(AfterBuildBase.FLASH_IMAGE_VER_MAJOR_STR) > 0:
                         strlist = line.strip(" ").split(" ")
-                        major = int(strlist[-1])
+                        str = strlist[-1]
+                        index = 0
+                        for i in str:
+                            if (ord(i) < 0x30) or (ord(i) > 0x39):
+                                str = str[0:index]
+                            else:
+                                index = index + 1
+                        major = int(str)
                     if line.find(AfterBuildBase.FLASH_IMAGE_VER_MINOR_STR) > 0:
                         strlist = line.strip(" ").split(" ")
-                        minor = int(strlist[-1])
+                        str = strlist[-1]
+                        index = 0
+                        for i in str:
+                            if (ord(i) < 0x30) or (ord(i) > 0x39):
+                                str = str[0:index]
+                            else:
+                                index = index + 1
+                        minor = int(str)
                     if line.find(AfterBuildBase.SOC_CRP_FLAG_STR) > 0:
                         strlist = line.strip(" ").split(" ")
-                        crp = int(strlist[-1])
+                        str = strlist[-1]
+                        index = 0
+                        for i in str:
+                            if (ord(i) < 0x30) or (ord(i) > 0x39):
+                                str = str[0:index]
+                            else:
+                                index = index + 1
+                        crp = int(str)
         except OSError as err:
             print("Error: read LN SDK version from file: {}".format(str(err)))
             return False

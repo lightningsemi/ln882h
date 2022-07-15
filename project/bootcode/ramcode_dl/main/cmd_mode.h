@@ -45,6 +45,8 @@ int cmd_flash_upgrade(bootram_cmd_tbl_t* cmdtbl, int argc, char* argv[]);
 int cmd_flash_dump(bootram_cmd_tbl_t* cmdtbl, int argc, char* argv[]);
 int cmd_flash_erase_all(bootram_cmd_tbl_t* cmdtbl, int argc, char* argv[]);
 int cmd_flash_erase(bootram_cmd_tbl_t* cmdtbl, int argc, char* argv[]);
+int cmd_flash_info(bootram_cmd_tbl_t* cmdtbl, int argc, char* argv[]);
+int cmd_flash_test(bootram_cmd_tbl_t* cmdtbl, int argc, char* argv[]);
 
 #ifdef __cplusplus
 }

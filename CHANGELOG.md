@@ -6,7 +6,36 @@
         <td>上游版本</td>
         <td>摘要</td>
     </tr>
-    <tr>
+<tr>
+        <td>
+            2022-07-15 10:50:00
+        </td>
+        <td>
+            v1.4
+        </td>
+        <td>
+            288ee4c6
+        </td>
+        <td>
+            1. WIFI 版本更新为 v1.0.7 <br />
+            2. BLE 版本更新为 v1.0.4 <br />
+            3. SDK 版本更新为 v1.4 <br />
+             <br /><b>SDK changelog:</b> <br />
+            1. 新增 RAMCODE 命令，增加获取 flash 信息和 Flash 整片测试命令 <br />
+            2. at 指令增加 nvic reset 功能<br />
+            3. 优化 wifi 网络性能<br />
+            4. 修复 connect 的时候 scan 到目标网络 但是没有发起 join 的问题     <br />
+            5. img 校准使用的 RAM 区域 4 字节对齐 <br />
+            6. wifi rf 校准优化 <br />
+            7. 增加 BLE 硬件复位接口 <br />
+            8. 增加 BLE 边带测试命令 <br />
+            9. 修复在重关联的时候拿到 ip 后偶现 dhcp release 的问题 <br />
+            10. wifi 校准函数合并为一个 wifi_rf_calibration
+    原来为 wifi_rf_preprocess 和 wifi_rf_image_cal 
+            <br />
+        </td>
+    </tr>
+<tr>
         <td>
             2022-06-24 10:50:00
         </td>

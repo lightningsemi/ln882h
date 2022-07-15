@@ -436,6 +436,7 @@ void     hal_misc_reset_rtc(void);
 void     hal_misc_reset_wic(void);
 void     hal_misc_reset_pmu(void);
 
+void     hal_misc_reset_ble(void);
 void     hal_misc_reset_aes(void);
 void     hal_misc_reset_trng(void);
 void     hal_misc_reset_ef(void);
