@@ -25,7 +25,7 @@
 
 #define SECTOR_SIZE_4KB            (1024 * 4)
 
-static char g_http_uri_buff[128] = "http://192.168.122.48:9090/ota-images/otaimage-v1.3.bin";
+static char g_http_uri_buff[512] = "http://192.168.122.48:9090/ota-images/otaimage-v1.3.bin";
 
 // a block to save http data.
 static char *temp4K_buf    = NULL;
@@ -74,10 +74,11 @@ static int ota_download_precheck(uint32_t app_offset, image_hdr_t * ota_hdr)
         // check version
         if (((ota_hdr->ver.ver_major << 8) + ota_hdr->ver.ver_minor) == \
             ((app_hdr->ver.ver_major << 8) + app_hdr->ver.ver_minor)) {
-            LOG(LOG_LVL_ERROR, "[%s:%d] same version, do not upgrade!\r\n");
+            LOG(LOG_LVL_ERROR, "[%s:%d] same version, do not upgrade!\r\n",
+                    __func__, __LINE__);
             goto ret_err;
         }
-        
+
         // check file size
         if (((ota_hdr->img_size_orig + sizeof(image_hdr_t)) > APP_SPACE_SIZE) || \
             ((ota_hdr->img_size_orig_xz + sizeof(image_hdr_t)) > OTA_SPACE_SIZE)) {
@@ -372,7 +373,6 @@ static ln_at_err_t ln_at_set_http_ota(uint8_t para_num, const char *name)
     }
 
     LOG(LOG_LVL_INFO, "Input http url:%s; len:%d\r\n", in_uri, len);
-    LOG(LOG_LVL_INFO, "now http url:%s; len:%d\r\n", g_http_uri_buff, strlen(g_http_uri_buff));
 
     strncpy(g_http_uri_buff, in_uri, len);
 

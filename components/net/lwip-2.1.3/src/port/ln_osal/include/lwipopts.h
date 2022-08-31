@@ -40,19 +40,19 @@ a lot of data that needs to be copied, this should be set high. */
 
 /* MEMP_NUM_PBUF: the number of memp struct pbufs. If the application
    sends a lot of data out of ROM (or other static memory), this should be set high. */
-#define MEMP_NUM_PBUF           (100)
+#define MEMP_NUM_PBUF           (50)
 
 /* MEMP_NUM_NETCONN: the number of struct netconns. (only needed if you use the sequential API, like api_lib.c) */
 #define MEMP_NUM_NETCONN        (MEMP_NUM_UDP_PCB + MEMP_NUM_TCP_PCB + MEMP_NUM_TCP_PCB_LISTEN)
 #define MEMP_NUM_NETBUF         (8)
 /* the number of UDP protocol control blocks. One per active RAW "connection". */
-#define MEMP_NUM_RAW_PCB        (4)
+#define MEMP_NUM_RAW_PCB        (2)
 /* MEMP_NUM_UDP_PCB: the number of UDP protocol control blocks. One per active UDP "connection". */
-#define MEMP_NUM_UDP_PCB        (6)
+#define MEMP_NUM_UDP_PCB        (4)
 /* MEMP_NUM_TCP_PCB: the number of simulatenously active TCP connections. */
-#define MEMP_NUM_TCP_PCB        (10)
+#define MEMP_NUM_TCP_PCB        (8)
 /* MEMP_NUM_TCP_PCB_LISTEN: the number of listening TCP connections. */
-#define MEMP_NUM_TCP_PCB_LISTEN (5)
+#define MEMP_NUM_TCP_PCB_LISTEN (3)
 /* MEMP_NUM_TCP_SEG: the number of simultaneously queued TCP segments. */
 #define MEMP_NUM_TCP_SEG        TCP_SND_QUEUELEN
 /* MEMP_NUM_SYS_TIMEOUT: the number of simulateously active timeouts. */
@@ -81,7 +81,7 @@ a lot of data that needs to be copied, this should be set high. */
 /*  TCP_SND_QUEUELEN: TCP sender buffer space (pbufs). This must be at least as much as (2 * TCP_SND_BUF/TCP_MSS) for things to work. */
 #define TCP_SND_QUEUELEN        (5 * TCP_SND_BUF/TCP_MSS)
 /* TCP receive window. */
-#define TCP_WND                 (6 * TCP_MSS)
+#define TCP_WND                 (2 * TCP_MSS)
 /* Maximum number of retransmissions of data segments. */
 #define TCP_MAXRTX              (12)
 /* Maximum number of retransmissions of SYN segments. */
@@ -187,10 +187,10 @@ a lot of data that needs to be copied, this should be set high. */
 #define TCPIP_THREAD_PRIO               OS_PRIORITY_ABOVE_NORMAL
 #define TCPIP_THREAD_STACKSIZE          (3*1024)
 
-#define TCPIP_MBOX_SIZE                 32
-#define DEFAULT_RAW_RECVMBOX_SIZE       8
-#define DEFAULT_UDP_RECVMBOX_SIZE       8
-#define DEFAULT_TCP_RECVMBOX_SIZE       8
+#define TCPIP_MBOX_SIZE                 8
+#define DEFAULT_RAW_RECVMBOX_SIZE       6
+#define DEFAULT_UDP_RECVMBOX_SIZE       6
+#define DEFAULT_TCP_RECVMBOX_SIZE       6
 #define DEFAULT_ACCEPTMBOX_SIZE         4
 
 #define DEFAULT_THREAD_STACKSIZE        500

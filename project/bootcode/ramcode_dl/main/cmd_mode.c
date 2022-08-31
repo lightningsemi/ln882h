@@ -68,6 +68,21 @@ static bootram_cmd_tbl_t bootram_cmd_list[] = {
         cmd_version,
         "ramcode version.\r\n"
     },
+    
+    {
+        "flash_info",
+        1,
+        cmd_flash_info,
+        "flash_info.\r\n"
+    },
+    
+    {
+        "flash_test",
+        1,
+        cmd_flash_test,
+        "flash_test.\r\n"
+    },
+    
 
 #if (defined(DEBUG_FLASH_ROBUST) && (DEBUG_FLASH_ROBUST == 1))
     {
@@ -239,6 +254,85 @@ void echo_result(int isPass)
         uint8_t ch = result[i];
         bootram_serial_write(&ch, 1);
     }
+}
+
+int cmd_flash_info(bootram_cmd_tbl_t* cmdtbl, int argc, char* argv[])
+{
+    uint32_t ret        = 0;
+    char     buf[50]    = {0};
+    uint32_t flash_size = 0;
+    
+    ret = bootram_flash_info();
+    
+    if((ret & 0xFF) == 0x15){
+        flash_size = 2;
+    }else{
+        flash_size = 1;
+    }
+    
+    sprintf(buf, "\r\nid:0x%X,flash size:%dM Byte\r\n", ret,flash_size);
+
+    for (int i = 0; i < strlen(buf); i++) {
+        uint8_t ch = buf[i];
+        bootram_serial_write(&ch, 1);
+    }
+    
+    return 0;
+}
+
+
+int cmd_flash_test(bootram_cmd_tbl_t* cmdtbl, int argc, char* argv[])
+{
+    uint32_t    ret                = 0;
+    char        buf[50]            = {0};
+    uint32_t    flash_size         = 0;
+    uint8_t     write_buf[4096];
+    uint8_t     read_buf[4096];
+    uint32_t    err_pos            = 0;
+
+    ret = bootram_flash_info();
+    
+    if((ret & 0xFF) == 0x15){
+        flash_size = 0x200000;
+    }else{
+        flash_size = 0x100000;
+    }
+    
+    for(int i = 0; i < 4096; i ++)
+    {
+        write_buf[i] = i;
+    }
+    
+    ret = 0;
+    bootram_flash_chiperase();
+    for(int i = 0; i < flash_size / 0x1000; i ++)
+    {
+        bootram_flash_write(i * 0x1000,0x1000,write_buf);
+        bootram_flash_read(i * 0x1000,0x1000,read_buf);
+        for(int x = 0; x < 4096; x ++)
+        {
+            if(write_buf[x] != read_buf[x]){
+                ret = 1;
+                err_pos = i * 0x1000 + x;
+                break;
+            }
+        }
+        if(ret != 0)
+            break;
+    }
+    
+    if(ret == 0){
+        sprintf(buf, "\r\nno err\r\n");
+    }else{
+        sprintf(buf, "\r\nerr pos:0x%X\r\n", err_pos);
+    }
+    
+    for (int i = 0; i < strlen(buf); i++) {
+        uint8_t ch = buf[i];
+        bootram_serial_write(&ch, 1);
+    }
+    
+    return 0;
 }
 
 int cmd_flash_erase(bootram_cmd_tbl_t* cmdtbl, int argc, char* argv[])

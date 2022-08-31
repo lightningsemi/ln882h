@@ -2149,6 +2149,12 @@ void hal_misc_reset_pmu(void)
     sysc_awo_srstn_pmu_setf(1);
 }
 
+void hal_misc_reset_ble(void)
+{
+    sysc_cmp_srstn_ble_setf(0);
+    sysc_cmp_srstn_ble_setf(1);
+}
+
 void hal_misc_reset_aes(void)
 {
     sysc_cmp_srstn_aes_setf(0);

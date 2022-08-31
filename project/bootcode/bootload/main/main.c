@@ -81,6 +81,16 @@ int main (int argc, char* argv[])
 
     ota_port_init();
 
+    do {
+        if (0xaeaebebe == hal_misc_awo_get_r_idle_reg()) {
+            partition_info_t part_ota_info;
+            if (LN_TRUE != ln_fetch_partition_info(PARTITION_TYPE_OTA, &part_ota_info)) {
+                break;
+            }
+            jump_to_application(part_ota_info.start_addr + sizeof(image_hdr_t));
+            while(1);
+        }
+    } while(0);
     if(OTA_ERR_NONE != ota_boot_upgrade_agent(jump_to_application))
     {
         // TODO:process error code

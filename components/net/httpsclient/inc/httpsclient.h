@@ -10,9 +10,9 @@
 #include "httpsclient_wrapper.h"
 
 #define FIELD_URL_HOST_MAX_LEN                   (256)
-#define FIELD_URL_PATH_MAX_LEN                   (256)
+#define FIELD_URL_PATH_MAX_LEN                   (256 * 2)
 
-#define FIELD_REQUEST_CONTENT_TYPE_MAX_LEN       (256)
+#define FIELD_REQUEST_CONTENT_TYPE_MAX_LEN       (256 * 2)
 #define FIELD_REQUEST_LOCATION_MAX_LEN           (256)
 #define FIELD_REQUEST_REFERRER_MAX_LEN           (256)
 #define FIELD_REQUEST_COOKIE_MAX_LEN             (256)

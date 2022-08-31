@@ -782,6 +782,11 @@ __STATIC_INLINE void sysc_cmp_srstn_qspi_setf(uint8_t srstn_qspi)
     hwp_sysc_cmp->sw_rstn.bit_field.srstn_qspi = srstn_qspi;
 }
 
+__STATIC_INLINE void sysc_cmp_srstn_ble_setf(uint8_t srstn_ble)
+{
+    hwp_sysc_cmp->sw_rstn.bit_field.srstn_ble = srstn_ble;
+}
+
 __STATIC_INLINE void sysc_cmp_io_en_set(uint32_t value)
 {
     hwp_sysc_cmp->io_en.val = value;

@@ -9,7 +9,7 @@ set(MCU         "-mthumb  -mabi=aapcs  ${CPU}  ${FPU}  ${FLOAT_ABI}")
 
 set(C_WARNFLAGS   "-Wall  -Wextra  -Wundef  -Wshadow  -Wredundant-decls        \
     -Wstrict-prototypes  -Wimplicit-function-declaration  -Wmissing-prototypes \
-    -Wdouble-promotion  -Wfloat-conversion  -pedantic"
+    -Wdouble-promotion  -Wfloat-conversion  -pedantic -Wformat=2 "
 )
 
 set(CXX_WARNFLAGS   "-Wall  -Wextra  -Wundef  -Wshadow  -Wredundant-decls      \

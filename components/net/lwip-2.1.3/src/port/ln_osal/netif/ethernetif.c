@@ -185,10 +185,10 @@ static void sta_netif_status_changed_cb(struct netif *nif)
         if (dhcp_supplied_address(nif) && (nif->flags & NETIF_FLAG_UP)
             && (netif_is_link_up(nif))) {
             print_netdev_info(nif);
+            wifi_set_allow_cpu_sleep_flag(1);
             if (g_get_ip_cb)
             {
                 g_get_ip_cb(nif);
-                wifi_set_allow_cpu_sleep_flag(1);
             }
         }
     }
@@ -237,7 +237,6 @@ int lwip_tcpip_init(void)
 
 int netdev_set_state(netif_idx_t nif_idx, netdev_state_t state)
 {
-//    netdev_t *ndev = NULL;
     struct netif *nif = NULL;
 
     if (nif_idx >= NETIF_IDX_MAX) {
@@ -257,17 +256,16 @@ int netdev_set_state(netif_idx_t nif_idx, netdev_state_t state)
             netif_set_status_callback(nif, sta_netif_status_changed_cb);
             netif_set_link_callback(nif, sta_netif_link_changed_cb);
 
-            netifapi_dhcp_release(nif);
             netifapi_dhcp_stop(nif);
             netifapi_dhcp_start(nif);
         }
         else
         {
+            netifapi_dhcp_stop(nif);
+
             netifapi_netif_set_down(nif);
             netifapi_netif_set_link_down(nif);
 
-            netifapi_dhcp_release(nif);
-            netifapi_dhcp_stop(nif);
             netif_set_status_callback(nif, NULL);
             netif_set_link_callback(nif, NULL);
         }

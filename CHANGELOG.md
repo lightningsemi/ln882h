@@ -6,6 +6,109 @@
         <td>上游版本</td>
         <td>摘要</td>
     </tr>
+<tr>
+        <td>
+            2022-07-15 10:50:00
+        </td>
+        <td>
+            v1.4
+        </td>
+        <td>
+            288ee4c6
+        </td>
+        <td>
+            1. WIFI 版本更新为 v1.0.7 <br />
+            2. BLE 版本更新为 v1.0.4 <br />
+            3. SDK 版本更新为 v1.4 <br />
+             <br /><b>SDK changelog:</b> <br />
+            1. 新增 RAMCODE 命令，增加获取 flash 信息和 Flash 整片测试命令 <br />
+            2. at 指令增加 nvic reset 功能<br />
+            3. 优化 wifi 网络性能<br />
+            4. 修复 connect 的时候 scan 到目标网络 但是没有发起 join 的问题     <br />
+            5. img 校准使用的 RAM 区域 4 字节对齐 <br />
+            6. wifi rf 校准优化 <br />
+            7. 增加 BLE 硬件复位接口 <br />
+            8. 增加 BLE 边带测试命令 <br />
+            9. 修复在重关联的时候拿到 ip 后偶现 dhcp release 的问题 <br />
+            10. wifi 校准函数合并为一个 wifi_rf_calibration
+    原来为 wifi_rf_preprocess 和 wifi_rf_image_cal 
+            <br />
+        </td>
+    </tr>
+<tr>
+        <td>
+            2022-06-24 10:50:00
+        </td>
+        <td>
+            no version
+        </td>
+        <td>
+            33ed5a55
+        </td>
+        <td>
+            1. 优化 mbedtls 内存. MBEDTLS_SSL_OUT_CONTENT_LEN 设置为4K <br />
+            2. 优化 wifi 传输速率 <br />
+            3. BLE 示例工程 sct 更新 <br />
+            4. add battery release project <br />
+            5. add mouse release project <br />
+            6. 添加接口 wifi_softap_set_max_supp_sta_num,wifi_softap_get_max_supp_sta_num 可以设置/获取最大支持的sta数目 <br />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2022-06-01 20:55:00
+        </td>
+        <td>
+            no version
+        </td>
+        <td>
+            c2382740
+        </td>
+        <td>
+            1. 增加 single tone 调试 AT+PVTCMD=s_tone_mode BLE AT+PVTCMD=s_tone_mode WIFI <br />
+            2. 修复在未设置 got ip function callback 的时候 WiFi 无法进入睡眠的问题 <br />
+            3. 增加 AT OTA 命令程序 URL 缓存大小；增加 AT CMD 缓存大小； <br />
+            4. 增加 https client path 和 CONTENT 缓冲区大小； <br />
+            5. mbedtls 移除对 MBEDTLS_SSL_IN_CONTENT_LEN 和 MBEDTLS_SSL_OUT_CONTENT_LEN 的配置，继承 MBEDTLS_SSL_MAX_CONTENT_LEN。 <br />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2022-05-25 16:45:00
+        </td>
+        <td>
+            no version
+        </td>
+        <td>
+            75faa75d
+        </td>
+        <td>
+            1. 修复在未设置 got ip function callback 的时候 WiFi 无法进入睡眠的问题 <br />
+            2. 射频测试的功能更新，增加 s_tone_mode 命令 <br />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2022-05-24 18:04:00
+        </td>
+        <td>
+            no version
+        </td>
+        <td>
+            75faa75d
+        </td>
+        <td>
+            1. 修复 log 输出参数不匹配问题及其他编译警告 <br />
+            2. 不定参使用 ##__VA_ARGS__ 来避免无参数错误 <br />
+            3. GNU 下，使用 __attribute__((format(printf, 2, 3))) 和 -Wformat=2 增强对 printf 类型的不定参函数进行 format 和 参数匹配检查 <br />
+            4. 更新 boot 程序，并添加 AT 指令 AT+BLE_START 以允许跳转到 OTA 分区执行代码 <br />
+            5. 增加 combo ble hci 认证固件 combo_ble_hci_exec_addr_0x00133100_log_B9_921600_cmd_A2A3_115200_sha1_7cd12ad9.bin <br />
+            6. start_build.py 脚本更新合并固件的功能 <br />
+            python3 start_build.py merge_fw --fw A.bin --offset 0x1000 --fw B.bin --offset 0x2000 --out outfile.bin <br />
+            7. 移除 ignore trailing bytes 相关的 dump 日志 <br />
+            8. 移除 wifi_sta_set_dtim_period 接口；增加 wifi_sta_set_listen_interval 接口；增加 wifi_softap_set_dtim_period 接口 <br />
+        </td>
+    </tr>
     <tr>
         <td>
             2022-04-25 16:50:00

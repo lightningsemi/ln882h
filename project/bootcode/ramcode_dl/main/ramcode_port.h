@@ -32,6 +32,7 @@ size_t        bootram_serial_write(const void* buf, size_t size);
 int           bootram_serial_flush(void);
 unsigned char bootram_serial_setbaudrate(uint32_t baudrate);
 void          bootram_user_reboot(void);
+int           bootram_flash_info(void);
 
 #ifdef __cplusplus
 }
