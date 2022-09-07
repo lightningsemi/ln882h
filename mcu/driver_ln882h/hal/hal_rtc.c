@@ -70,7 +70,7 @@ uint32_t hal_rtc_get_cnt(uint32_t rtc_base)
 {
     /* check the parameters */
     hal_assert(IS_RTC_ALL_PERIPH(rtc_base));
-    return rtc_rtc_ccvr_get(rtc_base);
+    return rtc_currentcountervalue_getf(rtc_base);
 }
 
         

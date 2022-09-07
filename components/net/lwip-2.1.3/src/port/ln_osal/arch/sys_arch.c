@@ -427,10 +427,6 @@ void sys_mbox_free(sys_mbox_t *mbox)
 }
 #endif
 
-
-/* Support only one tcpip thread to save space */
-static OS_Thread_t g_lwip_tcpip_thread;
-
 /** The only thread function:
  * Creates a new thread
  * @param name human-readable name for the thread (used for debugging purposes)
@@ -440,13 +436,16 @@ static OS_Thread_t g_lwip_tcpip_thread;
  * @param prio priority of the new thread (may be ignored by ports) */
 sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, int stacksize, int prio)
 {
-    if (OS_ThreadIsValid(&g_lwip_tcpip_thread))
-        return NULL;
+    OS_Status status = OS_OK;
+    OS_Thread_t os_thr_hdlr = { 0 };
 
-    if (OS_ThreadCreate(&g_lwip_tcpip_thread, name, (OS_ThreadEntry_t)thread, arg, (OS_Priority)prio, stacksize) != OS_OK) {
-        return NULL;
-    }
-    return &g_lwip_tcpip_thread;
+    LWIP_ASSERT("In param eror", !(stacksize < 4 || prio <= 0));
+
+    status = OS_ThreadCreate(&os_thr_hdlr, name, (OS_ThreadEntry_t)thread,
+        arg, (OS_Priority)prio, stacksize);
+    LWIP_ASSERT("task creation failed", status == OS_OK);
+
+    return os_thr_hdlr.handle;
 }
 #endif /* (NO_SYS == 0) */
 

@@ -295,9 +295,15 @@ void wlib_assert(int expr, const char *fun, int line)
 #define SNIFFER_MEM_POOL_CHUNK_BUF_SIZE    (30)
 #define SNIFFER_MEM_POOL_CHUNK_SIZE        (MEM_POOL_CHUNK_INFO_SIZE + SNIFFER_MEM_POOL_CHUNK_BUF_SIZE)
 static ln_mem_pool_t sniffer_mem_pool = {0};
+static uint8_t s_wlib_snp_inited = 0;
 
 int wlib_sniffer_mem_pool_init(void)
 {
+    if (s_wlib_snp_inited != 0) {
+        return LN_TRUE;
+    }
+    s_wlib_snp_inited = 1;
+
 #if (defined(SNIFFER_MEM_POOL_USE_DYNAMIC_MEM) && SNIFFER_MEM_POOL_USE_DYNAMIC_MEM)
     sniffer_mem_pool.mem_base       = (uint8_t  *)OS_Malloc(SNIFFER_MEM_POOL_CHUNK_CNT * SNIFFER_MEM_POOL_CHUNK_SIZE);
     sniffer_mem_pool.free_chunk_ptr = (uint8_t **)OS_Malloc(SNIFFER_MEM_POOL_CHUNK_CNT * sizeof(void *));
@@ -321,6 +327,11 @@ int wlib_sniffer_mem_pool_init(void)
 
 void wlib_sniffer_mem_pool_deinit(void)
 {
+    if (s_wlib_snp_inited == 0) {
+        return;
+    }
+    s_wlib_snp_inited = 0;
+
 #if (defined(SNIFFER_MEM_POOL_USE_DYNAMIC_MEM) && SNIFFER_MEM_POOL_USE_DYNAMIC_MEM)
     OS_Free(sniffer_mem_pool.mem_base);
     OS_Free(sniffer_mem_pool.free_chunk_ptr);
@@ -594,5 +605,17 @@ void wlib_os_delay_ms(uint32_t ms)
     OS_MsDelay(ms);
 }
 
+static const wlib_wifi_data_rate_t g_wlib_wifi_dr = {
+    .dr_11b = USER_CFG_DR_11B,
+    .dr_11g = USER_CFG_DR_11G,
+    .dr_11n = {10, 11, 12, 13, 14, 15, 16, 17}, /* offset is 10, not currently in use */
+    .dr_11b_only_basic_rate = USER_CFG_DR_11B_ONLY_BR,
+    .dr_11g_only_basic_rate = USER_CFG_DR_11G_ONLY_BR,
+    .dr_11bg_mixed1_basic_rate = USER_CFG_DR_11BG_MIXED1_BR,
+    .dr_11bg_mixed2_basic_rate = USER_CFG_DR_11BG_MIXED2_BR,
+};
 
-
+const wlib_wifi_data_rate_t *wlib_data_rate_info_get(void)
+{
+    return (const wlib_wifi_data_rate_t *)(&g_wlib_wifi_dr);
+}

@@ -11,22 +11,9 @@
 
 #include "ln_drv_uart.h"
 
-void (*uart0_it_handler)(uint32_t cur_len);
-void (*uart1_it_handler)(uint32_t cur_len);
-void (*uart2_it_handler)(uint32_t cur_len);
-
-uint8_t *uart0_recv_data = NULL;
-uint8_t *uart1_recv_data = NULL;
-uint8_t *uart2_recv_data = NULL;
-
-uint32_t uart0_recv_len = 0;
-uint32_t uart1_recv_len = 0;
-uint32_t uart2_recv_len = 0;
-
-
-uint32_t uart0_recv_pos = 0;
-uint32_t uart1_recv_pos = 0;
-uint32_t uart2_recv_pos = 0;
+void (*uart0_recv_it_handler)(void);
+void (*uart1_recv_it_handler)(void);
+void (*uart2_recv_it_handler)(void);
 
 /**
  * @brief UART 初始化
@@ -36,7 +23,7 @@ uint32_t uart2_recv_pos = 0;
  * @param baud_rate         设置UART波特率
  * @param uart_it_callback  设置UART接收中断回调函数
  */
-void uart_init(uart_x_t uart_x,uart_pin_cfg_t *uart_pin_cfg,uint32_t baud_rate,void (*uart_it_callback)(uint32_t))
+void uart_init(uart_x_t uart_x,uart_pin_cfg_t *uart_pin_cfg,uint32_t baud_rate,void (*uart_recv_it_callback)(void))
 {
     uint32_t uart_base = 0;
     uint32_t gpio_base = 0;
@@ -102,17 +89,16 @@ void uart_init(uart_x_t uart_x,uart_pin_cfg_t *uart_pin_cfg,uint32_t baud_rate,v
     hal_uart_tx_mode_en(uart_base,HAL_ENABLE);          //使能接收模式
     hal_uart_en(uart_base,HAL_ENABLE);                  //使能UART模块
     
-    NVIC_SetPriority((IRQn_Type)(UART0_IRQn + uart_x),     4);
+    NVIC_SetPriority((IRQn_Type)(UART0_IRQn + uart_x), 4);
     NVIC_EnableIRQ((IRQn_Type)(UART0_IRQn + uart_x));
     hal_uart_it_en(uart_base,USART_IT_RXNE);           //使能接收中断
 
     switch(uart_x)
     {
-        case UART_0: if(uart_it_callback != NULL) uart0_it_handler = uart_it_callback; break;
-        case UART_1: if(uart_it_callback != NULL) uart1_it_handler = uart_it_callback; break;
-        case UART_2: if(uart_it_callback != NULL) uart2_it_handler = uart_it_callback; break;
+        case UART_0: if(uart_recv_it_callback != NULL) uart0_recv_it_handler = uart_recv_it_callback; break;
+        case UART_1: if(uart_recv_it_callback != NULL) uart1_recv_it_handler = uart_recv_it_callback; break;
+        case UART_2: if(uart_recv_it_callback != NULL) uart2_recv_it_handler = uart_recv_it_callback; break;
     }
-
 }
 
 /**
@@ -120,9 +106,8 @@ void uart_init(uart_x_t uart_x,uart_pin_cfg_t *uart_pin_cfg,uint32_t baud_rate,v
  * 
  * @param uart_x 选择UART通道
  * @param data   设置发送指针
- * @param len    设置要发送的数据长度
  */
-void uart_send_data(uart_x_t uart_x,uint8_t *data,uint32_t len)
+void uart_send_data(uart_x_t uart_x,uint8_t data)
 {
     uint32_t uart_base = 0;
     switch(uart_x)
@@ -131,105 +116,94 @@ void uart_send_data(uart_x_t uart_x,uint8_t *data,uint32_t len)
         case UART_1: uart_base = UART1_BASE; break;
         case UART_2: uart_base = UART2_BASE; break;
     }
-
-    for(int i = 0; i < len; i++)
-    {
-        while(hal_uart_flag_get(uart_base,USART_FLAG_TXE) != HAL_SET);
-        hal_uart_send_data(uart_base,data[i]);
-    }
+    hal_uart_send_data(uart_base,data);
 }
 
 /**
  * @brief 设置UART接收指针
  * 
  * @param uart_x 选择UART通道
- * @param data   设置接收指针
- * @param len    设置指针的最大长度
  */
-void uart_recv_data(uart_x_t uart_x,uint8_t *data,uint32_t len)
+uint16_t uart_recv_data(uart_x_t uart_x)
 {
+    uint32_t uart_base = 0;
     switch(uart_x)
     {
-        case UART_0: uart0_recv_data = data; uart0_recv_len = len; uart0_recv_pos = 0; break;
-        case UART_1: uart1_recv_data = data; uart1_recv_len = len; uart1_recv_pos = 0; break;
-        case UART_2: uart2_recv_data = data; uart2_recv_len = len; uart2_recv_pos = 0; break;
+        case UART_0: uart_base = UART0_BASE; break;
+        case UART_1: uart_base = UART1_BASE; break;
+        case UART_2: uart_base = UART2_BASE; break;
     }
+    return hal_uart_recv_data(uart_base);
 }
 
+/**
+ * @brief 获取UART RX缓冲区非空标志位
+ * 
+ * @param uart_x 
+ * @return uint8_t 
+ */
+uint8_t uart_get_rx_not_empty_flag(uart_x_t uart_x)
+{
+    uint32_t uart_base = 0;
+    switch(uart_x)
+    {
+        case UART_0: uart_base = UART0_BASE; break;
+        case UART_1: uart_base = UART1_BASE; break;
+        case UART_2: uart_base = UART2_BASE; break;
+    }
+    return hal_uart_flag_get(uart_base,USART_FLAG_RXNE);
+}
 
+/**
+ * @brief 获取UART TX缓冲区为空标志位
+ * 
+ * @param uart_x 
+ * @return uint8_t 
+ */
+uint8_t uart_get_tx_empty_flag(uart_x_t uart_x)
+{
+    uint32_t uart_base = 0;
+    switch(uart_x)
+    {
+        case UART_0: uart_base = UART0_BASE; break;
+        case UART_1: uart_base = UART1_BASE; break;
+        case UART_2: uart_base = UART2_BASE; break;
+    }
+    return hal_uart_flag_get(uart_base,USART_FLAG_TXE);
+}
+
+/**
+ * @brief UART0中断服务函数
+ */
 void UART0_IRQHandler()
 {
     if(hal_uart_flag_get(UART0_BASE,USART_FLAG_RXNE) && hal_uart_it_en_status_get(UART0_BASE,USART_IT_RXNE))
     {
-        if(uart0_recv_pos >= uart0_recv_len)
-        {
-            hal_uart_recv_data(UART0_BASE);
-        }
-        else
-        {
-            if(uart0_recv_data != NULL)
-            {
-                uart0_recv_data[uart0_recv_pos++] = hal_uart_recv_data(UART0_BASE);
-            }
-            else
-            {
-                hal_uart_recv_data(UART0_BASE);
-            }
-        }
-        if(uart0_it_handler != NULL)
-            uart0_it_handler(uart0_recv_pos);
+        if(uart0_recv_it_handler != NULL)
+            uart0_recv_it_handler();
     }
-    if(hal_uart_flag_get(UART0_BASE,USART_FLAG_NOISE))
-    {
-        
-    }
-    
 }
 
+/**
+ * @brief UART1中断服务函数
+ */
 void UART1_IRQHandler()
 {
     if(hal_uart_flag_get(UART1_BASE,USART_FLAG_RXNE) && hal_uart_it_en_status_get(UART1_BASE,USART_IT_RXNE))
     {
-        if(uart1_recv_pos >= uart1_recv_len)
-        {
-            hal_uart_recv_data(UART1_BASE);
-        }
-        else
-        {
-            if(uart1_recv_data != NULL)
-            {
-                uart1_recv_data[uart1_recv_pos++] = hal_uart_recv_data(UART1_BASE);
-            }
-            else
-            {
-                hal_uart_recv_data(UART1_BASE);
-            }
-        }
-        if(uart1_it_handler != NULL)
-            uart1_it_handler(uart1_recv_pos);
+        if(uart1_recv_it_handler != NULL)
+            uart1_recv_it_handler();
     }
 }
 
+/**
+ * @brief UART2中断服务函数
+ */
 void UART2_IRQHandler()
 {
     if(hal_uart_flag_get(UART2_BASE,USART_FLAG_RXNE) && hal_uart_it_en_status_get(UART2_BASE,USART_IT_RXNE))
     {
-        if(uart2_recv_pos >= uart2_recv_len)
-        {
-            hal_uart_recv_data(UART2_BASE);
-        }
-        else
-        {
-            if(uart2_recv_data != NULL)
-            {
-                uart2_recv_data[uart2_recv_pos++] = hal_uart_recv_data(UART2_BASE);
-            }
-            else
-            {
-                hal_uart_recv_data(UART2_BASE);
-            }
-        }
-        if(uart2_it_handler != NULL)
-            uart2_it_handler(uart2_recv_pos);
+        if(uart2_recv_it_handler != NULL)
+            uart2_recv_it_handler();
     }
 }

@@ -278,6 +278,7 @@ int netdev_set_state(netif_idx_t nif_idx, netdev_state_t state)
             netifapi_netif_set_link_up(nif);
             dhcpd_stop();
             dhcpd_start();
+            print_netdev_info(nif);
         }
         else
         {

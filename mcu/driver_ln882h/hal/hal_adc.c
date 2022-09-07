@@ -21,6 +21,8 @@ static int8_t adc_cal_param_3 = 0;
 static int8_t adc_cal_param_4 = 0;
 static float  adc_cal_param_5 = 0;
 //static float  adc_cal_param_6 = 0;
+
+/* The ADC_CH0 will be used by WiFi CAL !!!*/
 void hal_adc_init(uint32_t adc_base,adc_init_t_def* adc_init)
 {
     uint8_t reg_value = 0;

@@ -78,7 +78,7 @@ typedef OS_Queue_t sys_mbox_t;
 #endif /* LWIP_MBOX_TRACE */
 
 /* thread */
-typedef OS_Thread_t * sys_thread_t;
+typedef OS_ThreadHandle_t sys_thread_t;
 
 /* sleep */
 #define sys_msleep(msec)            OS_MsDelay(msec)

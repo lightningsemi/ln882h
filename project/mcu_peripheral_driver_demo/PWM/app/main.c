@@ -20,11 +20,6 @@
 #include "ln_drv_pwm.h"
 
 
-/*
- *  注意！！！ 
- *  在驱动例程中，有一些函数的参数是指向字符串（数组）地址的指针，函数中没有检查这些指针的有效性，
- *  没有判断指针是否为空，也没有判断指针指向的数据是否还有剩余空间，这些都需要使用者自行决定！！！
-*/
 int main (int argc, char* argv[])
 {  
     uint32_t pwm_duty = 0;
@@ -36,18 +31,22 @@ int main (int argc, char* argv[])
     ln_show_reg_init();
 
     /****************** 2. 外设配置 ***********************/
-    pwm_init(1000,500,PWM_CHA_0,GPIO_B,GPIO_PIN_5);     //初始化PWM
+    pwm_init(10000,20,PWM_CHA_0,GPIO_B,GPIO_PIN_5);     //初始化PWM,设置频率为10K,占空比为20%
+    pwm_init(10000,20,PWM_CHA_1,GPIO_B,GPIO_PIN_6);     //初始化PWM
+    pwm_init(10000,20,PWM_CHA_2,GPIO_B,GPIO_PIN_7);     //初始化PWM
     pwm_start(PWM_CHA_0);                               //开始产生PWM
     while(1)
     {
         pwm_duty ++;
-        if(pwm_duty > 1000) pwm_duty = 0;
+        if(pwm_duty > 100) pwm_duty = 0;
         
         pwm_set_duty(pwm_duty,PWM_CHA_0);               //配置占空比
+        pwm_set_duty(pwm_duty,PWM_CHA_1); 
+        pwm_set_duty(pwm_duty,PWM_CHA_2); 
         
         LOG(LOG_LVL_INFO,"ln882H running! \n");
         
-        LOG(LOG_LVL_INFO,"Duty = %d, Freq = %d! \n",pwm_get_duty(PWM_CHA_0),pwm_get_freq(PWM_CHA_0));
+        LOG(LOG_LVL_INFO,"Duty = %f\n",pwm_get_duty(PWM_CHA_0));
         
         ln_delay_ms(100);
     }

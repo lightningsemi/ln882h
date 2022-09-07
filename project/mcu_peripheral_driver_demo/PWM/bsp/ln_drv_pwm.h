@@ -19,22 +19,26 @@
 #include "hal/hal_adv_timer.h"
 #include "hal/hal_gpio.h"
 #include "hal/hal_clock.h"
+
 typedef enum
 {
     PWM_CHA_0 = 0,
     PWM_CHA_1 = 1,
+    
     PWM_CHA_2 = 2,
     PWM_CHA_3 = 3,
+    
     PWM_CHA_4 = 4,
     PWM_CHA_5 = 5,
 
     PWM_CHA_6 = 6,
     PWM_CHA_7 = 7,
+    
     PWM_CHA_8 = 8,
     PWM_CHA_9 = 9,
+    
     PWM_CHA_10 = 10,
     PWM_CHA_11 = 11,
-
 }pwm_channel_t;
 
 
@@ -44,14 +48,11 @@ typedef enum
     GPIO_B = 1,
 }gpio_port_t;
 
-void     pwm_init(uint32_t period, uint32_t duty,pwm_channel_t pwm_channel_num,gpio_port_t gpio_port,gpio_pin_t gpio_pin);
+void     pwm_init(uint32_t freq, float duty,pwm_channel_t pwm_channel_num,gpio_port_t gpio_port,gpio_pin_t gpio_pin);
 void     pwm_start(pwm_channel_t pwm_channel_num);
-void     pwm_set_duty(uint32_t duty, pwm_channel_t pwm_channel_num);
-uint32_t pwm_get_duty(pwm_channel_t pwm_channel_num);
+void     pwm_set_duty(float duty, pwm_channel_t pwm_channel_num);
+float    pwm_get_duty(pwm_channel_t pwm_channel_num);
 void     pwm_set_freq(pwm_channel_t pwm_channel_num,uint32_t period);
-uint32_t pwm_get_freq(pwm_channel_t pwm_channel_num);
-
-
 
 #ifdef __cplusplus
 }
