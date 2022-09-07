@@ -9,6 +9,38 @@
 
 typedef size_t (*wlib_pvtcmd_output_pfn)(const char *format, va_list args);
 
+#define WLIB_DR_11B_MAX_NUM (4)
+#define WLIB_DR_11G_MAX_NUM (8)
+#define WLIB_DR_11N_MAX_NUM (8)
+#define WLIB_DR_BR_MAX_NUM  (8)
+
+/**
+ * wlib_wifi_data_rate_t
+ * Configure the unused rate to 0
+*/
+typedef struct
+{
+    uint8_t dr_11b[WLIB_DR_11B_MAX_NUM];  /* 1,  2,  5, 11                 */ /* Use 5 for 5.5 */
+    uint8_t dr_11g[WLIB_DR_11G_MAX_NUM];  /* 6,  9, 12, 18, 24, 36, 48, 54 */
+    uint8_t dr_11n[WLIB_DR_11N_MAX_NUM];  /* 0,  1,  2,  3,  4,  5,  6,  7 */ /* MCS0 - MCS7 */
+                                          /* 6, 13, 19, 26, 39, 52, 58, 65 */ /* GI = 800ns */
+                                          /* 7, 14, 21, 28, 43, 57, 65, 72 */ /* GI = 400ns */
+    uint8_t dr_11b_only_basic_rate[WLIB_DR_11B_MAX_NUM];
+    uint8_t dr_11g_only_basic_rate[WLIB_DR_11G_MAX_NUM];
+    uint8_t dr_11bg_mixed1_basic_rate[WLIB_DR_BR_MAX_NUM];
+    uint8_t dr_11bg_mixed2_basic_rate[WLIB_DR_BR_MAX_NUM];
+} wlib_wifi_data_rate_t; /* unit: Mbps */
+
+#define USER_CFG_DR_11B {1, 2, 5, 11}
+#define USER_CFG_DR_11G {6, 9, 12, 18, 24, 36, 48, 54}
+
+#define USER_CFG_DR_11B_ONLY_BR    {1, 2, 0, 0}
+#define USER_CFG_DR_11G_ONLY_BR    {6, 12, 24, 0, 0, 0, 0, 0}
+#define USER_CFG_DR_11BG_MIXED1_BR {1, 2, 5, 11, 0, 0, 0, 0}
+#define USER_CFG_DR_11BG_MIXED2_BR {1, 2, 5, 11, 6, 12, 24, 0}
+
+const wlib_wifi_data_rate_t *wlib_data_rate_info_get(void);
+
 /* hardware for MAC Interrupt */
 void    wlib_mac_isr_enable(void);
 void    wlib_mac_isr_disable(void);

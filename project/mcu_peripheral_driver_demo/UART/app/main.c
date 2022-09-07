@@ -15,13 +15,13 @@
 
 #include "ln_drv_uart.h"
 
-void uart0_callback(uint32_t cur_len);
-void uart1_callback(uint32_t cur_len);
-void uart2_callback(uint32_t cur_len);
+void uart0_recv_callback(void);
+void uart1_recv_callback(void);
+void uart2_recv_callback(void);
 
-uint8_t send_data[100] = "UART TEST";
-uint8_t recv_data[100];
-
+char send_data[100] = "UART TEST";
+char recv_data[100];
+uint32_t recv_cnt = 0;
 int main (int argc, char* argv[])
 {  
     /****************** 1. 系统初始化 ***********************/
@@ -29,8 +29,6 @@ int main (int argc, char* argv[])
     ln_show_reg_init();
 
     /****************** 2. UART 测试***********************/
-    void uart_init(uart_x_t uart_x,uart_pin_cfg_t *uart_pin_cfg,uint32_t baud_rate,void (*uart_it_callback)(uint32_t));
-    
     uart_pin_cfg_t  uart_pin_cfg;
     memset(&uart_pin_cfg,0,sizeof(uart_pin_cfg_t));
     
@@ -39,41 +37,32 @@ int main (int argc, char* argv[])
     uart_pin_cfg.uart_rx_port = GPIO_B;
     uart_pin_cfg.uart_rx_pin  = GPIO_PIN_8;
     
-    uart_init(UART_0,&uart_pin_cfg,115200,uart0_callback);
-    
-    uart_recv_data(UART_0,recv_data,100);
-    uart_send_data(UART_0,send_data,9);
-    
+    uart_init(UART_0,&uart_pin_cfg,115200,uart0_recv_callback);
+
     while(1)
     {
+        for(int i = 0; i < strlen(send_data); i ++){
+            while(uart_get_tx_empty_flag(UART_0) != HAL_SET);
+            uart_send_data(UART_0,send_data[i]);
+        }
         ln_delay_ms(1000);
     }
 }
 
-void uart0_callback(uint32_t cur_len)
+void uart0_recv_callback(void)
 {
-    if(cur_len == 8)
-    {
-        uart_send_data(UART_0,recv_data,8);
-        uart_recv_data(UART_0,recv_data,100);
+    if(uart_get_rx_not_empty_flag(UART_0) == HAL_SET){
+        recv_data[recv_cnt++] = uart_recv_data(UART_0);
     }
 }
 
-void uart1_callback(uint32_t cur_len)
+void uart1_recv_callback(void)
 {
-    if(cur_len == 8)
-    {
-        uart_send_data(UART_1,recv_data,8);
-        uart_recv_data(UART_1,recv_data,100);
-    }
+   
 }
 
-void uart2_callback(uint32_t cur_len)
+void uart2_recv_callback(void)
 {
-    if(cur_len == 8)
-    {
-        uart_send_data(UART_2,recv_data,8);
-        uart_recv_data(UART_2,recv_data,100);
-    }
+   
 }
 

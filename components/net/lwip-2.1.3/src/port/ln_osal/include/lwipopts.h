@@ -58,6 +58,8 @@ a lot of data that needs to be copied, this should be set high. */
 /* MEMP_NUM_SYS_TIMEOUT: the number of simulateously active timeouts. */
 #define MEMP_NUM_SYS_TIMEOUT    (10)
 
+#define MEMP_NUM_TCPIP_MSG_INPKT (12)
+#define MEMP_NUM_TCPIP_MSG_API   (8)
 
 #define PBUF_LINK_HLEN                  (14 + ETH_PAD_SIZE)
 
@@ -66,14 +68,18 @@ a lot of data that needs to be copied, this should be set high. */
 /* PBUF_POOL_SIZE: the number of buffers in the pbuf pool. */
 #define PBUF_POOL_SIZE          (2*IP_REASS_MAX_PBUFS) // 40
 /* PBUF_POOL_BUFSIZE: the size of each pbuf in the pbuf pool. */
-#define PBUF_POOL_BUFSIZE       512 //(NETIF_MTU + PBUF_LINK_HLEN)
+#define PBUF_POOL_BUFSIZE       772 //(NETIF_MTU + PBUF_LINK_HLEN)
 
+#if PBUF_POOL_BUFSIZE > (TCP_MSS+PBUF_IP_HLEN+PBUF_TRANSPORT_HLEN+PBUF_LINK_ENCAPSULATION_HLEN+PBUF_LINK_HLEN)
+#undef PBUF_POOL_BUFSIZE
+#define PBUF_POOL_BUFSIZE       (TCP_MSS+PBUF_IP_HLEN+PBUF_TRANSPORT_HLEN+PBUF_LINK_ENCAPSULATION_HLEN+PBUF_LINK_HLEN)
+#endif
 
 /* ---------- TCP options ---------- */
 #define LWIP_TCP                (1)
 #define TCP_TTL                 (255)
 /* Controls if TCP should queue segments that arrive out of order. Define to 0 if your device is low on memory. */
-#define TCP_QUEUE_OOSEQ         (0)
+#define TCP_QUEUE_OOSEQ         (1)
 /* TCP Maximum segment size. */
 #define TCP_MSS                 (NETIF_MTU - 40)  //TCP_MSS = (Ethernet MTU - IP header size - TCP header size)
 /* TCP sender buffer space (bytes). */
@@ -81,7 +87,7 @@ a lot of data that needs to be copied, this should be set high. */
 /*  TCP_SND_QUEUELEN: TCP sender buffer space (pbufs). This must be at least as much as (2 * TCP_SND_BUF/TCP_MSS) for things to work. */
 #define TCP_SND_QUEUELEN        (5 * TCP_SND_BUF/TCP_MSS)
 /* TCP receive window. */
-#define TCP_WND                 (2 * TCP_MSS)
+#define TCP_WND                 (3 * TCP_MSS)
 /* Maximum number of retransmissions of data segments. */
 #define TCP_MAXRTX              (12)
 /* Maximum number of retransmissions of SYN segments. */
@@ -187,10 +193,10 @@ a lot of data that needs to be copied, this should be set high. */
 #define TCPIP_THREAD_PRIO               OS_PRIORITY_ABOVE_NORMAL
 #define TCPIP_THREAD_STACKSIZE          (3*1024)
 
-#define TCPIP_MBOX_SIZE                 8
-#define DEFAULT_RAW_RECVMBOX_SIZE       6
-#define DEFAULT_UDP_RECVMBOX_SIZE       6
-#define DEFAULT_TCP_RECVMBOX_SIZE       6
+#define TCPIP_MBOX_SIZE                 (MEMP_NUM_TCPIP_MSG_INPKT + MEMP_NUM_TCPIP_MSG_API)
+#define DEFAULT_RAW_RECVMBOX_SIZE       (MEMP_NUM_NETBUF)
+#define DEFAULT_UDP_RECVMBOX_SIZE       (MEMP_NUM_NETBUF)
+#define DEFAULT_TCP_RECVMBOX_SIZE       (MEMP_NUM_NETBUF)
 #define DEFAULT_ACCEPTMBOX_SIZE         4
 
 #define DEFAULT_THREAD_STACKSIZE        500

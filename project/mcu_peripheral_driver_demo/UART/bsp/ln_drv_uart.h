@@ -43,9 +43,11 @@ typedef struct
     gpio_pin_t  uart_rx_pin;
 }uart_pin_cfg_t;
 
-void uart_init(uart_x_t uart_x,uart_pin_cfg_t *uart_pin_cfg,uint32_t baud_rate,void (*uart_it_callback)(uint32_t));
-void uart_send_data(uart_x_t uart_x,uint8_t *data,uint32_t len);
-void uart_recv_data(uart_x_t uart_x,uint8_t *data,uint32_t len);
+void        uart_init(uart_x_t uart_x,uart_pin_cfg_t *uart_pin_cfg,uint32_t baud_rate,void (*uart_it_callback)(void));
+void        uart_send_data(uart_x_t uart_x,uint8_t data);
+uint16_t    uart_recv_data(uart_x_t uart_x);
+uint8_t     uart_get_rx_not_empty_flag(uart_x_t uart_x);
+uint8_t     uart_get_tx_empty_flag(uart_x_t uart_x);
 
 #ifdef __cplusplus
 }

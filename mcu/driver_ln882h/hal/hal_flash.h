@@ -49,6 +49,7 @@ typedef enum
     FLASH_RESUME              = 0x7A,//Program/Erase Resume
     FLASH_READ_ID             = 0x9F,//Read Identification
     FLASH_READ_DEVICE_ID      = 0x90,//Read Manufacture ID/Device ID
+    FLASH_READ_UNIQUE_ID      = 0x4B,//Read Unique ID
     
     FLASH_SECURITY_ERASE      = 0x44,
     FLASH_SECURITY_PROGRAM    = 0x42,

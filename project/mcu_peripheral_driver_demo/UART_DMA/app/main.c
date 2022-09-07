@@ -36,11 +36,6 @@ int main (int argc, char* argv[])
     uart_pin_cfg.uart_rx_port = GPIO_B;
     uart_pin_cfg.uart_rx_pin  = GPIO_PIN_8;
     
-//    uart_init(UART_0,&uart_pin_cfg,115200,uart0_callback);
-//    
-//    uart_recv_data(UART_0,recv_data,100);
-//    uart_send_data(UART_0,send_data,9);
-
     uart_dma_init(UART_0,&uart_pin_cfg,115200,uart_dma_recv_callback,uart_dma_send_callback);
     uart_dma_recv_data(recv_data,10);
     uart_dma_send_data(send_data,9);

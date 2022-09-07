@@ -242,6 +242,16 @@ int     wifi_recv_ethernet_pkt_callback_reg(wifi_recv_ethernet_pkt_cb_t recv_cb)
 int     wifi_send_ethernet_pkt(uint8_t *data, int len, uint16_t retry_max, uint8_t retry_timeout);
 int     wifi_private_command(char *pvtcmd);
 
+void    wifi_disable_sw_duration_cfg(void);
+int     wifi_rts_threshold_set(int val);
+
+/**
+ * @param type
+ *      0: G_SELF_CTS_PROT
+ *      1: G_RTS_CTS_PROT
+*/
+int     wifi_erp_prot_set(uint8_t type);
+
 /**
  * wifi_rf_calibration
  * 

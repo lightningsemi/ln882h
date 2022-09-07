@@ -26,7 +26,9 @@
 
 typedef enum
 {
+    /* The ADC_CH0 will be used by WiFi CAL !!!*/
     ADC_AWD_CH0     = 0,     
+    
     ADC_AWD_CH1     = 1,     
     ADC_AWD_CH2     = 2,     
     ADC_AWD_CH3     = 3,     

@@ -6,6 +6,34 @@
         <td>上游版本</td>
         <td>摘要</td>
     </tr>
+    <tr>
+        <td>
+            2022-09-07 10:00:00
+        </td>
+        <td>
+            v1.5
+        </td>
+        <td>
+            1d029698
+        </td>
+        <td>
+            1. WIFI 版本更新为 v1.0.8 <br />
+            2. SDK 版本更新为 v1.5 <br />
+             <br /><b>SDK changelog:</b> <br />
+            1. 增加 GPIO 测试 Demo <br />
+            2. 修改 ramcode_dl 的复位接口<br />
+            3. 修改 pll 周期校准启动时机     <br />
+            4. 添加读取 Flash UID 接口 <br />
+            5. 修复 ap 模式下发送 send_null_frame_to_AP 函数的问题 <br />
+            6. 优化 lwip 配置 <br />
+            7. 增加设置 erp 类型和 rts threshold 的接口<br />
+            8. 修复 dhcpd 任务被多次创建同时运行的问题 <br />
+            9. AP 模式默认使用高功率表  <br />
+            10. 重新设计速率集配置，将 bg 速率集移动到 wifi_port.c/h 以供用户自行配置<br />
+            11. 修复 sniffer mem pool 被反复初始化的问题 <br />
+            13. 增加软件 duration 配置失能接口，默认使能软件配置功能，调用该接口后失能
+        </td>
+    </tr>
 <tr>
         <td>
             2022-07-15 10:50:00
