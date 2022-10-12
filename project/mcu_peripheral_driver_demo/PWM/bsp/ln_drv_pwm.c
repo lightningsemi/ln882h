@@ -31,7 +31,7 @@ void pwm_init(uint32_t freq, float duty,pwm_channel_t pwm_channel_num,gpio_port_
         case GPIO_B: gpio_reg_base = GPIOB_BASE; break;
     }
 
-    hal_gpio_pin_afio_select(gpio_reg_base,gpio_pin,(afio_function_t)(ADV_TIMER_PWM0 + PWM_CHA_0));
+    hal_gpio_pin_afio_select(gpio_reg_base,gpio_pin,(afio_function_t)(ADV_TIMER_PWM0 + pwm_channel_num));
     hal_gpio_pin_afio_en(gpio_reg_base,gpio_pin,HAL_ENABLE);
 
 

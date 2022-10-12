@@ -510,14 +510,16 @@ void xPortSysTickHandler( void )
 	portENABLE_INTERRUPTS();
 }
 /*-----------------------------------------------------------*/
-
+    uint32_t __curr_value = 0;
+    uint32_t ulReloadValue= 0;
 #if configUSE_TICKLESS_IDLE == 1
 	__attribute__((weak)) void vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime )
 	{
-	uint32_t ulReloadValue, ulCompleteTickPeriods, ulCompletedSysTickDecrements, ulSysTickCTRL;
+	uint32_t ulCompleteTickPeriods, ulCompletedSysTickDecrements;
 	TickType_t xModifiableIdleTime;
 	int flag = -1;
-
+    ulReloadValue = 0;
+        
 		/* Make sure the SysTick reload value does not overflow the counter. */
 		if( xExpectedIdleTime > xMaximumPossibleSuppressedTicks )
 		{
@@ -529,6 +531,7 @@ void xPortSysTickHandler( void )
 		inevitably result in some tiny drift of the time maintained by the
 		kernel with respect to calendar time. */
 		portNVIC_SYSTICK_CTRL_REG &= ~portNVIC_SYSTICK_ENABLE_BIT;
+        __curr_value = portNVIC_SYSTICK_CURRENT_VALUE_REG;
 
 		/* Calculate the reload value required to wait xExpectedIdleTime
 		tick periods.  -1 is used because this code will execute part way
@@ -591,18 +594,28 @@ void xPortSysTickHandler( void )
 			}
 			flag = configPOST_SLEEP_PROCESSING( xModifiableIdleTime );
 
+			/* Re-enable interrupts - see comments above __disable_irq() call
+			above. */
+            if (flag != 0){
+                __asm volatile( "cpsie i" );
+                __asm volatile( "dsb" );
+                __asm volatile( "isb" );
+
+                __asm volatile( "cpsid i" );
+                __asm volatile( "dsb" );
+                __asm volatile( "isb" );
+            }
 			/* Stop SysTick.  Again, the time the SysTick is stopped for is
 			accounted for as best it can be, but using the tickless mode will
 			inevitably result in some tiny drift of the time maintained by the
 			kernel with respect to calendar time. */
-			ulSysTickCTRL = portNVIC_SYSTICK_CTRL_REG;
-			portNVIC_SYSTICK_CTRL_REG = ( ulSysTickCTRL & ~portNVIC_SYSTICK_ENABLE_BIT );
+			portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT );
 
 			/* Re-enable interrupts - see comments above the cpsid instruction()
 			above. */
-			__asm volatile( "cpsie i" );
 
-			if( ( ulSysTickCTRL & portNVIC_SYSTICK_COUNT_FLAG_BIT ) != 0 )
+
+			if( ( portNVIC_SYSTICK_CTRL_REG & portNVIC_SYSTICK_COUNT_FLAG_BIT ) != 0 )
 			{
 				uint32_t ulCalculatedLoadValue;
 
@@ -633,7 +646,7 @@ void xPortSysTickHandler( void )
 			{
                 if(flag == 0){
                     ulCompleteTickPeriods = xModifiableIdleTime;
-                    portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
+                    portNVIC_SYSTICK_LOAD_REG = __curr_value;
                 }else{
                     /* Something other than the tick interrupt ended the sleep.
                        Work out how long the sleep lasted rounded to complete tick
@@ -657,13 +670,12 @@ void xPortSysTickHandler( void )
 			can only execute once in the case that the reload register is near
 			zero. */
 			portNVIC_SYSTICK_CURRENT_VALUE_REG = 0UL;
-			portENTER_CRITICAL();
 			{
 				portNVIC_SYSTICK_CTRL_REG |= portNVIC_SYSTICK_ENABLE_BIT;
 				vTaskStepTick( ulCompleteTickPeriods );
 				portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
 			}
-			portEXIT_CRITICAL();
+			__asm volatile( "cpsie i" );
 		}
 	}
 

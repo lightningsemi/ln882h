@@ -259,7 +259,7 @@ void creat_usr_app_task(void)
          * CLK_G_RF  CLK_G_ADV_TIMER  CLK_G_TRNG
         */
         ln_pm_lightsleep_clk_disable_select(CLK_G_GPIOA | CLK_G_GPIOB | CLK_G_SPI0 | CLK_G_SPI1 | CLK_G_I2C0 |
-                                            CLK_G_UART1 | CLK_G_UART2 | CLK_G_WDT | CLK_G_TIM_REG | CLK_G_TIM1 | CLK_G_TIM2 | CLK_G_TIM4 | CLK_G_MAC | CLK_G_DMA | CLK_G_RF | CLK_G_ADV_TIMER| CLK_G_TRNG);
+                                            CLK_G_UART1 | CLK_G_UART2 | CLK_G_WDT | CLK_G_TIM1 | CLK_G_TIM2 | CLK_G_MAC | CLK_G_DMA | CLK_G_RF | CLK_G_ADV_TIMER| CLK_G_TRNG);
     }
 
     if(OS_OK != OS_ThreadCreate(&g_usr_app_thread, "UsrAPP", usr_app_task_entry, NULL, OS_PRIORITY_BELOW_NORMAL, USR_APP_TASK_STACK_SIZE)) {
