@@ -556,11 +556,6 @@
               <FilePath>..\..\..\components\utils\runtime\runtime.c</FilePath>
             </File>
             <File>
-              <FileName>ln_pm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\components\utils\power_mgmt\ln_pm.c</FilePath>
-            </File>
-            <File>
               <FileName>ln_misc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\components\utils\ln_misc.c</FilePath>

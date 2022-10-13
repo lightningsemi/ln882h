@@ -234,6 +234,10 @@ def main():
 
         # ble_mcu_data_trans
         "project/ble_mcu_data_trans/keil_ln882h_rel",
+        # ble_mcu_prf_battery
+        "project/ble_mcu_prf_battery/keil_ln882h_rel",
+        # ble_mcu_prf_hid_mouse
+        "project/ble_mcu_prf_hid_mouse/keil_ln882h_rel",
         # ble_mcu_scan
         "project/ble_mcu_scan/keil_ln882h_rel",
 
@@ -242,10 +246,9 @@ def main():
         # combo_mcu_basic_example
         "project/combo_mcu_basic_example/keil_ln882h_rel",
 
-        # ble_mcu_prf_battery
-        "project/ble_mcu_prf_battery/keil_ln882h_rel",
-        # ble_mcu_prf_hid_mouse
-        "project/ble_mcu_prf_hid_mouse/keil_ln882h_rel",
+        # http_ota_example
+        "project/http_ota_example/keil_ln882h_rel",
+
         # mcu_peripheral_driver_test
         "project/mcu_peripheral_driver_test/keil_ln882h_dev",
         # mcu_peripheral_driver_demo
@@ -272,9 +275,10 @@ def main():
 
     gcc_proj_list = [
         "ble_mcu_data_trans",
-        "ble_mcu_scan",
         "ble_mcu_prf_battery",
         "ble_mcu_prf_hid_mouse",
+        "ble_mcu_scan",
+
         "wifi_mcu_basic_example",
         "combo_mcu_basic_example",
         "mcu_peripheral_driver_test",

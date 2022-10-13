@@ -137,6 +137,34 @@ __STATIC_INLINE void soc_xtal2pll(void)
 /*****************************************************************************/
 /*                        power save management                              */
 /*****************************************************************************/
+
+#include "hal/hal_timer.h"
+#define portNVIC_SYSTICK_CTRL_REG			( * ( ( volatile uint32_t * ) 0xe000e010 ) )
+#define portNVIC_SYSTICK_LOAD_REG			( * ( ( volatile uint32_t * ) 0xe000e014 ) )
+#define portNVIC_SYSTICK_CURRENT_VALUE_REG	( * ( ( volatile uint32_t * ) 0xe000e018 ) )
+
+#define portNVIC_SYSTICK_INT_BIT			( 1UL << 1UL )
+#define portNVIC_SYSTICK_ENABLE_BIT			( 1UL << 0UL )
+#define portNVIC_SYSTICK_COUNT_FLAG_BIT		( 1UL << 16UL )
+
+#define TIM_BASE                            (TIMER3_BASE)
+
+#if defined ( __CC_ARM )
+  #define LIGHT_SLEEP_MISSED_US               (10)
+#elif defined ( __GNUC__ )
+  #define LIGHT_SLEEP_MISSED_US               (10)
+#else
+  #error "Unsupported compiler"
+#endif
+
+static uint32_t last_us = 0;
+extern void wlib_hwtimer_init_v2(void * timer_cb);
+
+static void tim_callback (void)
+{
+    hal_tim_en(TIM_BASE, HAL_DISABLE);
+}
+
 __STATIC_INLINE void pmu_pre_sleep_update(pm_ctl_t * ctrl)
 {
     switch (ctrl->slp_mode)
@@ -230,6 +258,9 @@ __STATIC_INLINE void obj_post_sleep_proc(pm_ctl_t *ctrl)
     }
 }
 
+extern uint32_t __curr_value;
+extern uint32_t ulReloadValue;
+
 //#include "utils/debug/log.h"
 void ln_pm_rtos_pre_sleep_proc(uint32_t *expect_ms)
 {
@@ -246,6 +277,29 @@ void ln_pm_rtos_pre_sleep_proc(uint32_t *expect_ms)
     
     pm_ctrl->flag     = LN_TRUE;
     pm_ctrl->sleep_ms = *expect_ms;
+
+    static uint8_t _init_flag = 0;
+    if (_init_flag == 0) {
+        _init_flag = 1;
+        wlib_hwtimer_init_v2(tim_callback);
+    }
+
+    if (pm_ctrl->slp_mode == LIGHT_SLEEP) {
+        int32_t load_val = ((*expect_ms*1000) - 1 - last_us);
+        if (load_val < 0) {
+            //LOG(LOG_LVL_ERROR, "pre: load_val=%d\r\n", load_val);
+            return;
+        }
+
+        hal_tim_set_load_value(TIM_BASE, load_val);
+        hal_tim_en(TIM_BASE, HAL_ENABLE);
+        portNVIC_SYSTICK_CTRL_REG &= ~portNVIC_SYSTICK_ENABLE_BIT;
+        if (__curr_value > (ulReloadValue - portNVIC_SYSTICK_CURRENT_VALUE_REG)){
+            __curr_value -= (ulReloadValue - portNVIC_SYSTICK_CURRENT_VALUE_REG);
+        }else{
+            __curr_value = 1;
+        }
+    }
 
     if(pm_ctrl->slp_mode == DEEP_SLEEP) /* DEEP_SLEEP */
     {
@@ -277,6 +331,31 @@ int ln_pm_rtos_post_sleep_proc(uint32_t *expect_ms)
     obj_post_sleep_proc(pm_ctrl);
 //    LOG(LOG_LVL_ERROR, "post\r\n");
     
+    if (pm_ctrl->slp_mode == LIGHT_SLEEP) {
+
+        if (hal_tim_get_it_flag(TIM_BASE, TIM_IT_FLAG_ACTIVE) == 1) {
+            hal_tim_clr_it_flag(TIM_BASE, TIM_IT_FLAG_ACTIVE);
+            *expect_ms = pm_ctrl->sleep_ms;
+            last_us = (hal_tim_get_load_value(TIM_BASE) - hal_tim_get_current_cnt_value(TIM_BASE));
+            last_us += (LIGHT_SLEEP_MISSED_US);
+        } else {
+            uint32_t tmp_real_us = hal_tim_get_load_value(TIM_BASE) - hal_tim_get_current_cnt_value(TIM_BASE) + last_us;
+            real    = tmp_real_us / 1000;
+            last_us = tmp_real_us % 1000;
+
+            if (real > pm_ctrl->sleep_ms) {
+                //LOG(LOG_LVL_ERROR, "post: real=%d sleep=%d\r\n", real, pm_ctrl->sleep_ms);
+                *expect_ms = pm_ctrl->sleep_ms;
+            } else {
+                *expect_ms = real;
+            }
+            last_us += (LIGHT_SLEEP_MISSED_US + 1);
+        }
+
+        hal_tim_en(TIM_BASE, HAL_DISABLE);
+        ret = 0;
+    }
+
     if(pm_ctrl->slp_mode >= DEEP_SLEEP) /* DEEP_SLEEP, FROZEN_SLEEP */
     {        
         real = ((soc_sleep_timer_real_time_get()/1000000) + (STOP_OS_TICK_MISSED_NS/1000000)) ;

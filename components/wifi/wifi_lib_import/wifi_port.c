@@ -49,6 +49,23 @@ void wlib_hwtimer_init(void * timer_cb, uint32_t period_us)
     hal_tim_init(TIMER3_BASE,&tim_init);
 }
 
+void wlib_hwtimer_init_v2(void * timer_cb)
+{
+    tim_init_t_def tim_init;
+    memset(&tim_init, 0, sizeof(tim_init));
+
+    tim_init.tim_load_value = 0;              
+    tim_init.tim_mode = TIM_USER_DEF_CNT_MODE;
+    tim_init.tim_div = (uint32_t)(hal_clock_get_apb0_clk() / 1000000) - 1;                             
+    hal_tim_init(TIMER3_BASE, &tim_init);                
+
+    hw_timer_cb = ( void (*)(void) )timer_cb;
+
+    NVIC_SetPriority(TIMER3_IRQn, 4);
+    NVIC_EnableIRQ(TIMER3_IRQn);
+    hal_tim_it_cfg(TIMER3_BASE, TIM_IT_FLAG_ACTIVE, HAL_ENABLE);      
+}
+
 void wlib_hwtimer_start(void)
 {
     NVIC_EnableIRQ(TIMER3_IRQn);

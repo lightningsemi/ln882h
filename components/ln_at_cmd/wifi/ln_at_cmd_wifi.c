@@ -873,7 +873,9 @@ static void wifi_scan_complete_cb(void * arg)
 {
     LN_UNUSED(arg);
 
-    ln_at_sem_release(sem_scan);
+    if (sem_scan) {
+        ln_at_sem_release(sem_scan);
+    }
 }
 
 static void output_ap_list(void)
@@ -954,6 +956,7 @@ static ln_at_err_t ln_at_exec_scan(const char *name)
     //4. delete sem, callback
     wifi_manager_reg_event_callback(WIFI_MGR_EVENT_STA_SCAN_COMPLETE, NULL);
     ln_at_sem_delete(sem_scan);
+    sem_scan = NULL;
     wifi_manager_cleanup_scan_results();
 
     ln_at_printf(LN_AT_RET_OK_STR);
