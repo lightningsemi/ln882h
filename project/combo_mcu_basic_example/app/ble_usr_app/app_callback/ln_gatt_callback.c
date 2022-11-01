@@ -389,7 +389,7 @@ int gattc_read_req_ind_handler(ke_msg_id_t const msgid,
 	p_cfm->handle = param->handle;
 	p_cfm->status =GAP_ERR_NO_ERROR;
 	p_cfm->length = 1;
-	p_cfm->value[0]=0;
+	p_cfm->value[0]=0x11;
 	ke_msg_send(p_cfm);
 	return (KE_MSG_CONSUMED);
 }
@@ -414,14 +414,14 @@ int gattc_write_req_ind_handler(ke_msg_id_t const msgid,
 	p_cfm->status = GAP_ERR_NO_ERROR;
 	ke_msg_send(p_cfm);
     
-//	struct ln_attc_write_req_ind *data = blib_malloc(sizeof(struct ln_attc_write_req_ind ) + param->length);
-//	data->conidx=conidx;
-//	data->handle = param->handle;
-//	data->length = param->length;
-//	data->offset = param->offset;
-//	memcpy(&data->value[0],  param->value,  param->length);
-//	usr_queue_msg_send(BLE_MSG_WRITE_DATA, param->length,data);
-    hexdump(LOG_LVL_INFO, "[recv data]", (void *)param->value, param->length);
+	struct ln_attc_write_req_ind *data = blib_malloc(sizeof(struct ln_attc_write_req_ind ) + param->length);
+	data->conidx=conidx;
+	data->handle = param->handle;
+	data->length = param->length;
+	data->offset = param->offset;
+	memcpy(data->value,  param->value,  param->length);
+	usr_queue_msg_send(BLE_MSG_AT_RECIEVE, param->length,data);
+   // hexdump(LOG_LVL_INFO, "[recv data]", (void *)param->value, param->length);
     
 	return (KE_MSG_CONSUMED);
 }

@@ -44,24 +44,26 @@
 
 #include "rwip_task.h"      // Task definitions
 #include "ke_task.h"        // Kernel Task
+#include "ln_at.h"
 
 
 #include "usr_ble_app.h"
 #include "ln_app_callback.h"
 #include "ln_gatt_callback.h"
+#include "ln_at_cmd_ble.h"
 #if (TRACE_ENABLE)
 #include "utils/debug/log.h"
 #endif
 
 /// Application Environment Structure
 struct app_env_info_tag app_env_info= {0};
+
 extern uint8_t adv_actv_idx;
 extern uint8_t init_actv_idx;
 
 uint8_t g_gap_role = GAP_ROLE_NONE;
 
 #define MAX_MTU 260
-extern uint8_t svc_uuid[16];
 uint8_t con_num=0;
 
 /*
@@ -260,8 +262,8 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
             cfg_param.privacy_cfg = 0;
             memset((void *)&cfg_param.irk.key[0], 0x00, KEY_LEN);
             cfg_param.role    = GAP_ROLE_ALL;
-            //cfg_param.max_mtu = 1200;//2048;
-            //cfg_param.max_mps = 1200;//2048;
+            cfg_param.max_mtu = 1200;//2048;
+            cfg_param.max_mps = 1200;//2048;
             ln_app_set_dev_config(&cfg_param);
            
         }
@@ -684,7 +686,6 @@ static int gapc_cmp_evt_handler(ke_msg_id_t const msgid,
 	ke_msg_sync_lock_release();
 	return (KE_MSG_CONSUMED);
 }
-
 static int gapc_disconnect_ind_handler(ke_msg_id_t const msgid,
                                        void const *param,
                                        ke_task_id_t const dest_id,
@@ -721,7 +722,12 @@ static int gapc_peer_att_info_ind_handler(ke_msg_id_t const msgid,
 #if (TRACE_ENABLE)
 	LOG(LOG_LVL_TRACE,"app_gapc_peer_att_info_ind_handler handle=0x%x, req=0x%x,conidx=0x%x\r\n",p_param->handle,p_param->req,conidx);
 #endif
-
+	int8_t i;
+	for(i=0;i<p_param->info.name.length;i++)
+	{
+		LOG(LOG_LVL_TRACE,"app_gapc_peer_att_info_ind_handler name=0x%x\r\n",p_param->info.name.value[i]);
+	}
+	
 	memcpy(&(app_env_info.peer_att_info),p_param,sizeof(struct gapc_peer_att_info_ind));
 	return (KE_MSG_CONSUMED);
 }
@@ -749,11 +755,16 @@ static int gapc_peer_features_ind_handler(ke_msg_id_t const msgid,
         ke_task_id_t const dest_id,
         ke_task_id_t const src_id)
 {
+	int8_t i;
 	struct gapc_peer_features_ind *p_param = (struct gapc_peer_features_ind *)param;
 	uint8_t conidx = KE_IDX_GET(src_id);
 #if (TRACE_ENABLE)
 	LOG(LOG_LVL_TRACE,"gapc_peer_features_ind_handler conidx=0x%x\r\n",conidx);
 #endif
+	for(i=0;i<(sizeof(p_param->features)/sizeof(p_param->features[0]));i++)
+	{
+		LOG(LOG_LVL_TRACE,"gapc_peer_features_ind_handler name=%d\r\n",p_param->features[i]);
+	}
 	memcpy(&(app_env_info.peer_features_info),p_param,sizeof(struct gapc_peer_features_ind));
 	return (KE_MSG_CONSUMED);
 }
@@ -803,6 +814,7 @@ static int gapc_le_ping_to_val_ind_handler(ke_msg_id_t const msgid,
 	LOG(LOG_LVL_TRACE,"gapc_le_ping_to_val_ind_handler conidx=0x%x\r\n",conidx);
 #endif
 	memcpy(&(app_env_info.le_ping_to_val_info),p_param,sizeof( struct gapc_le_ping_to_val_ind));
+
 	return (KE_MSG_CONSUMED);
 }
 
@@ -820,6 +832,7 @@ static int gapc_le_phy_ind_handler(ke_msg_id_t const msgid,
 	LOG(LOG_LVL_TRACE,"gapc_le_phy_ind_handler conidx=0x%x\r\n",conidx);
 #endif
 	memcpy(&(app_env_info.le_phy_info),p_param,sizeof( struct gapc_le_phy_ind));
+
 	return (KE_MSG_CONSUMED);
 }
 
@@ -1266,5 +1279,20 @@ KE_MSG_HANDLER_TAB(app)
 ke_state_t app_state[APP_IDX_MAX];
 
 const struct ke_task_desc TASK_DESC_APP = {app_msg_handler_tab, app_state, APP_IDX_MAX, ARRAY_LEN(app_msg_handler_tab)};
+
+
+//check if ble connected
+uint8_t check_ble_connected(void)
+{
+	uint8_t connected=con_num;
+	if(connected!=0)
+	{
+		return 0;
+	}
+	else
+	{
+		return -1; //none connected
+	}
+}
 /// @} APP
 

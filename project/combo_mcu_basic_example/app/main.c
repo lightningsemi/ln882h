@@ -15,6 +15,7 @@
 #include "ln_kv_api.h"
 #include "ln_at.h"
 #include "flash_partition_table.h"
+#include "ln_at_cmd_ble.h"
 
 
 int main (int argc, char* argv[])
@@ -68,7 +69,9 @@ int main (int argc, char* argv[])
         uint8_t mac[6] ={0};
         ln_generate_random_mac(mac);
         mac[5] |= 0xC0; // This address is random generated, so assign 0x11 => Static Random Address
-
+				
+				memcpy(ble_mac,mac,sizeof(ble_mac));
+				
         extern void rw_init(uint8_t mac[6]);
         rw_init(mac);
     }

@@ -612,3 +612,33 @@ ln_at_parser_err_t ln_at_parser_get_str_param(uint8_t param_index, bool *is_defa
     }
     return LN_AT_PSR_ERR_NONE;
 }
+
+ln_at_parser_err_t ln_at_parser_get_int_str_param(uint8_t param_index, bool *is_default, char **str)
+{
+    ln_at_para_type_t type;
+    ln_at_parser_t *at_cmd = &g_ln_at_cmd_context;
+
+    if (!str || !is_default || (param_index < 1 || param_index > LN_AT_MAX_PARA_NUM))
+    {
+        return LN_AT_PSR_ERR_PARAM;
+    }
+
+    *is_default = false;
+    type = at_cmd->para[param_index - 1].para_type;
+
+    if (type == LN_AT_PARA_TYPE_OMIT)
+    {
+        *str = 0;
+        *is_default = true;
+    }
+    else if (type == LN_AT_PARA_TYPE_INIT)
+    {
+        *str = at_cmd->para[param_index - 1].para_start_pos;
+    }
+    else
+    {
+        return LN_AT_PSR_ERR_COMMON;
+    }
+    return LN_AT_PSR_ERR_NONE;    
+}
+

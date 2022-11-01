@@ -61,6 +61,7 @@ enum ble_usr_msg_type
     BLE_MSG_WRITE_DATA,
     BLE_MSG_CONN_IND,
     BLE_MSG_SVR_DIS,
+	  BLE_MSG_AT_RECIEVE,
 };
 
 /// States of APP task

@@ -51,5 +51,6 @@ ln_at_parser_err_t ln_at_parser_get_result(ln_at_parser_rst_t *rst);
 
 ln_at_parser_err_t ln_at_parser_get_int_param(uint8_t param_index, bool *is_default, int *value);
 ln_at_parser_err_t ln_at_parser_get_str_param(uint8_t param_index, bool *is_default, char **pp_str);
+ln_at_parser_err_t ln_at_parser_get_int_str_param(uint8_t param_index, bool *is_default, char **str);
 
 #endif /* __LN_AT_PARSER_H__ */

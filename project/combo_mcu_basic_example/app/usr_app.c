@@ -28,14 +28,18 @@
 #include "ln_app_callback.h"
 #include "usr_ble_app.h"
 #include "usr_send_data.h"
+#include "ln_at_cmd_ble.h"
+#include "ln_kv_api.h"
+#include "usr_ble_sys.h"
+#include "ln_at.h"
 
-#define DEVICE_NAME                  ("LN_data_trans+-*/")
-#define DEVICE_NAME_LEN              (sizeof(DEVICE_NAME))
-#define ADV_DATA_MAX_LENGTH          (28)
 
 extern uint8_t svc_uuid[16];
 extern uint8_t con_num;
 static OS_Thread_t ble_g_usr_app_thread;
+
+extern struct app_env_info_tag app_env_info;
+
 #define BLE_USR_APP_TASK_STACK_SIZE  (1024)
 
 uint8_t adv_actv_idx  =0;
@@ -51,6 +55,9 @@ static OS_Thread_t g_temp_cal_thread;
 #define TEMP_APP_TASK_STACK_SIZE   4*256 //Byte
 #endif
 
+static OS_Thread_t g_usr_test_thread;
+#define TEST_APP_TASK_STACK_SIZE	4*256
+
 /* declaration */
 static void wifi_init_ap(void);
 static void wifi_init_sta(void);
@@ -62,8 +69,8 @@ static uint8_t psk_value[40]      = {0x0};
 // static uint8_t target_ap_bssid[6] = {0xC0, 0xA5, 0xDD, 0x84, 0x6F, 0xA8};
 
 wifi_sta_connect_t connect = {
-    .ssid    = "TL_WR741N_7F84",
-    .pwd     = "12345678901234567890123456",
+    .ssid    = "LN_2.4G",
+    .pwd     = "LN2021!@#",
     .bssid   = NULL,
     .psk_value = NULL,
 };
@@ -94,7 +101,7 @@ static void wifi_scan_complete_cb(void * arg)
     ln_list_t *list;
     uint8_t node_count = 0;
     ap_info_node_t *pnode;
-
+	
     wifi_manager_ap_list_update_enable(LN_FALSE);
 
     // 1.get ap info list.
@@ -106,9 +113,12 @@ static void wifi_scan_complete_cb(void * arg)
         uint8_t * mac = (uint8_t*)pnode->info.bssid;
         ap_info_t *ap_info = &pnode->info;
 
+       /* 
         LOG(LOG_LVL_INFO, "\tCH=%2d,RSSI= %3d,", ap_info->channel, ap_info->rssi);
         LOG(LOG_LVL_INFO, "BSSID:[%02X:%02X:%02X:%02X:%02X:%02X],SSID:\"%s\"\r\n", \
                            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], ap_info->ssid);
+			*/
+        
     }
 
     wifi_manager_ap_list_update_enable(LN_TRUE);
@@ -216,7 +226,6 @@ static void usr_app_task_entry(void *params)
     wifi_init_sta();
     // wifi_init_ap();
 
-
     while(NETDEV_LINK_UP != netdev_get_link_state(netdev_get_active())){
         OS_MsDelay(1000);
     }
@@ -295,15 +304,36 @@ static void app_set_adv_data(void)
 {
     //adv data: adv length--adv type--adv string ASCII
     uint8_t adv_data[ADV_DATA_MAX_LENGTH] = {0};
-    adv_data[0] = DEVICE_NAME_LEN + 1;
-    adv_data[1] = 0x09;  //adv type :local name
-    memcpy(&adv_data[2],DEVICE_NAME,DEVICE_NAME_LEN);
+
+		if (!ln_kv_has_key(KV_SYSPARAM_BLE_NAME))
+		{
+			LOG(LOG_LVL_INFO,"KV_SYSPARAM_BLE_NAME is null,set default name in ram!\r\n");
+      adv_data[0] = DEVICE_NAME_LEN + 1;
+      adv_data[1] = 0x09;  //adv type :local name
+      memcpy(&adv_data[2],DEVICE_NAME_DEFAULT,DEVICE_NAME_LEN);
+		}
+		else
+		{
+			int kvret;
+			size_t r_len = 0;
+			ble_name_param_t p_param;
+			
+			memset(&p_param,0,sizeof(ble_name_param_t));
+			kvret=ln_kv_get((const char *)KV_SYSPARAM_BLE_NAME , (void *)(&p_param), sizeof(ble_name_param_t),&r_len);
+			if(KV_ERR_NONE!=kvret)
+			{
+				LOG(LOG_LVL_ERROR,"get KV_SYSPARAM_BLE_NAME fail \r\n");
+			}
+			adv_data[0]=p_param.ble_name_len+1;
+			adv_data[1]=0x09;
+			memcpy(&adv_data[2],p_param.ble_name,p_param.ble_name_len);
+		}
+
     struct ln_gapm_set_adv_data_cmd adv_data_param;
     adv_data_param.actv_idx = adv_actv_idx;
     adv_data_param.length = sizeof(adv_data);
     adv_data_param.data = adv_data;
     ln_app_set_adv_data(&adv_data_param);
-    
 }
 
 static void app_start_advertising(void)
@@ -368,6 +398,7 @@ static void start_init(void)
 	app_start_init();
 }
 
+
 static OS_Queue_t ble_usr_queue;
 
 void usr_creat_queue(void)
@@ -395,11 +426,14 @@ int usr_queue_msg_recv(void *msg, uint32_t timeout)
 static void ble_app_task_entry(void *params)
 {
     ble_usr_msg_t usr_msg;
+	
+		uint8_t role=0;
 
     usr_creat_queue();
 
     extern void ble_app_init(void);
     ble_app_init();
+	  
 #if (SLAVE)
 	start_adv();
 #endif
@@ -421,11 +455,26 @@ static void ble_app_task_entry(void *params)
                 {
                     struct ln_attc_write_req_ind *p_param = (struct ln_attc_write_req_ind *)usr_msg.msg;
                     struct ln_gattc_send_evt_cmd send_data;
-                    hexdump(LOG_LVL_INFO, "[recv data]", (void *)p_param->value, p_param->length);
-                    send_data.handle = p_param->handle + 2;
-                    send_data.length = p_param->length;
-                    send_data.value = p_param->value;
-                    ln_app_gatt_send_ntf(p_param->conidx,&send_data);
+										
+										struct gapc_connection_req_ind *addr=OS_Malloc(sizeof(struct gapc_connection_req_ind));							
+										memcpy(addr->peer_addr.addr,app_env_info.conn_req_info.peer_addr.addr,GAP_BD_ADDR_LEN);
+                    //hexdump(LOG_LVL_INFO, "[recv data]", (void *)p_param->value, p_param->length);
+									/*
+										ln_at_printf("peer addr:%02X%02X%02X%02X%02X%02X",app_env_info.conn_req_info.peer_addr.addr[0],\
+										app_env_info.conn_req_info.peer_addr.addr[1],\
+										app_env_info.conn_req_info.peer_addr.addr[2],\
+										app_env_info.conn_req_info.peer_addr.addr[3],\
+										app_env_info.conn_req_info.peer_addr.addr[4],\
+										app_env_info.conn_req_info.peer_addr.addr[5]);
+									*/
+										ln_at_printf("AT+NOTIFY=%02X%02X%02X%02X%02X%02X,%d,%s\r\n",addr->peer_addr.addr[0],addr->peer_addr.addr[1],\
+										addr->peer_addr.addr[2],addr->peer_addr.addr[3],addr->peer_addr.addr[4],addr->peer_addr.addr[5],p_param->length,(char *)p_param->value);
+//										LOG(LOG_LVL_WARN,"p_param->handle=%d\r\n",p_param->handle);
+//                    send_data.handle = p_param->handle + 2;
+//                    send_data.length = p_param->length;
+//                    send_data.value = p_param->value;
+//                    ln_app_gatt_send_ntf(p_param->conidx,&send_data);
+										OS_Free(addr);
                 }
                 break;
 
@@ -456,6 +505,17 @@ static void ble_app_task_entry(void *params)
                     ln_app_update_param(p_param->conidx, &conn_param);
                 }
                 break;
+								
+								case BLE_MSG_AT_RECIEVE:
+								{
+										struct ln_attc_write_req_ind *p_param = (struct ln_attc_write_req_ind *)usr_msg.msg;
+										struct gapc_connection_req_ind *addr=OS_Malloc(sizeof(struct gapc_connection_req_ind));							
+										memcpy(addr->peer_addr.addr,app_env_info.conn_req_info.peer_addr.addr,GAP_BD_ADDR_LEN);
+										ln_at_printf("AT+NOTIFY=%02X%02X%02X%02X%02X%02X,%d,%s\r\n",addr->peer_addr.addr[0],addr->peer_addr.addr[1],\
+										addr->peer_addr.addr[2],addr->peer_addr.addr[3],addr->peer_addr.addr[4],addr->peer_addr.addr[5],\
+										p_param->length,(char *)p_param->value);
+										OS_Free(addr);
+								}break;
 
                 case BLE_MSG_SVR_DIS:
                 {
@@ -482,6 +542,25 @@ static void ble_app_task_entry(void *params)
 	}
 }
 
+static void test_app_task_entry(void *params)
+{
+	LN_UNUSED(params);
+
+	OS_MsDelay(2000);
+	while(1)
+	{
+		struct ln_gattc_send_evt_cmd *p_data = blib_malloc(sizeof(struct ln_gattc_send_evt_cmd) );
+		p_data->handle=0;
+		p_data->length=5;
+		p_data->value="A231B13123";
+		usr_queue_msg_send(BLE_MSG_AT_RECIEVE,sizeof(struct ln_gattc_send_evt_cmd ),p_data);
+		LOG(LOG_LVL_INFO,"ble queue send ok!\r\n");
+		OS_MsDelay(1000);
+	}
+	
+	
+}
+
 void creat_usr_app_task(void)
 {
     if(OS_OK != OS_ThreadCreate(&g_usr_app_thread, "WifiUsrAPP", usr_app_task_entry, NULL, OS_PRIORITY_BELOW_NORMAL, USR_APP_TASK_STACK_SIZE)) {
@@ -498,6 +577,14 @@ void creat_usr_app_task(void)
         LN_ASSERT(1);
     }
 #endif
+
+#if 0		
+    if(OS_OK != OS_ThreadCreate(&g_usr_test_thread, "TestUsrAPP", test_app_task_entry, NULL, OS_PRIORITY_BELOW_NORMAL, TEST_APP_TASK_STACK_SIZE)) 
+    {
+        LN_ASSERT(1);
+    }
+#endif
+		
 
     /* print sdk version */
     {
