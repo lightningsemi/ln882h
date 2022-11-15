@@ -167,6 +167,12 @@ class AfterBuildKeil(AfterBuildBase):
         OTA image
         """
         return super().build_stage_third()
+    
+    def build_stage_fourth(self) ->bool:
+        """
+        flashimage.hex
+        """
+        return super().build_stage_fourth()
 
     def doAllWork(self) -> bool:
         if not self.build_stage_first():
@@ -174,6 +180,8 @@ class AfterBuildKeil(AfterBuildBase):
         if not self.build_stage_second():
             return False
         if not self.build_stage_third():
+            return False
+        if not self.build_stage_fourth():
             return False
         return True
 

@@ -125,12 +125,12 @@ static err_t ethernetif_init(struct netif *netif, netif_idx_t nif_idx)
 
     if (nif_idx == NETIF_IDX_STA) {
 #if LWIP_NETIF_HOSTNAME
-        netif->hostname = "sta";
+        netif->hostname = "LN882H_Small_TV";
 #endif
         memcpy(netif->name, IF_NAME_STA, sizeof(netif->name));
     } else if (nif_idx == NETIF_IDX_AP) {
 #if LWIP_NETIF_HOSTNAME
-        netif->hostname = "ap";
+        netif->hostname = "LN882H_Small_TV";
 #endif
         memcpy(netif->name, IF_NAME_AP, sizeof(netif->name));
     } else {
@@ -237,6 +237,7 @@ int lwip_tcpip_init(void)
 
 int netdev_set_state(netif_idx_t nif_idx, netdev_state_t state)
 {
+//    netdev_t *ndev = NULL;
     struct netif *nif = NULL;
 
     if (nif_idx >= NETIF_IDX_MAX) {
@@ -256,16 +257,17 @@ int netdev_set_state(netif_idx_t nif_idx, netdev_state_t state)
             netif_set_status_callback(nif, sta_netif_status_changed_cb);
             netif_set_link_callback(nif, sta_netif_link_changed_cb);
 
+            netifapi_dhcp_release(nif);
             netifapi_dhcp_stop(nif);
             netifapi_dhcp_start(nif);
         }
         else
         {
-            netifapi_dhcp_stop(nif);
-
             netifapi_netif_set_down(nif);
             netifapi_netif_set_link_down(nif);
 
+            netifapi_dhcp_release(nif);
+            netifapi_dhcp_stop(nif);
             netif_set_status_callback(nif, NULL);
             netif_set_link_callback(nif, NULL);
         }

@@ -16,23 +16,11 @@ extern "C" {
 #define SERVICE     1   // provide data device ,for example mouse .keyboard ,sensor
 #define CLIENT      0	// get data device,for example PC, mobile phone
 
-#define ADV_DATA_MAX_LENGTH          (28)
-
-
-enum STATUS
-{
-	FAIL = 0,
-	OK   = 1,
-};
-
 
 
 void creat_usr_app_task(void);
 void app_restart_adv(void);
 void app_create_init(void);
-
-
-
 
 
 #ifdef __cplusplus

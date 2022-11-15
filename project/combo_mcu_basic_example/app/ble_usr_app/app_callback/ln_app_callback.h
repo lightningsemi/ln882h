@@ -123,7 +123,6 @@ struct app_env_info_tag
  ****************************************************************************************
  */
 
-uint8_t check_ble_connected(void);
 
 
 #endif // _LN_APP_CALLBACK_H_

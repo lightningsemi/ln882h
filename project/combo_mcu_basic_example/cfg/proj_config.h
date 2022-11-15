@@ -4,6 +4,8 @@
 #define DISABLE                                 (0)
 #define ENABLE                                  (1)
 
+#define USE_IR_DEVICE                           DISABLE
+
 #define __CONFIG_OS_KERNEL
 
 /*
@@ -58,12 +60,12 @@
  */
 #define CFG_UART0_TX_BUF_SIZE      256
 #define CFG_UART0_RX_BUF_SIZE      256
-#define CFG_UART1_TX_BUF_SIZE      128
-#define CFG_UART1_RX_BUF_SIZE      256
-#define CFG_UART2_TX_BUF_SIZE      128
-#define CFG_UART2_RX_BUF_SIZE      256
+#define CFG_UART1_TX_BUF_SIZE      50
+#define CFG_UART1_RX_BUF_SIZE      50
+#define CFG_UART2_TX_BUF_SIZE      0
+#define CFG_UART2_RX_BUF_SIZE      0
 
-#define CFG_UART_BAUDRATE_LOG      921600
+#define CFG_UART_BAUDRATE_LOG      1000000
 #define CFG_UART_BAUDRATE_CONSOLE  115200
 
 

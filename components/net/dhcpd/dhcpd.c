@@ -8,7 +8,7 @@
 #define DHCPD_TASK_STACK_SIZE   256*5
 
 #define DHCP_HOST_NETMASK                 ("255.255.255.0")
-#define DHCP_HOST_DNS1                    ("114.114.114.114")
+#define DHCP_HOST_DNS1                    ("192.168.4.1")
 #define DHCP_SERVER_NAME_STR              ("LN-DHCP-Server")
 #define DHCP_HOST_NAME_STR                ("LN882H-SoftAP")
 

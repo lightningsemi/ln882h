@@ -5,3 +5,4 @@ from .ln_tools import *
 from .makeimage import *
 from .ota_image_generator import *
 from .part_desc_info import *
+from .bin_to_hex import *

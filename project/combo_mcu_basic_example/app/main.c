@@ -15,8 +15,11 @@
 #include "ln_kv_api.h"
 #include "ln_at.h"
 #include "flash_partition_table.h"
-#include "ln_at_cmd_ble.h"
 
+
+#if USE_IR_DEVICE
+    #include "ln_drv_ir.h"
+#endif
 
 int main (int argc, char* argv[])
 {
@@ -35,11 +38,17 @@ int main (int argc, char* argv[])
     //2. register os heap mem
     OS_DefineHeapRegions();
 
+    
     log_init();
+#if USE_IR_DEVICE
+    ln_drv_ir_init();
+#else
     if (LN_AT_ERR_NONE != ln_at_init()) {
         LOG(LOG_LVL_ERROR, "ln at init fail.\r\n");
         return -1;
     }
+#endif
+    
 
     cm_backtrace_init("combo_mcu_basic_example", "hw", "sw");
     LOG(LOG_LVL_INFO, "------  combo_mcu_basic_example  ------\r\n");
@@ -69,13 +78,11 @@ int main (int argc, char* argv[])
         uint8_t mac[6] ={0};
         ln_generate_random_mac(mac);
         mac[5] |= 0xC0; // This address is random generated, so assign 0x11 => Static Random Address
-				
-				memcpy(ble_mac,mac,sizeof(ble_mac));
-				
+
         extern void rw_init(uint8_t mac[6]);
         rw_init(mac);
     }
-
+    
     //Creat usr app task.
     creat_usr_app_task();
 

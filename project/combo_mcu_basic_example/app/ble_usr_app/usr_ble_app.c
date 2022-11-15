@@ -20,3 +20,4 @@ void ble_app_init(void)
     // Reset the stack
     ln_app_gapm_reset();
 }
+

@@ -52,7 +52,7 @@
           <OutputName>firmware_XIP</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
-          <CreateHexFile>0</CreateHexFile>
+          <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
           <ListingPath>.\Listings\</ListingPath>
@@ -129,8 +129,8 @@
         </DebugOption>
         <Utilities>
           <Flash1>
-            <UseTargetDll>0</UseTargetDll>
-            <UseExternalTool>1</UseExternalTool>
+            <UseTargetDll>1</UseTargetDll>
+            <UseExternalTool>0</UseExternalTool>
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
@@ -139,7 +139,7 @@
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
           <Flash3>"..\..\..\tools\JFlash\JFlash.exe" (-openprj..\..\..\tools\JFlash\ln882h.jflash -open.\flashimage.bin,0x0 -programverify)</Flash3>
-          <Flash4></Flash4>
+          <Flash4>.\JLinkSettings.ini</Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
           <pFcArmRoot></pFcArmRoot>
@@ -336,10 +336,10 @@
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
-              <MiscControls>--gnu</MiscControls>
-              <Define>LN882H,ARM_MATH_CM4</Define>
+              <MiscControls>--gnu;--locale=english</MiscControls>
+              <Define>LN882H,ARM_MATH_CM4,LV_LVGL_H_INCLUDE_SIMPLE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\components\ble\app;..\..\..\components\ble\ble_api\common;..\..\..\components\ble\ble_api\gap_gatt\api;..\..\..\components\ble\ble_lib_import;..\..\..\components\ble\mac\ble\hl\api;..\..\..\components\ble\mac\ble\hl\inc;..\..\..\components\ble\mac\ble\ll\api;..\..\..\components\ble\mac\ble\ll\import;..\..\..\components\ble\mac\ble\ll\src;..\..\..\components\ble\mac\ble\ll\src\llm;..\..\..\components\ble\mac\ble\profiles\netcfg\api;..\..\..\components\ble\mac\em\api;..\..\..\components\ble\mac\hci\api;..\..\..\components\ble\mac\sch\api;..\..\..\components\ble\mac\sch\import;..\..\..\components\ble\modules\aes\api;..\..\..\components\ble\modules\common\api;..\..\..\components\ble\modules\dbg\api;..\..\..\components\ble\modules\ecc_p256\api;..\..\..\components\ble\modules\h4tl\api;..\..\..\components\ble\modules\ke\api;..\..\..\components\ble\modules\lib_ver\api;..\..\..\components\ble\modules\nvds\api;..\..\..\components\ble\modules\rf\api;..\..\..\components\ble\modules\rwip\api;..\..\..\components\net\lwip-2.1.3\src\include;..\..\..\components\net\lwip-2.1.3\src\port\ln_osal\include;..\..\..\components\wifi\wifi_manager;..\..\..\components\wifi\wifi_lib_import;..\..\..\components\wifi\wifi_lib_export;..\..\..\components\fs\nvds;..\..\..\components\fs\partition_mgr;..\..\..\components\fs\kv\kv_port;..\..\..\components\fs\kv\kv;..\..\..\components\serial;..\..\..\components\net\dhcpd;..\..\..\components\net\iperf;..\..\..\components\net\ping;..\..\..\components\kernel;..\..\..\components\kernel\FreeRTOS\Source\include;..\..\..\components\kernel\FreeRTOS_Adapter;..\..\..\components\kernel\FreeRTOS\Source\portable\RVDS\ARM_CM4F;..\..\..\components\utils\debug\runtime;..\..\..\components\utils\debug\reboot_trace;..\..\..\components\utils;..\..\..\components;..\..\..\mcu\driver_ln882h;..\..\..\mcu\driver_ln882h\reg;..\..\..\mcu\CMSIS_5.3.0;..\..\..\mcu\ln882h;..\..\..\components;..\..\..\components\ln_at;..\..\..\components\ln_at\adapter;..\..\..\components\ln_at\cmd;..\..\..\components\ln_at\parser;..\..\..\components\ln_at\transfer;..\..\..\components\ln_at_cmd\system;..\cfg;..\bsp;..\app;..\app\ble_usr_app;..\app\ble_usr_app\app_callback;..\..\..\components\ble\ble_profiles\prf_common;..\..\..\components\ble;..\..\..\components\ble\ble_arch;..\..\..\components\ln_at_cmd\ble</IncludePath>
+              <IncludePath>..\..\..\components\ble\app;..\..\..\components\ble\ble_api\common;..\..\..\components\ble\ble_api\gap_gatt\api;..\..\..\components\ble\ble_lib_import;..\..\..\components\ble\mac\ble\hl\api;..\..\..\components\ble\mac\ble\hl\inc;..\..\..\components\ble\mac\ble\ll\api;..\..\..\components\ble\mac\ble\ll\import;..\..\..\components\ble\mac\ble\ll\src;..\..\..\components\ble\mac\ble\ll\src\llm;..\..\..\components\ble\mac\ble\profiles\netcfg\api;..\..\..\components\ble\mac\em\api;..\..\..\components\ble\mac\hci\api;..\..\..\components\ble\mac\sch\api;..\..\..\components\ble\mac\sch\import;..\..\..\components\ble\modules\aes\api;..\..\..\components\ble\modules\common\api;..\..\..\components\ble\modules\dbg\api;..\..\..\components\ble\modules\ecc_p256\api;..\..\..\components\ble\modules\h4tl\api;..\..\..\components\ble\modules\ke\api;..\..\..\components\ble\modules\lib_ver\api;..\..\..\components\ble\modules\nvds\api;..\..\..\components\ble\modules\rf\api;..\..\..\components\ble\modules\rwip\api;..\..\..\components\net\lwip-2.1.3\src\include;..\..\..\components\net\lwip-2.1.3\src\port\ln_osal\include;..\..\..\components\wifi\wifi_manager;..\..\..\components\wifi\wifi_lib_import;..\..\..\components\wifi\wifi_lib_export;..\..\..\components\fs\nvds;..\..\..\components\fs\partition_mgr;..\..\..\components\fs\kv\kv_port;..\..\..\components\fs\kv\kv;..\..\..\components\serial;..\..\..\components\net\dhcpd;..\..\..\components\net\iperf;..\..\..\components\net\ping;..\..\..\components\kernel;..\..\..\components\kernel\FreeRTOS\Source\include;..\..\..\components\kernel\FreeRTOS_Adapter;..\..\..\components\kernel\FreeRTOS\Source\portable\RVDS\ARM_CM4F;..\..\..\components\utils\debug\runtime;..\..\..\components\utils\debug\reboot_trace;..\..\..\components\utils;..\..\..\components;..\..\..\mcu\driver_ln882h;..\..\..\mcu\driver_ln882h\reg;..\..\..\mcu\CMSIS_5.3.0;..\..\..\mcu\ln882h;..\..\..\components;..\..\..\components\ln_at;..\..\..\components\ln_at\adapter;..\..\..\components\ln_at\cmd;..\..\..\components\ln_at\parser;..\..\..\components\ln_at\transfer;..\..\..\components\ln_at_cmd\system;..\cfg;..\bsp;..\app;..\app\ble_usr_app;..\app\ble_usr_app\app_callback;..\..\..\components\ble\ble_profiles\prf_common;..\..\..\components\ble;..\..\..\components\ble\ble_arch;..\..\..\components\net\httpsclient\inc;..\..\..\components\net\httpsclient\src;..\..\..\components\net\mbedtls\include;..\bsp\img;..\bsp\font</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -493,6 +493,26 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_efuse.c</FilePath>
             </File>
+            <File>
+              <FileName>hal_dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_dma.c</FilePath>
+            </File>
+            <File>
+              <FileName>hal_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>hal_rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_rtc.c</FilePath>
+            </File>
+            <File>
+              <FileName>hal_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_i2c.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -507,6 +527,16 @@
               <FileName>drv_adc_measure.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp\drv_adc_measure.c</FilePath>
+            </File>
+            <File>
+              <FileName>ln_drv_spi_lcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\bsp\ln_drv_spi_lcd.c</FilePath>
+            </File>
+            <File>
+              <FileName>weather_num.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\weather_num.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -598,6 +628,11 @@
               <FileType>1</FileType>
               <FilePath>..\app\usr_app.c</FilePath>
             </File>
+            <File>
+              <FileName>get_internet_info.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\get_internet_info.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -652,11 +687,6 @@
               <FileName>ln_at_cmd_wifi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\components\ln_at_cmd\wifi\ln_at_cmd_wifi.c</FilePath>
-            </File>
-            <File>
-              <FileName>ln_at_cmd_ble.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\components\ln_at_cmd\ble\ln_at_cmd_ble.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -912,11 +942,6 @@
               <FileName>usr_ble_app.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\app\ble_usr_app\usr_ble_app.c</FilePath>
-            </File>
-            <File>
-              <FileName>usr_ble_sys.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\app\ble_usr_app\usr_ble_sys.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1271,14 +1296,122 @@
             </File>
           </Files>
         </Group>
+        <Group>
+          <GroupName>::Data Exchange</GroupName>
+        </Group>
+        <Group>
+          <GroupName>::LVGL</GroupName>
+        </Group>
       </Groups>
     </Target>
   </Targets>
 
   <RTE>
     <apis/>
-    <components/>
-    <files/>
+    <components>
+      <component Cbundle="LVGL" Cclass="LVGL" Cgroup="lvgl" Csub="Benchmark" Cvendor="LVGL" Cversion="8.3.0" condition="LVGL-Essential">
+        <package name="lvgl" schemaVersion="1.4" url="https://raw.githubusercontent.com/lvgl/lvgl/master/env_support/cmsis-pack/" vendor="LVGL" version="1.0.6"/>
+        <targetInfos>
+          <targetInfo name="firmware_ln882h"/>
+        </targetInfos>
+      </component>
+      <component Cbundle="LVGL" Cclass="LVGL" Cgroup="lvgl" Csub="Demo:Widgets" Cvendor="LVGL" Cversion="8.3.0" condition="LVGL-Essential">
+        <package name="lvgl" schemaVersion="1.4" url="https://raw.githubusercontent.com/lvgl/lvgl/master/env_support/cmsis-pack/" vendor="LVGL" version="1.0.6"/>
+        <targetInfos>
+          <targetInfo name="firmware_ln882h"/>
+        </targetInfos>
+      </component>
+      <component Cbundle="LVGL" Cclass="LVGL" Cgroup="lvgl" Csub="Essential" Cvendor="LVGL" Cversion="8.3.0">
+        <package name="lvgl" schemaVersion="1.4" url="https://raw.githubusercontent.com/lvgl/lvgl/master/env_support/cmsis-pack/" vendor="LVGL" version="1.0.6"/>
+        <targetInfos>
+          <targetInfo name="firmware_ln882h"/>
+        </targetInfos>
+      </component>
+      <component Cbundle="LVGL" Cclass="LVGL" Cgroup="lvgl" Csub="Extra Themes" Cvendor="LVGL" Cversion="8.3.0" condition="LVGL-Essential">
+        <package name="lvgl" schemaVersion="1.4" url="https://raw.githubusercontent.com/lvgl/lvgl/master/env_support/cmsis-pack/" vendor="LVGL" version="1.0.6"/>
+        <targetInfos>
+          <targetInfo name="firmware_ln882h"/>
+        </targetInfos>
+      </component>
+      <component Cbundle="LVGL" Cclass="LVGL" Cgroup="lvgl" Csub="Porting" Cvendor="LVGL" Cversion="8.3.0" condition="LVGL-Essential">
+        <package name="lvgl" schemaVersion="1.4" url="https://raw.githubusercontent.com/lvgl/lvgl/master/env_support/cmsis-pack/" vendor="LVGL" version="1.0.6"/>
+        <targetInfos>
+          <targetInfo name="firmware_ln882h"/>
+        </targetInfos>
+      </component>
+      <component Cclass="Data Exchange" Cgroup="JSON" Csub="cJSON" Cvendor="MDK-Packs" Cversion="1.7.7" condition="ARMCC">
+        <package name="cJSON" schemaVersion="1.4" url="https://github.com/MDK-Packs/Pack/raw/master/cJSON/" vendor="MDK-Packs" version="1.0.0"/>
+        <targetInfos>
+          <targetInfo name="firmware_ln882h"/>
+        </targetInfos>
+      </component>
+    </components>
+    <files>
+      <file attr="config" category="sourceC" name="lv_cmsis_pack.c" version="1.0.0">
+        <instance index="0">RTE\LVGL\lv_cmsis_pack.c</instance>
+        <component Cbundle="LVGL" Cclass="LVGL" Cgroup="lvgl" Csub="Essential" Cvendor="LVGL" Cversion="8.3.0-dev"/>
+        <package name="lvgl" schemaVersion="1.4" url="https://raw.githubusercontent.com/lvgl/lvgl/master/env_support/cmsis-pack/" vendor="LVGL" version="1.0.1-alpha3"/>
+        <targetInfos>
+          <targetInfo name="firmware_ln882h"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="preIncludeGlobal" name="lv_conf_cmsis.h" version="1.0.0">
+        <instance index="0">RTE\LVGL\lv_conf_cmsis.h</instance>
+        <component Cbundle="LVGL" Cclass="LVGL" Cgroup="lvgl" Csub="Essential" Cvendor="LVGL" Cversion="8.3.0-dev"/>
+        <package name="lvgl" schemaVersion="1.4" url="https://raw.githubusercontent.com/lvgl/lvgl/master/env_support/cmsis-pack/" vendor="LVGL" version="1.0.1-alpha3"/>
+        <targetInfos>
+          <targetInfo name="firmware_ln882h"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="sourceC" name="examples\porting\lv_port_disp_template.c" version="1.0.0">
+        <instance index="0">RTE\LVGL\lv_port_disp_template.c</instance>
+        <component Cbundle="LVGL" Cclass="LVGL" Cgroup="lvgl" Csub="Porting" Cvendor="LVGL" Cversion="8.3.0-dev" condition="LVGL-Essential"/>
+        <package name="lvgl" schemaVersion="1.4" url="https://raw.githubusercontent.com/lvgl/lvgl/master/env_support/cmsis-pack/" vendor="LVGL" version="1.0.1-alpha3"/>
+        <targetInfos>
+          <targetInfo name="firmware_ln882h"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="header" name="examples\porting\lv_port_disp_template.h" version="1.0.0">
+        <instance index="0">RTE\LVGL\lv_port_disp_template.h</instance>
+        <component Cbundle="LVGL" Cclass="LVGL" Cgroup="lvgl" Csub="Porting" Cvendor="LVGL" Cversion="8.3.0-dev" condition="LVGL-Essential"/>
+        <package name="lvgl" schemaVersion="1.4" url="https://raw.githubusercontent.com/lvgl/lvgl/master/env_support/cmsis-pack/" vendor="LVGL" version="1.0.1-alpha3"/>
+        <targetInfos>
+          <targetInfo name="firmware_ln882h"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="sourceC" name="examples\porting\lv_port_fs_template.c" version="1.0.0">
+        <instance index="0">RTE\LVGL\lv_port_fs_template.c</instance>
+        <component Cbundle="LVGL" Cclass="LVGL" Cgroup="lvgl" Csub="Porting" Cvendor="LVGL" Cversion="8.3.0-dev" condition="LVGL-Essential"/>
+        <package name="lvgl" schemaVersion="1.4" url="https://raw.githubusercontent.com/lvgl/lvgl/master/env_support/cmsis-pack/" vendor="LVGL" version="1.0.1-alpha3"/>
+        <targetInfos>
+          <targetInfo name="firmware_ln882h"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="header" name="examples\porting\lv_port_fs_template.h" version="1.0.0">
+        <instance index="0">RTE\LVGL\lv_port_fs_template.h</instance>
+        <component Cbundle="LVGL" Cclass="LVGL" Cgroup="lvgl" Csub="Porting" Cvendor="LVGL" Cversion="8.3.0-dev" condition="LVGL-Essential"/>
+        <package name="lvgl" schemaVersion="1.4" url="https://raw.githubusercontent.com/lvgl/lvgl/master/env_support/cmsis-pack/" vendor="LVGL" version="1.0.1-alpha3"/>
+        <targetInfos>
+          <targetInfo name="firmware_ln882h"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="sourceC" name="examples\porting\lv_port_indev_template.c" version="1.0.0">
+        <instance index="0">RTE\LVGL\lv_port_indev_template.c</instance>
+        <component Cbundle="LVGL" Cclass="LVGL" Cgroup="lvgl" Csub="Porting" Cvendor="LVGL" Cversion="8.3.0-dev" condition="LVGL-Essential"/>
+        <package name="lvgl" schemaVersion="1.4" url="https://raw.githubusercontent.com/lvgl/lvgl/master/env_support/cmsis-pack/" vendor="LVGL" version="1.0.1-alpha3"/>
+        <targetInfos>
+          <targetInfo name="firmware_ln882h"/>
+        </targetInfos>
+      </file>
+      <file attr="config" category="header" name="examples\porting\lv_port_indev_template.h" version="1.0.0">
+        <instance index="0">RTE\LVGL\lv_port_indev_template.h</instance>
+        <component Cbundle="LVGL" Cclass="LVGL" Cgroup="lvgl" Csub="Porting" Cvendor="LVGL" Cversion="8.3.0-dev" condition="LVGL-Essential"/>
+        <package name="lvgl" schemaVersion="1.4" url="https://raw.githubusercontent.com/lvgl/lvgl/master/env_support/cmsis-pack/" vendor="LVGL" version="1.0.1-alpha3"/>
+        <targetInfos>
+          <targetInfo name="firmware_ln882h"/>
+        </targetInfos>
+      </file>
+    </files>
   </RTE>
 
   <LayerInfo>

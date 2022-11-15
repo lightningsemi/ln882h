@@ -15,18 +15,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import imp
 import os
 from ln_tools import check_python_version
 from makeimage import MakeImageTool
 from ota_image_generator import OTATOOL
 import xml.etree.ElementTree as ET
-
+from bin_to_hex import bin_to_hex
+import time
+ 
 
 class AfterBuildBase:
     FLASH_IMAGE_VER_MAJOR_STR = "FLASH_IMAGE_VER_MAJOR"
     FLASH_IMAGE_VER_MINOR_STR = "FLASH_IMAGE_VER_MINOR"
     SOC_CRP_FLAG_STR          = "SOC_CRP_FLAG"
-
+    HEX_START_ADDR            = 0x10000000
+    #HEX_START_ADDR            = 0x00000000
     def __init__(self) -> None:
         self.sdkroot_dir        = None # LN SDK root dir.
         self.buildout_dir       = None # absolute directory, in which app.axf/app.elf resides.
@@ -83,11 +87,27 @@ class AfterBuildBase:
         print("Succeed to build: {}".format(ota_tool.output_filepath))
         return True
 
+    def build_stage_fourth(self) -> bool:
+        """
+        flashimage.bin --> flashimage.hex
+        """
+        if not bin_to_hex(self.output_filepath,self.output_filepath[0:-4]+'.hex',self.HEX_START_ADDR):
+            print("Failed to build {}".format(self.output_filepath[0:-4]+'.hex'))
+            return False
+        now_time = time.localtime()
+        time_string = "{yyyy}-{MM:02d}-{DD:02d} {hh:02d}:{mm:02d}:{ss:02d}".format(yyyy=now_time.tm_year,
+        MM=now_time.tm_mon, DD=now_time.tm_mday,
+        hh=now_time.tm_hour, mm=now_time.tm_min, ss=now_time.tm_sec)
+        print("----------" * 6)
+        print("\t\t\thex done @ {t}".format(t=time_string))
+        print("----------" * 6)
+        return True
+
     def doAllWork(self) -> bool:
         if not self.build_stage_first():
             return False
         if not self.build_stage_second():
             return False
         if not self.build_stage_third():
-            return False
+            return False 
         return True

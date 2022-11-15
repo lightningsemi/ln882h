@@ -647,6 +647,7 @@ __exit:
     return LN_AT_ERR_COMMON;
 }
 
+
 static ln_at_err_t ln_at_set_wifi_join_ap(uint8_t para_num, const char *name)
 {
     return _ln_at_parse_cwjap(para_num, name);
