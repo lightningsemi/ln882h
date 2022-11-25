@@ -1,4 +1,4 @@
-OUTPUT_FORMAT("elf32-littlearm", "elf32-gigarm", "elf32-littlearm")
+OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(Reset_Handler)
 

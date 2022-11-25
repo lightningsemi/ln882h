@@ -1,11 +1,11 @@
-OUTPUT_FORMAT("elf32-littlearm", "elf32-gigarm", "elf32-littlearm")
+OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(Reset_Handler)
 
 /* Linker script to configure memory regions. */
 MEMORY
 {
-  FLASH     (rx)  : ORIGIN = 0x10007100, LENGTH = 1200K
+  FLASH     (rx)  : ORIGIN = 0x10007100, LENGTH = 1228544
   RAM0      (rwx) : ORIGIN = 0x20000000, LENGTH = 288K
   RETENTION (rwx) : ORIGIN = 0x20048000, LENGTH = 8K
   CACHE_MEM (rwx) : ORIGIN = 0x2004A000, LENGTH = 32K

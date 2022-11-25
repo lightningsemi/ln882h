@@ -2862,6 +2862,12 @@ static ln_at_err_t ln_at_get_ate_ok(const char *name)
     ln_nvds_get_tx_power_comp((uint8_t *)&val);
     ln_at_printf("+TXPOWER_COMP:%d\r\n", val);
 
+    ln_nvds_get_tx_power_b_comp((uint8_t *)&val);
+    ln_at_printf("+TXPOWER_B_COMP:%d\r\n", val);
+
+    ln_nvds_get_tx_power_gn_comp((uint8_t *)&val);
+    ln_at_printf("+TXPOWER_GN_COMP:%d\r\n", val);
+
     ln_at_printf(LN_AT_RET_OK_STR);
     return LN_AT_ERR_NONE;
 }
@@ -2871,6 +2877,7 @@ static ln_at_err_t ln_at_set_ate_ok(uint8_t para_num, const char *name)
     bool is_default = false;
     int val = 0;
     int8_t xtal_cap = 0, tx_power = 0;
+    int8_t tx_pwr_b = 0, tx_pwr_gn = 0;
 
     if (para_num != 1) {
         goto __exit;
@@ -2884,15 +2891,33 @@ static ln_at_err_t ln_at_set_ate_ok(uint8_t para_num, const char *name)
         ln_nvds_set_ate_result('F');
     } 
     else if (val == 1) {
+        extern int ate_get_xtalcap_calibration_info(void);
+        extern int ate_get_txpower_calibration_info(void);
         extern int ate_get_xtalcap_txpower_offset (int8_t *xtal_cap, int8_t *tx_power);
+
+        extern int ate_is_calibrated_txpower_b(void);
+        extern int ate_is_calibrated_txpower_gn(void);
+        extern int ate_get_txpower_b_gn_offset (int8_t *tx_pwr_b, int8_t *tx_pwr_gn);
+
         ate_get_xtalcap_txpower_offset(&xtal_cap, &tx_power);
+        ate_get_txpower_b_gn_offset(&tx_pwr_b, &tx_pwr_gn);
 
         /* 1. save to nvds(flash) */
         //1.1 save XTAL_CAP
-        ln_nvds_set_xtal_comp_val(xtal_cap);
+        if (ate_get_xtalcap_calibration_info()) {
+            ln_nvds_set_xtal_comp_val(xtal_cap);
+        }
 
         //1.2 save TX_POWER
-        ln_nvds_set_tx_power_comp(tx_power);
+        if (ate_get_txpower_calibration_info()) {
+            ln_nvds_set_tx_power_comp(tx_power);
+        }
+        if (ate_is_calibrated_txpower_b()) {
+            ln_nvds_set_tx_power_b_comp(tx_pwr_b);
+        }
+        if (ate_is_calibrated_txpower_gn()) {
+            ln_nvds_set_tx_power_gn_comp(tx_pwr_gn);
+        }
 
         //1.3 save ATE result
         //('S'=ate_successful, 'F'=ate_failed)
@@ -2912,3 +2937,113 @@ __exit:
 
 LN_AT_CMD_REG(ATE_OK, ln_at_get_ate_ok, ln_at_set_ate_ok, NULL, NULL);
 
+static void * ln_at_wifi_ap_scan_cpl_sem = NULL;
+static void ln_at_wifi_ap_scan_cpl_cb(void *arg)
+{
+    // release semaphore
+    ln_at_sem_release(ln_at_wifi_ap_scan_cpl_sem);
+}
+
+static ln_at_err_t ln_at_ap_scan(wifi_scan_cfg_t *scan_cfg)
+{
+    ln_at_err_t ret = LN_AT_ERR_NONE;
+    ap_info_t *ap_info = NULL;
+    int ap_info_items = 20;
+    ap_info_t *ap_info_rst = NULL;
+    int ap_info_rst_items = 0;
+
+    ln_at_wifi_ap_scan_cpl_sem = ln_at_sem_create(0, 1);
+    if (!ln_at_wifi_ap_scan_cpl_sem) {
+        ret = LN_AT_ERR_COMMON;
+        goto __exit;
+    }
+
+    ap_info = OS_Malloc(ap_info_items * sizeof(ap_info_t));
+    if (!ap_info) {
+        ret = LN_AT_ERR_COMMON;
+        goto __exit;
+    }
+
+    wifi_softap_scan(scan_cfg, ap_info, ap_info_items, ln_at_wifi_ap_scan_cpl_cb);
+
+    // wait scan cpl semaphore
+    ln_at_sem_wait(ln_at_wifi_ap_scan_cpl_sem, OS_WAIT_FOREVER);
+    ln_at_sem_delete(ln_at_wifi_ap_scan_cpl_sem);
+
+    // get scan result
+    wifi_softap_scan_results_get(&ap_info_rst, &ap_info_rst_items);
+    ln_at_printf("ap scan results:%d\r\n", ap_info_rst_items);
+
+    if (!ap_info_rst) {
+        ret = LN_AT_ERR_COMMON;
+        goto __exit;
+    }
+
+    ln_at_printf("%10.10s   %19.16s   %4.4s   %2.2s   %4.4s\r\n",
+        "ssid", "bssid", "rssi", "ch", "auth");
+
+    for (int i = 0; i < ap_info_rst_items; i++) {
+        ln_at_printf("%10.10s   [%02x:%02x:%02x:%02x:%02x:%02x]"
+            "   %4d   %2d   %4d\r\n", 
+            ap_info_rst[i].ssid, ap_info_rst[i].bssid[0],
+            ap_info_rst[i].bssid[1], ap_info_rst[i].bssid[2],
+            ap_info_rst[i].bssid[3], ap_info_rst[i].bssid[4],
+            ap_info_rst[i].bssid[5], ap_info_rst[i].rssi,
+            ap_info_rst[i].channel, ap_info_rst[i].authmode);
+    }
+
+__exit:
+    if (ap_info) {
+        OS_Free(ap_info);
+        ap_info = NULL;
+    }
+
+    if (ret != LN_AT_ERR_NONE) {
+        ln_at_printf(LN_AT_RET_ERR_STR);
+    } else {
+        ln_at_printf(LN_AT_RET_OK_STR);
+    }
+
+    return ret;
+}
+
+/**
+ * AT+AP_SCAN=<timeout>
+*/
+static ln_at_err_t ln_at_set_ap_scan(uint8_t para_num, const char *name)
+{
+    bool is_default = false;
+    int timeout = 0;
+
+    wifi_scan_cfg_t scan_cfg = {
+        .scan_time = 50,
+    };
+
+    if (para_num != 1) {
+        goto __exit;
+    }
+
+    if (LN_AT_PSR_ERR_NONE != ln_at_parser_get_int_param(1, &is_default, &timeout)) {
+        goto __exit;
+    }
+
+    if (timeout > 100) {
+        ln_at_printf("Note: 0 < timeout <= 100\r\n");
+    }
+
+    scan_cfg.scan_time = timeout;
+
+    return ln_at_ap_scan(&scan_cfg);
+__exit:
+    ln_at_printf(LN_AT_RET_ERR_STR);
+    return LN_AT_ERR_COMMON;
+}
+
+/**
+ * AT+AP_SCAN
+*/
+static ln_at_err_t ln_at_exec_ap_scan(const char *name)
+{
+    return ln_at_ap_scan(NULL);
+}
+LN_AT_CMD_REG(AP_SCAN, NULL, ln_at_set_ap_scan, NULL, ln_at_exec_ap_scan);

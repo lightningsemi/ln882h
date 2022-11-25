@@ -195,10 +195,15 @@ set(LWIP_SRC_C
 set(lwip_static_target "lwip")
 add_library(${lwip_static_target} STATIC ${LWIP_SRC_C})
 
+if(NOT DEFINED PROJECT_CFG_DIR)
+    message(STATUS "PROJECT_CFG_DIR is not defined, define now!")
+    set(PROJECT_CFG_DIR ${LN_SDK_ROOT}/project/${USER_PROJECT}/cfg)
+endif()
+
 target_include_directories(${lwip_static_target}
     PUBLIC
     ${LN_SDK_ROOT}/project/${USER_PROJECT}/bsp
-    ${LN_SDK_ROOT}/project/${USER_PROJECT}/cfg
+    ${PROJECT_CFG_DIR}
     ${LN_SDK_ROOT}/components
     ${COMP_WIFI_DIR}/wifi_lib_export
     ${MCU_LN882X_DIR}/${CHIP_SERIAL}

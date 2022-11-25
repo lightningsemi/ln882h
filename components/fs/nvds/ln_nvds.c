@@ -336,3 +336,35 @@ int ln_nvds_set_ate_result(uint8_t  val) {
 int ln_nvds_get_ate_result(uint8_t *val) {
     return ln_nvds_read(NV9_ATE_RESULT_OFFSET, val, NV9_ATE_RESULT_LEN);
 }
+
+/* NV10_TX_POWER_COMP_B_OFFST, NV10_TX_POWER_COMP_B_LEN */
+int ln_nvds_set_tx_power_b_comp(uint8_t  val) {
+    uint8_t rd_val = 0;
+    if (NVDS_ERR_OK == ln_nvds_get_tx_power_b_comp(&rd_val)) {
+        if (rd_val == val) {
+            return NVDS_ERR_OK;
+        }
+    }
+
+    return ln_nvds_write(NV10_TX_POWER_COMP_B_OFFST, &val, NV10_TX_POWER_COMP_B_LEN);
+}
+
+int ln_nvds_get_tx_power_b_comp(uint8_t *val) {
+    return ln_nvds_read(NV10_TX_POWER_COMP_B_OFFST, val, NV10_TX_POWER_COMP_B_LEN);
+}
+
+/* NV11_TX_POWER_COMP_GN_OFFST, NV11_TX_POWER_COMP_GN_LEN */
+int ln_nvds_set_tx_power_gn_comp(uint8_t  val) {
+    uint8_t rd_val = 0;
+    if (NVDS_ERR_OK == ln_nvds_get_tx_power_gn_comp(&rd_val)) {
+        if (rd_val == val) {
+            return NVDS_ERR_OK;
+        }
+    }
+
+    return ln_nvds_write(NV11_TX_POWER_COMP_GN_OFFST, &val, NV11_TX_POWER_COMP_GN_LEN);
+}
+
+int ln_nvds_get_tx_power_gn_comp(uint8_t *val) {
+    return ln_nvds_read(NV11_TX_POWER_COMP_GN_OFFST, val, NV11_TX_POWER_COMP_GN_LEN);
+}

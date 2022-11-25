@@ -108,7 +108,7 @@ void wlib_aes_encrypt(void *ctx, const uint8_t *ptext, uint8_t *ctext);
 void wlib_aes_decrypt(void *ctx, const uint8_t *ctext, uint8_t *ptext);
 
 /* tx power external compensation */
-void   wlib_get_tx_power_ext_comp_val(int8_t *val);
+void   wlib_get_tx_power_ext_comp_val(int8_t *bgn_pwr, int8_t *b_pwr, int8_t *gn_pwr);
 
 /* heap memory manager */
 void  *wlib_malloc(uint32_t size);

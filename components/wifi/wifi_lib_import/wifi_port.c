@@ -228,23 +228,44 @@ void wlib_aes_decrypt(void *ctx, const uint8_t *ctext, uint8_t *ptext)
 }
 
 /* tx power external compensation */
-void wlib_get_tx_power_ext_comp_val(int8_t *val)
+void wlib_get_tx_power_ext_comp_val(int8_t *bgn_pwr, int8_t *b_pwr, int8_t *gn_pwr)
 {
-    uint8_t rd_val = 0;
-    if (!val) {
+    uint8_t rd_val1 = 0, rd_val2 = 0, rd_val3 = 0;
+    if (!bgn_pwr || !b_pwr || !gn_pwr) {
         return;
     }
 
-    if (NVDS_ERR_OK != ln_nvds_get_tx_power_comp(&rd_val)) {
+    if (NVDS_ERR_OK != ln_nvds_get_ate_result(&rd_val1)) {
+        return;
+    } else {
+        if (rd_val1 != NV9_ATE_RESULT_OK) {
+           return; 
+        }
+    }
+
+    if (NVDS_ERR_OK != ln_nvds_get_tx_power_comp(&rd_val1)) {
+        return;
+    }
+    if (NVDS_ERR_OK != ln_nvds_get_tx_power_b_comp(&rd_val2)) {
+        return;
+    }
+    if (NVDS_ERR_OK != ln_nvds_get_tx_power_gn_comp(&rd_val3)) {
         return;
     }
 
-    if (rd_val == 0xFF) {
-        *val = 0;
-        return;
+    if (rd_val1 == 0xFF) {
+        rd_val1 = 0;
+    }
+    if (rd_val2 == 0xFF) {
+        rd_val2 = 0;
+    }
+    if (rd_val3 == 0xFF) {
+        rd_val3 = 0;
     }
 
-    *val = (int8_t)rd_val;
+    *bgn_pwr = (int8_t)rd_val1;
+    *b_pwr   = (int8_t)rd_val2;
+    *gn_pwr  = (int8_t)rd_val3;
 }
 
 /* heap memory manager */

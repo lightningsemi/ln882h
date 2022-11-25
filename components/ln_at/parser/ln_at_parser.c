@@ -612,3 +612,42 @@ ln_at_parser_err_t ln_at_parser_get_str_param(uint8_t param_index, bool *is_defa
     }
     return LN_AT_PSR_ERR_NONE;
 }
+
+ln_at_parser_err_t ln_at_param_dump(void)
+{
+    int num = 0;
+    const char *type_str[4] = {
+        "int",
+        "string",
+        "omit",
+        "unknown"
+    };
+
+    const char *value = NULL;
+    ln_at_parser_t *at_cmd = &g_ln_at_cmd_context;
+
+    num = at_cmd->total_para_num;
+
+    LN_AT_LOG_I("======================================\r\n");
+    LN_AT_LOG_I("index type     value\r\n");
+    for (int i = 0; i < num; i++)
+    {
+        if (at_cmd->para[i].para_type > LN_AT_PARA_TYPE_UNKNOWN)
+        {
+            continue;
+        }
+
+        if (at_cmd->para[i].para_type == LN_AT_PARA_TYPE_OMIT || 
+            at_cmd->para[i].para_type == LN_AT_PARA_TYPE_UNKNOWN) {
+            value = " ";
+        } else {
+            value = (const char *)at_cmd->para[i].para_start_pos;
+        }
+
+        LN_AT_LOG_I("[%2d] %-8.8s %s\r\n",
+            i,
+            type_str[at_cmd->para[i].para_type],
+            value);
+    }
+    LN_AT_LOG_I("======================================\r\n");
+}

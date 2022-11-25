@@ -437,6 +437,7 @@ void sys_mbox_free(sys_mbox_t *mbox)
 sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, int stacksize, int prio)
 {
     OS_Status status = OS_OK;
+    (void)status;
     OS_Thread_t os_thr_hdlr = { 0 };
 
     LWIP_ASSERT("In param eror", !(stacksize < 4 || prio <= 0));

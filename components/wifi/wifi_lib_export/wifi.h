@@ -224,6 +224,9 @@ int     wifi_softap_deauth(uint8_t * mac_addr);
 int     wifi_softap_set_max_supp_sta_num(uint8_t num);
 int     wifi_softap_get_max_supp_sta_num(uint8_t *num);
 
+int     wifi_softap_scan(wifi_scan_cfg_t *cfg, void *buff, int items, void (*cb)(void *arg));
+void    wifi_softap_scan_results_get(ap_info_t **buff, int *items);
+
 int     wifi_sta_reg_callback(sta_cb_t *sta_cb);
 int     wifi_softap_reg_callback(ap_cb_t *ap_cb);
 

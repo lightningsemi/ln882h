@@ -47,3 +47,17 @@ ln_at_err_t ln_at_basic_ate1_exec(const char *name)
 }
 LN_AT_CMD_REG(ATE1, NULL, NULL, NULL, ln_at_basic_ate1_exec);
 
+static ln_at_err_t ln_at_self_test_set(uint8_t para_num, const char *name)
+{
+    LN_UNUSED(name);
+
+    LN_AT_LOG_I("=== AT self test <%s> ===\r\n", name);
+    LN_AT_LOG_I("param cnt:%d\r\n", para_num);
+
+    ln_at_param_dump();
+
+    LN_AT_LOG_I("=== AT self test end ===\r\n");
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+}
+LN_AT_CMD_REG(SELF_TEST, NULL, ln_at_self_test_set, NULL, NULL);

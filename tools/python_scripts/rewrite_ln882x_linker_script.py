@@ -44,7 +44,7 @@ def do_rewrite_linkerscript(cfg_filepath, ld_filepath):
         for define in user_define:
             if define["partition_type"] == "APP":
                 app_start_addr = int(define["start_addr"], 16)
-                app_size_kb = define["size_KB"]
+                app_size_kb = define["size_KB"] * 1024 - 256
                 break
 
     app_start_addr += 0x10000000 + 0x100
@@ -56,7 +56,7 @@ def do_rewrite_linkerscript(cfg_filepath, ld_filepath):
     new_file_contents = []
     for lineRaw in ld_file_contents:
         if (lineRaw.find("FLASH") > 0) and (lineRaw.find("ORIGIN") > 0) and (lineRaw.find("LENGTH") > 0) :
-            newline = "  FLASH     (rx)  : ORIGIN = 0x{_size:08X}, LENGTH = {_len}K\n".format(_size=app_start_addr, _len=app_size_kb)
+            newline = "  FLASH     (rx)  : ORIGIN = 0x{_size:08X}, LENGTH = {_len}\n".format(_size=app_start_addr, _len=app_size_kb)
             new_file_contents.append(newline)
         else:
             new_file_contents.append(lineRaw)
