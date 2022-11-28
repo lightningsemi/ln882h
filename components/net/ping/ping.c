@@ -96,7 +96,11 @@ ping_send(int s, ip_addr_t *addr)
 
     to.sin_len = sizeof(to);
     to.sin_family = AF_INET;
+#if LWIP_IPV6    
+    inet_addr_from_ip4addr(&to.sin_addr, &addr->u_addr.ip4);
+#else
     inet_addr_from_ip4addr(&to.sin_addr, addr);
+#endif
 
     err = lwip_sendto(s, iecho, ping_size, 0, (struct sockaddr*)&to, sizeof(to));
 
@@ -121,7 +125,11 @@ static void ping_recv(int s)
             if (len >= (int)(sizeof(struct ip_hdr)+sizeof(struct icmp_echo_hdr)))
             {
                 ip_addr_t fromaddr;
+#if LWIP_IPV6
+                inet_addr_to_ip4addr(&fromaddr.u_addr.ip4, &from.sin_addr);
+#else
                 inet_addr_to_ip4addr(&fromaddr, &from.sin_addr);
+#endif
                 LOG(PING_DEBUG, "ping recv: %s  %"U32_F" ms.\r\n", ipaddr_ntoa(&fromaddr), (OS_GetTicks() - ping_time));
 
                 ping_printf("+%"U32_F"ms\r\n", (OS_GetTicks() - ping_time));
@@ -175,8 +183,11 @@ void ping_sender(void *arg)
     tcpip_ip_info_t  ip_info;
 
     netdev_get_ip_info(netdev_get_active(), &ip_info);
-
+#if LWIP_IPV6
+    if(! ip4addr_aton(((ping_param_t *)arg)->host, &target_ip.u_addr.ip4)) {
+#else
     if(! ip4addr_aton(((ping_param_t *)arg)->host, &target_ip)) {
+#endif
         ping_status = 0;
         OS_ThreadDelete(&g_ping_thread);
         //ping stop

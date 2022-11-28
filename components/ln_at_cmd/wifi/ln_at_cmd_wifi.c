@@ -2753,6 +2753,45 @@ static ln_at_err_t ln_at_get_country_cfg_def(const char *name)
 }
 #endif /* 0 */
 
+#if LWIP_IPV6
+
+extern void ipv6_msg(char *url);
+static ln_at_err_t ln_ipv6_test(uint8_t para_num, const char *name)
+{
+    int ret;
+    bool is_default = false;
+    char *url = NULL;
+
+    if (para_num == 1)
+    {
+        if (LN_AT_PSR_ERR_NONE == ln_at_parser_get_str_param(1, &is_default, &url))
+        {
+            ipv6_msg(url);
+        }
+    }
+
+    ln_at_printf("%s\r\n", url);
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+}
+
+ln_at_err_t ln_at_show_ip6(const char *name)
+{
+    struct netif * netif1 = netdev_get_netif(NETIF_IDX_STA);
+    LN_UNUSED(name);
+    ln_at_printf("IPv6 link-local address: %s\r\n", ipaddr_ntoa(netif_ip_addr6(netif1, 0)));
+    ln_at_printf("IPv6 link-local address: %s\r\n", ipaddr_ntoa(netif_ip_addr6(netif1, 1)));
+    ln_at_printf("IPv6 link-local address: %s\r\n", ipaddr_ntoa(netif_ip_addr6(netif1, 2)));
+
+
+    ln_at_printf(LN_AT_RET_OK_STR);
+    return LN_AT_ERR_NONE;
+}
+
+LN_AT_CMD_REG(IPV6,     NULL,     ln_ipv6_test,     NULL, NULL);
+LN_AT_CMD_REG(IPV6_INFO,     NULL,     NULL,     NULL, ln_at_show_ip6);
+
+#endif
 
 /**
  * name, get, set, test, exec

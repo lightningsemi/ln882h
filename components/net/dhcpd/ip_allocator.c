@@ -75,7 +75,11 @@ int dhcpd_ip_allocate(dhcpd_ip_item_t *ip_pool, char *mac, ip4_addr_t *ip_addr, 
     }
 
     memcpy(ip_item->mac, mac, 6);
+#if LWIP_IPV6
+    ip4_addr_copy(*ip_addr, ip_item->ip);
+#else
 	ip_addr_copy(*ip_addr, ip_item->ip);
+#endif
 
     if(pre_allocated && ip_item->allocted == LN_FALSE) {
         set_ip_item_status(ip_item, LN_TRUE);

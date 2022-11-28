@@ -17,6 +17,9 @@
 #include "ln_misc.h"
 #include "ln882h.h"
 #include "usr_app.h"
+#include "lwip/sockets.h"
+#include "lwip/netdb.h"
+#include "lwip/netif.h"
 
 #define PM_DEFAULT_SLEEP_MODE             (ACTIVE)
 #define PM_WIFI_DEFAULT_PS_MODE           (WIFI_NO_POWERSAVE)
@@ -28,7 +31,12 @@
 static OS_Thread_t g_temp_cal_thread;
 #define TEMP_APP_TASK_STACK_SIZE          (4*256) //Byte
 #endif
-
+#if LWIP_IPV6
+static OS_Thread_t g_temp_ipv6_thread;
+#define IPV6_APP_TASK_STACK_SIZE          (4*1024) //Byte
+OS_Queue_t *ipv6queue = NULL;
+#define LN_URL_MAX_LEN                      100
+#endif
 static OS_Thread_t g_usr_app_thread;
 
 /* declaration */
@@ -42,8 +50,8 @@ static uint8_t psk_value[40]      = {0x0};
 // static uint8_t target_ap_bssid[6] = {0xC0, 0xA5, 0xDD, 0x84, 0x6F, 0xA8};
 
 wifi_sta_connect_t connect = {
-    .ssid    = "A_Murphy",
-    .pwd     = "ZJT123zjt",
+    .ssid    = "mingjun",
+    .pwd     = "12345678",
     .bssid   = NULL,
     .psk_value = NULL,
 };
@@ -116,7 +124,12 @@ void wifi_init_sta(void)
     //2. net device(lwip)
     netdev_set_mac_addr(NETIF_IDX_STA, mac_addr);
     netdev_set_active(NETIF_IDX_STA);
-
+#if LWIP_IPV6
+    struct netif * netif1 = netdev_get_netif(NETIF_IDX_STA);
+    netif_create_ip6_linklocal_address(netif1, 1);
+    LOG(LOG_LVL_INFO, "IPv6 link-local address: %s\r\n", ipaddr_ntoa(netif_ip_addr6(netif1, 0)));
+    netif_set_ip6_autoconfig_enabled(netif1, 1);
+#endif
     //3. wifi start
     wifi_manager_reg_event_callback(WIFI_MGR_EVENT_STA_SCAN_COMPLETE, &wifi_scan_complete_cb);
 
@@ -183,7 +196,6 @@ void wifi_init_ap(void)
     }
 }
 
-
 void usr_app_task_entry(void *params)
 {
     LN_UNUSED(params);
@@ -240,6 +252,144 @@ void temp_cal_app_task_entry(void *params)
     }
 }
 
+#if LWIP_IPV6
+int ipv6_connect(const char *host, const char *service)
+{
+    int sockfd, ret;
+    struct addrinfo hints, *res, *ressave;
+    char buff[128] = {0};"GET /times HTTP/1.1\r\nHost:baidu.com\r\n\r\n";
+    char recv_buf[128]={0};
+
+    memset(&hints, 0, sizeof(hints));
+    if(host[0] == 'b') // "baidu for ipv4 test"
+    {
+        hints.ai_family = AF_INET;
+        LOG(LOG_LVL_INFO, "ipv6_connect start ipv4\r\n");
+    }
+    else
+    {
+        hints.ai_family = AF_INET6;
+        LOG(LOG_LVL_INFO, "ipv6_connect start ipv6\r\n");
+    }
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_IP;
+
+
+    
+    LOG(LOG_LVL_INFO, "ipv6_connect start\r\n");
+    if (0 != (ret = lwip_getaddrinfo(host, service, &hints, &res)))
+    {
+        LOG(LOG_LVL_INFO, "lwip_getaddrinfo error\r\n");
+        return -1;
+    }
+
+    do{
+        if (-1 == (sockfd = lwip_socket(res->ai_family, res->ai_socktype, res->ai_protocol)))
+        {
+            LOG(LOG_LVL_INFO, "create lwip_socket error\r\n");
+            res = res->ai_next;
+            break;
+        }
+        
+        if(hints.ai_family == AF_INET6)
+        {
+            struct sockaddr_in6 *addr = (struct sockaddr_in6 *)res->ai_addr;
+            ip6_addr_t fromaddr;
+            inet6_addr_to_ip6addr(&fromaddr, &addr->sin6_addr);
+            LOG(LOG_LVL_INFO, "connect ip: %s\r\n",inet6_ntoa(fromaddr));
+        }
+        else
+        {
+            struct sockaddr_in *addr = (struct sockaddr_in *)res->ai_addr;
+            ip4_addr_t fromaddr;
+            inet_addr_to_ip4addr(&fromaddr, &addr->sin_addr);
+            LOG(LOG_LVL_INFO, "connect ip: %s\r\n",inet_ntoa(fromaddr));
+        }
+        
+        if (lwip_connect(sockfd, res->ai_addr, res->ai_addrlen) != 0)
+        {
+            LOG(LOG_LVL_INFO, "lwip_connect error errno = %d\r\n",errno);
+            break;
+        }
+        else
+        {
+            LOG(LOG_LVL_INFO, "lwip_connect succeed\r\n");
+            sprintf(buff,"GET /times HTTP/1.1\r\nHost:%s\r\n\r\n", host);
+            lwip_send(sockfd, buff, strlen(buff), 0);
+            memset(recv_buf, 0, sizeof(recv_buf));
+            ret = lwip_read(sockfd, recv_buf, 128);
+            
+            if(ret > 0)
+            {
+                LOG(LOG_LVL_INFO, "lwip_read %s\r\n",recv_buf);
+            }
+            else
+            {
+                LOG(LOG_LVL_INFO, "lwip_read failed\r\n");
+            }
+        }
+    }while(0);
+    close(sockfd);
+    freeaddrinfo(res);
+    return 0;
+}
+
+void ipv6_msg(char *url)
+{   
+    if(ipv6queue != NULL)
+    {
+        OS_QueueSend(ipv6queue, url, 0);
+    }
+}
+
+void ipv6_task_entry(void *params)
+{
+    char *url;
+    
+    LN_UNUSED(params);
+    ipv6queue = OS_Malloc(sizeof(OS_Queue_t));
+    
+    if(ipv6queue == NULL)
+    {
+        OS_ThreadDelete(NULL);
+    }
+    
+    memset(ipv6queue, 0, sizeof(OS_Queue_t));
+    
+    if(OS_OK != OS_QueueCreate(ipv6queue, 2, LN_URL_MAX_LEN))
+    {
+        LOG(LOG_LVL_INFO, "ipv6_task_entry url : %s\r\n", url);
+        OS_Free(ipv6queue);
+        ipv6queue = NULL;
+        OS_ThreadDelete(NULL);
+    }
+    
+    url = OS_Malloc(LN_URL_MAX_LEN);
+    
+    if(url == NULL)
+    {
+        OS_Free(ipv6queue);
+        ipv6queue = NULL;
+        OS_ThreadDelete(NULL);
+    }
+
+    memset(url, 0, LN_URL_MAX_LEN);
+
+    while (1)
+    {
+        OS_QueueReceive(ipv6queue, url, portMAX_DELAY);
+        LOG(LOG_LVL_INFO, "ipv6_task_entry url : %s\r\n", url);
+        ipv6_connect(url,"80");
+    }
+    
+    OS_Free(url);
+    OS_Free(ipv6queue);
+    ipv6queue = NULL;
+    OS_ThreadDelete(NULL);
+
+}
+#endif
+
 void creat_usr_app_task(void)
 {
     {
@@ -272,6 +422,12 @@ void creat_usr_app_task(void)
     }
 #endif
 
+#if LWIP_IPV6
+    if(OS_OK != OS_ThreadCreate(&g_temp_ipv6_thread, "ipv6", ipv6_task_entry, NULL, OS_PRIORITY_BELOW_NORMAL, IPV6_APP_TASK_STACK_SIZE)) {
+        LN_ASSERT(1);
+    }
+#endif
+    
     /* print sdk version */
     {
         LOG(LOG_LVL_INFO, "LN882H SDK Ver: %s [build time:%s][0x%08x]\r\n",

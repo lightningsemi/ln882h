@@ -211,7 +211,11 @@ int dhcpd_start(void)
         ip_addr2 = ip4_addr2(&(server_config->server));
         ip_addr3 = ip4_addr3(&(server_config->server));
         ip_addr4 = ip4_addr4(&(server_config->ip_start)) + i;
-        IP_ADDR4(&(ip_item->ip), ip_addr1, ip_addr2, ip_addr3, ip_addr4);
+        #if LWIP_IPV6
+            IP4_ADDR(&(ip_item->ip), ip_addr1, ip_addr2, ip_addr3, ip_addr4);
+        #else
+            IP_ADDR4(&(ip_item->ip), ip_addr1, ip_addr2, ip_addr3, ip_addr4);
+        #endif
         DHCPD_PRINTF("IP_POOL: i=%d %d.%d.%d.%d\r\n", i, ip4_addr1(&(ip_item->ip)), ip4_addr2(&(ip_item->ip)), ip4_addr3(&(ip_item->ip)), ip4_addr4(&(ip_item->ip)));
     }
 

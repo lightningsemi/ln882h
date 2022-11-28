@@ -341,7 +341,11 @@ static void iperf_client(void *thread_param)
     LN_UNUSED(thread_param);
 
     struct tcp_pcb *pcb = NULL;
+#if LWIP_IPV6
+    ip_addr_t server_ip;
+#else
     ip4_addr_t server_ip;
+#endif
     err_t err = ERR_OK;
     int port;
 
@@ -353,7 +357,11 @@ static void iperf_client(void *thread_param)
             continue;
         }
         pcb = tcp_new();
+#if LWIP_IPV6
+        server_ip.u_addr.ip4.addr = inet_addr(param.host);
+#else
         server_ip.addr = inet_addr(param.host);
+#endif
         port = param.port;
 
         err = tcp_connect(pcb, &server_ip, port, iperf_client_connected);

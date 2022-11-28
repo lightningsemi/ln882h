@@ -186,6 +186,7 @@ set(LWIPAPPFILES
 set(LWIP_SRC_C
     ${COREFILES}
     ${CORE4FILES}
+	${CORE6FILES}
     ${APIFILES}
     ${NETIFFILES}
     port/ln_osal/netif/ethernetif.c
