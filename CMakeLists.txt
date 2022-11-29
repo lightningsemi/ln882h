@@ -31,8 +31,8 @@ if(NOT DEFINED VENDOR_SDK_ADAPTED)
     #######################   NOTE: select user project here  ##################
     ############################################################################
     if(NOT DEFINED USER_PROJECT)
-        set(USER_PROJECT  wifi_mcu_basic_example)
-        #set(USER_PROJECT  ble_mcu_data_trans)
+        #set(USER_PROJECT  wifi_mcu_basic_example)
+        set(USER_PROJECT  ble_mcu_data_trans)
         #set(USER_PROJECT  ble_mcu_prf_hid_mouse)
         #set(USER_PROJECT  ble_mcu_prf_battery)
         #set(USER_PROJECT  ble_mcu_scan)

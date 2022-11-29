@@ -3,10 +3,8 @@ include(ProjModuleCollect.cmake)
 set(PROJ_ALL_SRC
     app/main.c
     app/usr_app.c
-    app/usr_send_data.c
-    app/app_callback/ln_gap_callback.c
-    app/app_callback/ln_gatt_callback.c
-    app/app_callback/usr_ble_app.c
+    app/demo/throughput_app/bleprph_throughput/main/throughput.c
+    app/demo/throughput_app/bleprph_throughput/main/gatt_svr.c
     bsp/serial_hw.c
     bsp/serial_h4tl_driver.c
     # bsp/drv_adc_measure.c
@@ -21,7 +19,7 @@ add_executable(${pro_executable_target}     ${PROJ_ALL_SRC})
 
 target_link_libraries(${pro_executable_target}
     PUBLIC
-    ${CHIP_SERIAL}_ble_full_stack
+    ${CHIP_SERIAL}_ble_controller_stack_nim
     -lc -lm -lnosys
 
     PRIVATE
@@ -37,7 +35,6 @@ target_link_directories(${pro_executable_target}
 target_include_directories(${pro_executable_target}
     PRIVATE
     app
-    app/app_callback
     bsp
     cfg
 )

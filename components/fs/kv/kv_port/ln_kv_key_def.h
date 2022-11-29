@@ -29,7 +29,7 @@
   #define KV_SYSPARAM_SNPT_CFG                ((const char *)"23_snpt_cfg")
 #endif
 
-#define KV_JOYLINK_INFO_CFG                 ((const char *)"24_joylink_cfg")
+#define KV_BLE_MAC                          ((const char *)"24_ble_mac")
 
 
 

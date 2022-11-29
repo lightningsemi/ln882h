@@ -345,8 +345,11 @@ uint8_t hci_cmd_get_max_param_size(uint16_t opcode);
  * @param[in]  payload  Pointer to payload
  *****************************************************************************************
  */
+#if (!BLE_CUSTOMER_HOST_PRESENT)
 void hci_cmd_received(uint16_t opcode, uint8_t length, uint8_t *payload);
-
+#else
+uint8_t hci_cmd_received_override(uint16_t opcode, uint8_t length, uint8_t *payload);
+#endif
 /**
  ****************************************************************************************
  * @brief Allocates the reception buffer for ACL TX data
@@ -370,8 +373,12 @@ uint8_t* hci_acl_tx_data_alloc(uint16_t hdl_flags, uint16_t len);
  * @param[in]   payload   Pointer to payload
  *****************************************************************************************
  */
+#if (!BLE_CUSTOMER_HOST_PRESENT)
 void hci_acl_tx_data_received(uint16_t hdl_flags, uint16_t datalen, uint8_t * payload);
-
+#else
+uint8_t hci_acl_tx_data_received_override(uint16_t hdl_flags, uint16_t datalen, uint8_t* payload);
+int hci_h4tl_receive(uint8_t* buf, uint16_t len);
+#endif
 #if (BT_EMB_PRESENT)
 #if (VOICE_OVER_HCI)
 /**
@@ -508,6 +515,12 @@ void hci_fc_host_nb_acl_pkts_complete(uint16_t acl_pkt_nb);
  */
 void hci_fc_host_nb_sync_pkts_complete(uint16_t sync_pkt_nb);
 
+#if (BLE_CUSTOMER_HOST_PRESENT)
+typedef int (*hci_func_cb)(uint8_t* buf, uint16_t len);
+int hci_to_host_callback_register(const hci_func_cb evt_to_host_cb, const hci_func_cb acldata_to_host_cb);
+#include "ln_hci_adapter.h"
+int ln_vhci_host_register_callback(const ln_vhci_host_callback_t *callback);
+#endif
 #endif //HCI_PRESENT
 
 /// @} HCI

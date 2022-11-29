@@ -50,7 +50,7 @@
 #define APP_MESH_DEMO_TYPE_LEN        (1)
 
 
-#define CFG_DBG
+//#define CFG_DBG
 #define CFG_EMB
 #define CFG_BLE
 //#define CFG_NVDS     //if use NVDS,should call nvds_init(uint8_t *base, uint32_t len) to initialize NVDS
@@ -71,15 +71,17 @@
 /***********************************************************
 * use the ble host 
 ***********************************************************/    
-#define CFG_HOST
+//#define CFG_HOST
+#define CFG_CUSTOMER_HOST
 /***********************************************************
 * host Profile Support 
 ***********************************************************/  
-#define  CFG_PRF
+//#define  CFG_PRF
+
 /***********************************************************
 * Application Support 
 ***********************************************************/  
-#define  CFG_APP
+//#define  CFG_APP
 
 /***********************************************************
 * use the application host interface 
@@ -147,6 +149,10 @@
 #define BLE_HOST_PRESENT            0
 #endif // defined(CFG_BLE) && defined(CFG_HOST)
 
+#if defined(CFG_CUSTOMER_HOST)
+#define BLE_CUSTOMER_HOST_PRESENT   1
+#endif
+
 #if defined(CFG_BLE) && defined(CFG_APP)
 #define BLE_APP_PRESENT             1
 #else // defined(CFG_BLE) && defined(CFG_APP)
@@ -186,7 +192,7 @@
 #if BLE_HOST_PRESENT
 #define H4TL_SUPPORT      ((AHI_TL_SUPPORT) + (HCI_TL_SUPPORT))
 #else // !BLE_HOST_PRESENT
-#define H4TL_SUPPORT      (HCI_TL_SUPPORT)
+#define H4TL_SUPPORT      ((HCI_TL_SUPPORT) && (!BLE_CUSTOMER_HOST_PRESENT))
 #endif // BLE_HOST_PRESENT
 
 /// Number of HCI commands the stack can handle simultaneously

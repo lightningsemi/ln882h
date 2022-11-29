@@ -2,30 +2,18 @@
 #define __USR_APP_H__
 
 #include <stdint.h>
+#include "stdbool.h"
 
+#define LN_BLE_MAC_ADDR0    0x00    
+#define LN_BLE_MAC_ADDR1    0x50    
+#define LN_BLE_MAC_ADDR2    0xC2
+#define LN_BLE_MAC_ADDR3    0x5E
+#define LN_BLE_MAC_ADDR4    0x11
+#define LN_BLE_MAC_ADDR5    0x22
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
-//usr config  these 4 macros
-#define SLAVE       1   //SLAVE  set 1, will start an advertising
-#define MASTER      0   //MASTER set 1, will start a direct connectable initiating requst 
-
-#define SERVICE     1   // provide data device ,for example mouse .keyboard ,sensor
-#define CLIENT      0   // get data device,for example PC, mobile phone
-
-
-
-void ble_creat_usr_app_task(void);
-void app_restart_adv(void);
-void app_create_init(void);
-void usr_queue_msg_send(uint16_t id, uint16_t length, void *msg);
-
-#ifdef __cplusplus
-}
-#endif
+void     creat_usr_app_task  (void);
+void     ln_load_config_info (void);
+uint8_t* ln_get_mac_array    (bool reverse);
 
 #endif /* __USR_APP_H__ */
 
