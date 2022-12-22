@@ -26,6 +26,8 @@
 #define TIMER0_BASE                 (TIMER_BASE + 0x00000000U)
 #define TIMER1_BASE                 (TIMER_BASE + 0x00000018U)
 #define TIMER2_BASE                 (TIMER_BASE + 0x00000030U)
+
+/* The TIMER3 will be used by WiFi Lib !!!*/
 #define TIMER3_BASE                 (TIMER_BASE + 0x00000048U)
 
 
@@ -90,7 +92,9 @@ void        hal_tim_set_load_value(uint32_t tim_x_base,uint32_t value);
 void        hal_tim_set_load2_value(uint32_t tim_x_base,uint32_t value);
 uint32_t    hal_tim_get_current_cnt_value(uint32_t tim_x_base);
 void        hal_tim_pwm_en(uint32_t tim_x_base,hal_en_t en);
-
+uint8_t     hal_tim_get_div(uint32_t tim_x_base);
+uint32_t    hal_tim_get_load_value(uint32_t tim_x_base);
+uint32_t    hal_tim_get_load2_value(uint32_t tim_x_base);
 
             //timer interrupt init
 void        hal_tim_it_cfg(uint32_t tim_x_base,tim_it_flag_t tim_it_flag,hal_en_t en);

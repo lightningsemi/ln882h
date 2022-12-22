@@ -280,6 +280,7 @@ int netdev_set_state(netif_idx_t nif_idx, netdev_state_t state)
             netifapi_netif_set_link_up(nif);
             dhcpd_stop();
             dhcpd_start();
+            print_netdev_info(nif);
         }
         else
         {
@@ -307,8 +308,8 @@ netif_idx_t netdev_get_active(void)
 netdev_link_state_t netdev_get_link_state(netif_idx_t nif_idx)
 {
     netdev_t *ndev = ethernetif_get_netdev(nif_idx);
-
-    if (netif_is_link_up(&ndev->nif)) {
+                
+    if (netif_is_link_up(&ndev->nif) && (ndev->nif.flags & NETIF_FLAG_UP)) {
         return NETDEV_LINK_UP;
     } else {
         return NETDEV_LINK_DOWN;

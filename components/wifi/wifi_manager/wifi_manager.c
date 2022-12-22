@@ -222,6 +222,7 @@ static void sta_disconnected(void)
 {
     LOG(LOG_LVL_INFO, "STA disconnected to target AP!\r\n");
     netdev_set_state(NETIF_IDX_STA, NETDEV_DOWN);
+    wifi_set_allow_cpu_sleep_flag(0);
 
     if (event_cb[WIFI_MGR_EVENT_STA_DISCONNECTED]) {
         event_cb[WIFI_MGR_EVENT_STA_DISCONNECTED](NULL);

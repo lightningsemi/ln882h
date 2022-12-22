@@ -9,11 +9,10 @@
 #include "utils/reboot_trace/reboot_trace.h"
 #include "utils/runtime/runtime.h"
 #include "hal/hal_interrupt.h"
-#include "ln_utils.h"
-#include "ln_misc.h"
 #include "ln_nvds.h"
 #include "ln_kv_api.h"
 #include "ln_at.h"
+#include "ln_utils.h"
 #include "flash_partition_table.h"
 
 
@@ -38,7 +37,10 @@ int main (int argc, char* argv[])
     //2. register os heap mem
     OS_DefineHeapRegions();
 
+<<<<<<<< HEAD:project/ble_setup_net_demo/app/main.c
     
+========
+>>>>>>>> origin/master:project/aws_iot_core/app/main.c
     log_init();
 #if USE_IR_DEVICE
     ln_drv_ir_init();
@@ -50,8 +52,13 @@ int main (int argc, char* argv[])
 #endif
     
 
+<<<<<<<< HEAD:project/ble_setup_net_demo/app/main.c
     cm_backtrace_init("combo_mcu_basic_example", "hw", "sw");
     LOG(LOG_LVL_INFO, "------  combo_mcu_basic_example  ------\r\n");
+========
+    cm_backtrace_init("wifi_mcu_basic_example", "HW_V1.0", "SW_V1.0");
+    LOG(LOG_LVL_INFO, "------  wifi_mcu_basic_example  ------\r\n");
+>>>>>>>> origin/master:project/aws_iot_core/app/main.c
 
     if (NVDS_ERR_OK != ln_nvds_init(NVDS_SPACE_OFFSET)) {
         LOG(LOG_LVL_ERROR, "NVDS init filed!\r\n");
@@ -74,6 +81,7 @@ int main (int argc, char* argv[])
     //Init lwip stack.
     lwip_tcpip_init();
 
+<<<<<<<< HEAD:project/ble_setup_net_demo/app/main.c
     {
         uint8_t mac[6] ={0};
         ln_generate_random_mac(mac);
@@ -83,6 +91,8 @@ int main (int argc, char* argv[])
         rw_init(mac);
     }
     
+========
+>>>>>>>> origin/master:project/aws_iot_core/app/main.c
     //Creat usr app task.
     creat_usr_app_task();
 

@@ -6,6 +6,93 @@
         <td>上游版本</td>
         <td>摘要</td>
     </tr>
+    <tr>
+        <td>
+            2022-11-25 15:00:00
+        </td>
+        <td>
+            v1.7
+        </td>
+        <td>
+            73bf2b87
+        </td>
+        <td>
+            1. 修复链接脚本问题（配置默认小端格式，修复 app 分区可能越界的问题） <br />
+            2. 增加亚马逊 aws 连接组件和 demo 工程 <br />
+            3. 修复上次解决复位后 PHY 异常问题引入的单 ble 模式不工作的问题，在 PHY 的初始化前后，开关 RF_TRX <br />
+            4. 修复低功耗起来后频点偏差的问题 <br />
+            5. AT 组件增加 dump 参数的调试接口 <br />
+            6. 增加 AP 模式下扫描的功能 <br />
+            7. 修复硬件过滤器多路配置的同步问题 <br />
+            8. WiFi 组件增加 MAC_STA_STARTUP、MAC_AP_STARTUP 状态 <br />
+            9. WiFi TX 功率补偿接口支持 b 模式 gn 模式单独补偿 <br />
+            10. 改善低温（-40~-10）下 EVM 指标 <br />
+            11. 增加腾讯云 qcloud 组件和 demo <br />
+            12. 修复 WiFi disconnect 的时候会锁定信道的问题 <br />
+            13. 修复 WiFi PA 误开关的问题 <br />
+            14. 更新低功耗策略，WiFi disconnect 之后默认不允许 CPU 休眠 <br />
+            15. 移除 cJSON 组件，版本太旧，且跟新版本 API 不兼容，顾移除。如果用户业务或者组件需要使用 cJSON，请添加到该业务代码或者组件里自行维护 <br />
+            16. 修复速率集相关代码重构引入的 STA 模式连接 11b only 路由器会失败的问题 <br />
+            17. 修复 STA 关联上路由器后 scan 操作可能的死机问题 <br />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2022-10-12 10:00:00
+        </td>
+        <td>
+            v1.6
+        </td>
+        <td>
+            c5088226
+        </td>
+        <td>
+            1. WIFI Lib 版本更新为 v1.0.9 <br />
+            2. SDK 版本更新为 v1.6 <br />
+             <br /><b>SDK changelog:</b> <br />
+            1. 优化light_sleep模式下功耗，修复该模式下OSTick补偿方式(24小时误差小于15S） <br />
+            2. 修复PWM Demo示例工程中不能配置引脚功能的问题 <br />
+            3. 增强AT命令(wifi scan)的健壮性 <br />
+            4. 更新<b>wifilib</b> <br />
+				4.1. 优化内存，增加用户可用内存(os_heap)33KB+ <br />
+				4.2. PLL校准只在温度变化跨度较大情况下进行，降低高温区由于温区边界宽度较小反复触发PLL校准的问题. <br />
+				4.3. 修复 WiFi scan 在扫描指定信道的时候可能使用内存脏数据的问题 <br />
+				4.4. 增加指定信道扫描功能（当 STA 处于连接状态，不允许指定信道扫描） <br />
+				4.5. RFDC校准增强健壮性 <br />
+				4.6. 优化配置，修复在某特定场景下的CCA判断错误的问题，增强抗干扰特性 <br />
+				4.7. SoftAP启动时增加随机ms延时 <br />
+				4.8. 优化PHY的配置时间，减小light_sleep模式下tbtt提前唤醒时间 <br />
+				4.9. 开启monitor模式时可以自动信道切换进行scan操作，保持smartcfg配网(usr_sniffer)模式下信道切换交给用户操作 <br />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2022-09-07 10:00:00
+        </td>
+        <td>
+            v1.5
+        </td>
+        <td>
+            1d029698
+        </td>
+        <td>
+            1. WIFI 版本更新为 v1.0.8 <br />
+            2. SDK 版本更新为 v1.5 <br />
+             <br /><b>SDK changelog:</b> <br />
+            1. 增加 GPIO 测试 Demo <br />
+            2. 修改 ramcode_dl 的复位接口<br />
+            3. 修改 pll 周期校准启动时机     <br />
+            4. 添加读取 Flash UID 接口 <br />
+            5. 修复 ap 模式下发送 send_null_frame_to_AP 函数的问题 <br />
+            6. 优化 lwip 配置 <br />
+            7. 增加设置 erp 类型和 rts threshold 的接口<br />
+            8. 修复 dhcpd 任务被多次创建同时运行的问题 <br />
+            9. AP 模式默认使用高功率表  <br />
+            10. 重新设计速率集配置，将 bg 速率集移动到 wifi_port.c/h 以供用户自行配置<br />
+            11. 修复 sniffer mem pool 被反复初始化的问题 <br />
+            13. 增加软件 duration 配置失能接口，默认使能软件配置功能，调用该接口后失能
+        </td>
+    </tr>
 <tr>
         <td>
             2022-07-15 10:50:00

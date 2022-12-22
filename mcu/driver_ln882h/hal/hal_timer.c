@@ -12,7 +12,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "hal/hal_timer.h"
 
-
+/* The TIMER3 will be used by WiFi Lib !!!*/
 void hal_tim_init(uint32_t tim_x_base,tim_init_t_def *tim_init)
 {
     /* check the parameters */
@@ -80,6 +80,33 @@ void hal_tim_deinit(void)
     sysc_cmp_timer4_gate_en_setf(0);
 }
 
+uint8_t hal_tim_get_div(uint32_t tim_x_base)
+{
+    /* check the parameters */
+    hal_assert(IS_TIMER_ALL_PERIPH(tim_x_base));
+
+    uint8_t div_val = 0;
+
+    switch (tim_x_base)
+    {
+        case TIMER0_BASE:
+            div_val = sysc_cmp_timer1_div_para_m1_getf();
+            break;
+        case TIMER1_BASE:
+            div_val = sysc_cmp_timer2_div_para_m1_getf();
+            break;
+        case TIMER2_BASE:
+            div_val = sysc_cmp_timer3_div_para_m1_getf();
+            break;
+        case TIMER3_BASE:
+            div_val = sysc_cmp_timer4_div_para_m1_getf();
+            break;
+        default:
+            break;
+    }
+    return div_val;
+}
+
 void hal_tim_en(uint32_t tim_x_base,hal_en_t en)
 {
     /* check the parameters */
@@ -115,6 +142,13 @@ void hal_tim_set_load_value(uint32_t tim_x_base,uint32_t value)
     timer_timerloadcountregister_setf(tim_x_base,value);
 }
 
+uint32_t hal_tim_get_load_value(uint32_t tim_x_base)
+{
+    /* check the parameters */
+    hal_assert(IS_TIMER_ALL_PERIPH(tim_x_base));
+    return timer_timerloadcountregister_getf(tim_x_base);
+}
+
 void hal_tim_set_load2_value(uint32_t tim_x_base,uint32_t value)
 {
     /* check the parameters */
@@ -122,6 +156,13 @@ void hal_tim_set_load2_value(uint32_t tim_x_base,uint32_t value)
     hal_assert(IS_TIM_LOAD_VALUE(value));
 
     timer_timerloadcount2register_setf(tim_x_base,value);
+}
+
+uint32_t hal_tim_get_load2_value(uint32_t tim_x_base)
+{
+    /* check the parameters */
+    hal_assert(IS_TIMER_ALL_PERIPH(tim_x_base));
+    return timer_timerloadcount2register_getf(tim_x_base);
 }
 
 uint32_t hal_tim_get_current_cnt_value(uint32_t tim_x_base)

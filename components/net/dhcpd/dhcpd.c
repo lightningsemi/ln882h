@@ -20,16 +20,23 @@ struct raw_msg {
     int                 socket_fd;
 };
 
+typedef enum {
+    DHCPD_TASK_NOT_CREATED = 0,
+    DHCPD_TASK_IS_CREATED,
+    DHCPD_TASK_IS_RUNNING,
+    DHCPD_TASK_SIGNAL_EXIT,
+} dhcpd_flag_e;
+
 typedef struct dhcpd_ctrl{
     OS_Thread_t                 dhcpd_thr;
     int                         dhcp_socket;
-    int                         flag;
+    volatile dhcpd_flag_e       flag;
     server_config_t             server_config;
     dhcpd_ip_item_t             ip_pool[DHCPD_IP_POOL_SIZE];
     struct raw_msg              msg;
 } dhcpd_ctrl_t;
 
-static dhcpd_ctrl_t g_dhcpd_ctrl = {0,};
+static dhcpd_ctrl_t g_dhcpd_ctrl = {0, -1, DHCPD_TASK_NOT_CREATED, };
 
 static void dhcpd_handle_msg(struct raw_msg *msg);
 static void dhcpd_close_socket(int *dhcp_socket);
@@ -68,7 +75,6 @@ static void dhcpd_task( void *pvParameters )
 
     if((dhcpd->dhcp_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {//216Byte
         DHCPD_ERR("Cannot open the socket!\r\n");
-        dhcpd_close_socket(&dhcpd->dhcp_socket);
         goto out;
     }
 
@@ -82,7 +88,6 @@ static void dhcpd_task( void *pvParameters )
 
     if(bind(dhcpd->dhcp_socket, (struct sockaddr*)&server_address, sizeof(server_address)) < 0) {
         DHCPD_ERR("Cannot bind the socket with the address!\r\n");
-        dhcpd_close_socket(&dhcpd->dhcp_socket);
         goto out;
     }
 	DHCPD_PRINTF("dhcpd_task start...\r\n");
@@ -95,7 +100,9 @@ static void dhcpd_task( void *pvParameters )
     msg->sockaddr_from.sin_addr.s_addr = htonl(INADDR_ANY);
     msg->socket_fd = dhcpd->dhcp_socket;
 
-    while(dhcpd->flag)
+    dhcpd->flag = DHCPD_TASK_IS_RUNNING;
+
+    while(dhcpd->flag == DHCPD_TASK_IS_RUNNING)
     {
         FD_ZERO(&read_set);
         FD_SET(dhcpd->dhcp_socket, &read_set);
@@ -156,6 +163,7 @@ out:
         dhcpd->msg.send_buff = NULL;
     }
 
+    dhcpd->flag = DHCPD_TASK_NOT_CREATED;
     OS_ThreadDelete(&(dhcpd->dhcpd_thr));
     OS_ThreadSetInvalid( &(dhcpd->dhcpd_thr) );
     return;
@@ -175,10 +183,10 @@ int dhcpd_start(void)
     dhcpd_ip_item_t *ip_item = NULL;
     uint8_t ip_addr1, ip_addr2, ip_addr3, ip_addr4;
 
-	if(dhcpd->flag == LN_TRUE){
-		return DHCPD_ERR_STATE;
-	}
-	dhcpd->flag = LN_TRUE;
+    if(dhcpd->flag != DHCPD_TASK_NOT_CREATED){
+        return DHCPD_ERR_STATE;
+    }
+    dhcpd->flag = DHCPD_TASK_IS_CREATED;
 
     if(0 == ip4_addr_get_u32(&(server_config->server)) || 0 == server_config->port || 0 == server_config->lease || 0 == server_config->renew) {
         DHCPD_ERR("server_config parameter error!\r\n");
@@ -211,6 +219,7 @@ int dhcpd_start(void)
 
     if (OS_OK != OS_ThreadCreate(&(dhcpd->dhcpd_thr), "dhcpd", dhcpd_task, (void *)dhcpd, OS_PRIORITY_BELOW_NORMAL, DHCPD_TASK_STACK_SIZE)) {
         DHCPD_ERR("[%s, %d]OS_ThreadCreate dhcpd->dhcpd_thr fail.\r\n", __func__, __LINE__);
+        dhcpd->flag = DHCPD_TASK_NOT_CREATED;
         return DHCPD_ERR_OS_SERVICE;
     }
 
@@ -221,11 +230,15 @@ int dhcpd_stop(void)
 {
     dhcpd_ctrl_t *dhcpd = dhcpd_get_handle();
 
-    if(dhcpd->flag == LN_TRUE)
+    if(dhcpd->flag == DHCPD_TASK_IS_RUNNING)
     {
-        dhcpd->flag = LN_FALSE;
+        /* notify dhcpd task exit */
+        dhcpd->flag = DHCPD_TASK_SIGNAL_EXIT;
+        do {
+            OS_MsDelay(10);
+        } while (dhcpd->flag != DHCPD_TASK_NOT_CREATED);
+
         // DHCPD_ERR("------  DHCP STOP  ------\r\n");
-        OS_MsDelay(60);
     }
     return DHCPD_ERR_NONE;
 }
@@ -233,7 +246,7 @@ int dhcpd_stop(void)
 int dhcpd_is_running(void)
 {
     dhcpd_ctrl_t *dhcpd = dhcpd_get_handle();
-    return dhcpd->flag;
+    return (dhcpd->flag == DHCPD_TASK_IS_RUNNING);
 }
 
 static void dhcpd_close_socket(int *dhcp_socket)
@@ -748,7 +761,7 @@ int do_decline(struct raw_msg *msg, uint16_t *send_pkt_len, uint16_t max_mtu) {
 int dhcpd_curr_config_set(server_config_t *server_config)
 {
     dhcpd_ctrl_t *dhcpd = dhcpd_get_handle();
-    if (dhcpd->flag == LN_TRUE) {
+    if (dhcpd->flag == DHCPD_TASK_IS_RUNNING) {
         return DHCPD_ERR_STATE;
     }
     memcpy(&(dhcpd->server_config), server_config, sizeof(server_config_t));

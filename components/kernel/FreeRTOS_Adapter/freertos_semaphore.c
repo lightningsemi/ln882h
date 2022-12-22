@@ -143,9 +143,8 @@ OS_Status OS_SemaphoreRelease(OS_Semaphore_t *sem)
 
 UBaseType_t OS_SemaphoreGetCount(OS_Semaphore_t *sem)
 {
-    
     OS_HANDLE_ASSERT(OS_SemaphoreIsValid(sem), sem->handle);
-    
+
     if (OS_IsISRContext()) {
 		return uxSemaphoreGetCountFromISR(sem->handle);
 	}else{

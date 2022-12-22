@@ -224,6 +224,9 @@ int     wifi_softap_deauth(uint8_t * mac_addr);
 int     wifi_softap_set_max_supp_sta_num(uint8_t num);
 int     wifi_softap_get_max_supp_sta_num(uint8_t *num);
 
+int     wifi_softap_scan(wifi_scan_cfg_t *cfg, void *buff, int items, void (*cb)(void *arg));
+void    wifi_softap_scan_results_get(ap_info_t **buff, int *items);
+
 int     wifi_sta_reg_callback(sta_cb_t *sta_cb);
 int     wifi_softap_reg_callback(ap_cb_t *ap_cb);
 
@@ -242,8 +245,24 @@ int     wifi_recv_ethernet_pkt_callback_reg(wifi_recv_ethernet_pkt_cb_t recv_cb)
 int     wifi_send_ethernet_pkt(uint8_t *data, int len, uint16_t retry_max, uint8_t retry_timeout);
 int     wifi_private_command(char *pvtcmd);
 
-void    wifi_rf_preprocess(void);
-void    wifi_rf_image_cal(void);
+void    wifi_disable_sw_duration_cfg(void);
+int     wifi_rts_threshold_set(int val);
+
+/**
+ * @param type
+ *      0: G_SELF_CTS_PROT
+ *      1: G_RTS_CTS_PROT
+*/
+int     wifi_erp_prot_set(uint8_t type);
+
+/**
+ * wifi_rf_calibration
+ * 
+ * Merge function wifi_rf_preprocess() and function wifi_rf_image_cal(),
+ * and finally close RF!
+ * RF will be turned on after mac phy initialization is complete.
+*/
+void    wifi_rf_calibration(void);
 void    wifi_temp_cal_init(uint16_t adc_ch0_val,int8_t cap_comp);
 void    wifi_do_temp_cal_period(uint16_t adc_ch0_val);
 

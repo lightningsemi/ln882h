@@ -14,7 +14,7 @@
 #include "ramcode_port.h"
 #include "serial/serial.h"
 #include "hal/hal_flash.h"
-
+#include "hal/hal_misc.h"
 /*****************************************  variables *********************************************/
 
 static Serial_t bootram_fd;
@@ -75,7 +75,7 @@ int bootram_flash_chiperase(void)
 
 void bootram_user_reboot(void)
 {
-    NVIC_SystemReset();
+    hal_misc_reset_all();
 }
 
 void bootram_serial_init(void)

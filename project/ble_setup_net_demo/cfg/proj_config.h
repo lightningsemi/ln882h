@@ -7,6 +7,7 @@
 #define USE_IR_DEVICE                           DISABLE
 
 #define __CONFIG_OS_KERNEL
+#define __CFG_OS_TICKLESS_EN                    (0) //(LN882H)ble project not support,set 0
 
 /*
  * Clock settings section

@@ -396,6 +396,14 @@ void hal_adv_tim_set_cap_edge(uint32_t adv_tim_x_base,adv_tim_cap_edg_t adv_tim_
     }
 }
 
+uint8_t hal_adv_tim_get_clock_div(uint32_t adv_tim_x_base)
+{
+    /* check the parameters */
+    hal_assert(IS_ADV_TIMER_ALL_PERIPH(adv_tim_x_base));
+    return pwm_div_getf(adv_tim_x_base);
+}
+
+
 uint8_t hal_adv_tim_get_cap_dege(uint32_t adv_tim_x_base)
 {
     uint8_t reg_data = 0;

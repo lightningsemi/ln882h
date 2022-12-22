@@ -106,7 +106,11 @@
 #define configUSE_APPLICATION_TASK_TAG	0
 #define configUSE_COUNTING_SEMAPHORES	1
 #define configGENERATE_RUN_TIME_STATS	( TASK_RUN_MONITOR )
-#define configUSE_TICKLESS_IDLE         1//1
+#if (defined(__CFG_OS_TICKLESS_EN) && (__CFG_OS_TICKLESS_EN == 0))
+  #define configUSE_TICKLESS_IDLE         0//1
+#else
+  #define configUSE_TICKLESS_IDLE         1//1
+#endif
 #define configUSE_STATS_FORMATTING_FUNCTIONS ( TASK_RUN_MONITOR )
 #define configUSE_CPU_USAGE             0
 
@@ -129,7 +133,7 @@
     #define portGET_OS_TICK_COMPENSATE_VAL(x)    ln_get_os_tick_comp_val(x)
 #endif
 
-#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP                   3//(3)
+#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP                   10//(3)
 
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES 		0

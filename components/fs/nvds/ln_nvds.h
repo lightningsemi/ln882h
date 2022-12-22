@@ -57,8 +57,14 @@
 #define NV9_ATE_RESULT_OK              ('S')
 #define NV9_ATE_RESULT_FAILED          ('F')
 
+#define NV10_TX_POWER_COMP_B_OFFST     (NV9_ATE_RESULT_OFFSET + NV9_ATE_RESULT_LEN)
+#define NV10_TX_POWER_COMP_B_LEN       (1)
+
+#define NV11_TX_POWER_COMP_GN_OFFST    (NV10_TX_POWER_COMP_B_OFFST + NV10_TX_POWER_COMP_B_LEN)
+#define NV11_TX_POWER_COMP_GN_LEN      (1)
+
 //If vendor add new macro into the nvds,please update it!
-#if ((NV9_ATE_RESULT_OFFSET + NV9_ATE_RESULT_LEN) > SIZE_4KB)
+#if ((NV11_TX_POWER_COMP_GN_OFFST + NV11_TX_POWER_COMP_GN_LEN) > SIZE_4KB)
   #error "NVDS area overflow!!!"
 #endif
 
@@ -104,6 +110,12 @@ int    ln_nvds_get_boot_delay_en(uint8_t *val);
 
 int    ln_nvds_set_ate_result(uint8_t  val);
 int    ln_nvds_get_ate_result(uint8_t *val);
+
+int    ln_nvds_set_tx_power_b_comp(uint8_t  val);
+int    ln_nvds_get_tx_power_b_comp(uint8_t *val);
+
+int    ln_nvds_set_tx_power_gn_comp(uint8_t  val);
+int    ln_nvds_get_tx_power_gn_comp(uint8_t *val);
 
 #ifdef __cplusplus
 }

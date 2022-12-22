@@ -472,8 +472,38 @@ uint16_t hal_flash_read_status(void)
 }
 
 /**
+ * @brief Read FLASH Unique ID 128bits.
+ */
+void hal_flash_read_unique_id(uint8_t *unique_id)
+{
+    uint8_t cmd_buf[5];
+    uint8_t read_back[16]; 
+    uint16_t value = 0;
+
+    cmd_buf[0] = FLASH_READ_UNIQUE_ID;
+    cmd_buf[1] = 0;//dumy data
+    cmd_buf[2] = 0;//dumy data
+    cmd_buf[3] = 0;//dumy data
+    cmd_buf[4] = 0;//dumy data
+
+#if (FLASH_XIP == 1)
+    GLOBAL_INT_DISABLE();
+    flash_cache_disable();
+#endif
+
+    hal_qspi_standard_read_byte(read_back, sizeof(read_back), cmd_buf, sizeof(cmd_buf));
+
+#if (FLASH_XIP == 1)
+    flash_cache_init(0);
+    GLOBAL_INT_RESTORE();
+#endif
+
+    memcpy(unique_id,read_back,sizeof(read_back));
+}
+
+
+/**
  * @brief Send command Program/Erase Suspend
- * @return uint16_t
  */
 void hal_flash_program_erase_suspend(void)
 {
@@ -493,7 +523,6 @@ void hal_flash_program_erase_suspend(void)
 
 /**
  * @brief Send command Program/Erase Resume
- * @return uint16_t
  */
 void hal_flash_program_erase_resume(void)
 {

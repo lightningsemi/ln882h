@@ -49,6 +49,23 @@ void wlib_hwtimer_init(void * timer_cb, uint32_t period_us)
     hal_tim_init(TIMER3_BASE,&tim_init);
 }
 
+void wlib_hwtimer_init_v2(void * timer_cb)
+{
+    tim_init_t_def tim_init;
+    memset(&tim_init, 0, sizeof(tim_init));
+
+    tim_init.tim_load_value = 0;              
+    tim_init.tim_mode = TIM_USER_DEF_CNT_MODE;
+    tim_init.tim_div = (uint32_t)(hal_clock_get_apb0_clk() / 1000000) - 1;                             
+    hal_tim_init(TIMER3_BASE, &tim_init);                
+
+    hw_timer_cb = ( void (*)(void) )timer_cb;
+
+    NVIC_SetPriority(TIMER3_IRQn, 4);
+    NVIC_EnableIRQ(TIMER3_IRQn);
+    hal_tim_it_cfg(TIMER3_BASE, TIM_IT_FLAG_ACTIVE, HAL_ENABLE);      
+}
+
 void wlib_hwtimer_start(void)
 {
     NVIC_EnableIRQ(TIMER3_IRQn);
@@ -211,23 +228,44 @@ void wlib_aes_decrypt(void *ctx, const uint8_t *ctext, uint8_t *ptext)
 }
 
 /* tx power external compensation */
-void wlib_get_tx_power_ext_comp_val(int8_t *val)
+void wlib_get_tx_power_ext_comp_val(int8_t *bgn_pwr, int8_t *b_pwr, int8_t *gn_pwr)
 {
-    uint8_t rd_val = 0;
-    if (!val) {
+    uint8_t rd_val1 = 0, rd_val2 = 0, rd_val3 = 0;
+    if (!bgn_pwr || !b_pwr || !gn_pwr) {
         return;
     }
 
-    if (NVDS_ERR_OK != ln_nvds_get_tx_power_comp(&rd_val)) {
+    if (NVDS_ERR_OK != ln_nvds_get_ate_result(&rd_val1)) {
+        return;
+    } else {
+        if (rd_val1 != NV9_ATE_RESULT_OK) {
+           return; 
+        }
+    }
+
+    if (NVDS_ERR_OK != ln_nvds_get_tx_power_comp(&rd_val1)) {
+        return;
+    }
+    if (NVDS_ERR_OK != ln_nvds_get_tx_power_b_comp(&rd_val2)) {
+        return;
+    }
+    if (NVDS_ERR_OK != ln_nvds_get_tx_power_gn_comp(&rd_val3)) {
         return;
     }
 
-    if (rd_val == 0xFF) {
-        *val = 0;
-        return;
+    if (rd_val1 == 0xFF) {
+        rd_val1 = 0;
+    }
+    if (rd_val2 == 0xFF) {
+        rd_val2 = 0;
+    }
+    if (rd_val3 == 0xFF) {
+        rd_val3 = 0;
     }
 
-    *val = (int8_t)rd_val;
+    *bgn_pwr = (int8_t)rd_val1;
+    *b_pwr   = (int8_t)rd_val2;
+    *gn_pwr  = (int8_t)rd_val3;
 }
 
 /* heap memory manager */
@@ -295,9 +333,15 @@ void wlib_assert(int expr, const char *fun, int line)
 #define SNIFFER_MEM_POOL_CHUNK_BUF_SIZE    (30)
 #define SNIFFER_MEM_POOL_CHUNK_SIZE        (MEM_POOL_CHUNK_INFO_SIZE + SNIFFER_MEM_POOL_CHUNK_BUF_SIZE)
 static ln_mem_pool_t sniffer_mem_pool = {0};
+static uint8_t s_wlib_snp_inited = 0;
 
 int wlib_sniffer_mem_pool_init(void)
 {
+    if (s_wlib_snp_inited != 0) {
+        return LN_TRUE;
+    }
+    s_wlib_snp_inited = 1;
+
 #if (defined(SNIFFER_MEM_POOL_USE_DYNAMIC_MEM) && SNIFFER_MEM_POOL_USE_DYNAMIC_MEM)
     sniffer_mem_pool.mem_base       = (uint8_t  *)OS_Malloc(SNIFFER_MEM_POOL_CHUNK_CNT * SNIFFER_MEM_POOL_CHUNK_SIZE);
     sniffer_mem_pool.free_chunk_ptr = (uint8_t **)OS_Malloc(SNIFFER_MEM_POOL_CHUNK_CNT * sizeof(void *));
@@ -321,6 +365,11 @@ int wlib_sniffer_mem_pool_init(void)
 
 void wlib_sniffer_mem_pool_deinit(void)
 {
+    if (s_wlib_snp_inited == 0) {
+        return;
+    }
+    s_wlib_snp_inited = 0;
+
 #if (defined(SNIFFER_MEM_POOL_USE_DYNAMIC_MEM) && SNIFFER_MEM_POOL_USE_DYNAMIC_MEM)
     OS_Free(sniffer_mem_pool.mem_base);
     OS_Free(sniffer_mem_pool.free_chunk_ptr);
@@ -594,5 +643,17 @@ void wlib_os_delay_ms(uint32_t ms)
     OS_MsDelay(ms);
 }
 
+static const wlib_wifi_data_rate_t g_wlib_wifi_dr = {
+    .dr_11b = USER_CFG_DR_11B,
+    .dr_11g = USER_CFG_DR_11G,
+    .dr_11n = {10, 11, 12, 13, 14, 15, 16, 17}, /* offset is 10, not currently in use */
+    .dr_11b_only_basic_rate = USER_CFG_DR_11B_ONLY_BR,
+    .dr_11g_only_basic_rate = USER_CFG_DR_11G_ONLY_BR,
+    .dr_11bg_mixed1_basic_rate = USER_CFG_DR_11BG_MIXED1_BR,
+    .dr_11bg_mixed2_basic_rate = USER_CFG_DR_11BG_MIXED2_BR,
+};
 
-
+const wlib_wifi_data_rate_t *wlib_data_rate_info_get(void)
+{
+    return (const wlib_wifi_data_rate_t *)(&g_wlib_wifi_dr);
+}
