@@ -107,6 +107,7 @@ void     hal_flash_init(void);
 void     hal_flash_deinit(void);
 uint8_t  hal_flash_read_by_cache(uint32_t offset, uint32_t length, uint8_t *buffer);
 uint8_t  hal_flash_read(uint32_t offset, uint32_t length, uint8_t *buffer);
+uint8_t  hal_flash_quad_read(uint32_t offset, uint32_t length, uint8_t *buffer);
 uint8_t  hal_flash_program(uint32_t offset, uint32_t length, uint8_t *buffer);
 void     hal_flash_erase(uint32_t offset, uint32_t length);//@param: offset,length(Note:4K Aligned)
 void     hal_flash_chip_erase(void);

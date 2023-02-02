@@ -114,6 +114,27 @@ uint8_t hal_flash_read(uint32_t offset, uint32_t length, uint8_t *buffer)
     return 0;
 }
 
+//@param: offset,length(Note:4bytes Aligned)
+uint8_t hal_flash_quad_read(uint32_t offset, uint32_t length, uint8_t *buffer)
+{
+    uint32_t length_in_words = (length) / sizeof(uint32_t);
+    hal_assert( (offset+length) <= FALSH_SIZE_MAX );
+#if (FLASH_XIP == 1)
+    GLOBAL_INT_DISABLE();
+    flash_cache_disable();
+#endif
+    if(length_in_words > 0){
+        hal_qspi_quad_read_word((uint32_t *)buffer, length_in_words, FLASH_QUAD_FAST_READ, offset);
+        buffer += sizeof(uint32_t)*length_in_words;
+        offset += sizeof(uint32_t)*length_in_words;
+    }
+#if (FLASH_XIP == 1)
+    flash_cache_init(0);
+    GLOBAL_INT_RESTORE();
+#endif
+    return 0;
+}
+
 uint8_t hal_flash_read_by_cache(uint32_t offset, uint32_t length, uint8_t *buffer)
 {
     uint32_t addr = 0;
@@ -478,7 +499,6 @@ void hal_flash_read_unique_id(uint8_t *unique_id)
 {
     uint8_t cmd_buf[5];
     uint8_t read_back[16]; 
-    uint16_t value = 0;
 
     cmd_buf[0] = FLASH_READ_UNIQUE_ID;
     cmd_buf[1] = 0;//dumy data

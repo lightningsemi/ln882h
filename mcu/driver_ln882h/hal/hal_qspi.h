@@ -100,6 +100,7 @@ void  hal_qspi_deinit(void);
 void  hal_qspi_standard_write(uint8_t *bufptr, uint32_t length);
 void  hal_qspi_standard_read_byte(uint8_t *rd_ptr, uint32_t rd_len, uint8_t *wr_ptr, uint8_t wr_len);
 void  hal_qspi_standard_read_word(uint32_t *rd_ptr, uint32_t rd_len_in_word, uint8_t instruction, uint32_t addr);
+void  hal_qspi_quad_read_word(uint32_t *rd_ptr, uint32_t rd_len_in_word, uint8_t instruction, uint32_t addr);
 
 
 #ifdef __cplusplus

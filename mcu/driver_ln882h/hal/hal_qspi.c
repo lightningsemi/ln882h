@@ -106,6 +106,36 @@ void hal_qspi_standard_read_word(uint32_t *rd_ptr, uint32_t rd_len_in_word, uint
     qspi_sckdv_setf(4);
 }
 
+
+void hal_qspi_quad_read_word(uint32_t *rd_ptr, uint32_t rd_len_in_word, uint8_t instruction, uint32_t addr)
+{
+    uint32_t i = 0, rd_tmp = 0;
+    uint8_t * pdata = (uint8_t *)rd_ptr;
+    qspi_rsd_setf(1);//QSPI_RxSampleDlySet(1);
+    qspi_sckdv_setf(16);
+    qspi_ser_setf(0);//LL_QSPI_SlaveSelect(0);
+    qspi_ctrlr0_pack(QSPI_QUAD, DFS_32_32_BITS, 0, 0, 0, QSPI_RX_ONLY, CLK_INACTIVE_LOW, CLK_TOGGLE_IN_MIDDLE, QSPI_MOTOROLA);
+    qspi_spi_ctrlr0_pack( 8, 2, 6, 0 );
+    qspi_ctrlr1_pack( rd_len_in_word - 1);
+    qspi_ssi_en_setf( QSPI_ENABLE );
+    qspi_dr_set(instruction);
+    qspi_dr_set(addr);
+    qspi_ser_setf( QSPI_SLAVE_INDEX );//LL_QSPI_SlaveSelect
+    while( !qspi_tfe_getf() ){};
+    for(i = 0; i < rd_len_in_word; i++)
+    {
+        while( !qspi_rfne_getf()){};
+        rd_tmp = qspi_dr_get();
+        *pdata++ = (uint8_t)(rd_tmp >> 24);
+        *pdata++ = (uint8_t)(rd_tmp >> 16);
+        *pdata++ = (uint8_t)(rd_tmp >> 8);
+        *pdata++ = (uint8_t)(rd_tmp);
+    }
+    while( qspi_busy_getf() == QSPI_BUSY ){};
+    qspi_ssi_en_setf(QSPI_DISABLE);
+    qspi_sckdv_setf(4);
+}
+
 void hal_qspi_standard_write(uint8_t *bufptr, uint32_t length)
 {
     qspi_sckdv_setf(16); //QSPI SCK DIV
