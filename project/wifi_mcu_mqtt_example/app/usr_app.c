@@ -120,7 +120,8 @@ void wifi_init_sta(void)
     netdev_set_active(NETIF_IDX_STA);
 
     //3. wifi start
-    wifi_manager_reg_event_callback(WIFI_MGR_EVENT_STA_SCAN_COMPLETE, &wifi_scan_complete_cb);
+    //wifi_manager_reg_event_callback(WIFI_MGR_EVENT_STA_SCAN_COMPLETE, &wifi_scan_complete_cb);
+	netdev_get_ip_cb_set(netdev_get_ip_changed_flag_cb);
 
     if(WIFI_ERR_NONE != wifi_sta_start(mac_addr, ps_mode)){
         LOG(LOG_LVL_ERROR, "[%s]wifi sta start filed!!!\r\n", __func__);
@@ -184,7 +185,6 @@ void wifi_init_ap(void)
         LOG(LOG_LVL_ERROR, "[%s, %d]wifi_start() fail.\r\n", __func__, __LINE__);
     }
 }
-
 
 void usr_app_task_entry(void *params)
 {

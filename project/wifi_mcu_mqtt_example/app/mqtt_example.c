@@ -32,23 +32,25 @@
 #include "mqtt_example.h"
 #include "usr_ctrl.h"
 
+#include "stdbool.h"
+#include "lwip/dns.h"
+
 /*
- * 1. This mqtt demo use tencent iot server, please refer this url to set your own mqtt model
- *    (https://console.cloud.tencent.com/);
- * 2. You can use mqtt.fx to verify your mqtt model firstly. 
- *    (https://cloud.tencent.com/document/product/634/14630)
- * 3. Please refer to this url(https://cloud.tencent.com/document/product/634/32546) to get the 
- *    username & password, and note that these data have to be updated; 
+* 1. This mqtt demo use "broker-cn.emqx.io:1883", please refer (https://www.emqx.com/zh).
+ * 2. You can use mqtt.fx to verify your code. 
  */
 
+#define MQTT_SERVER					"broker-cn.emqx.io"
+#ifndef MQTT_SERVER
 #define MQTT_SERVER_IP				"192.168.0.101"
-#define MQTT_SERVER_PORT			7788
+#endif
+#define MQTT_SERVER_PORT			1883
 
 #define MQTT_CLIENT_ID		"admin"
 #define MQTT_CLIENT_USR		"admin"
 #define MQTT_CLIENT_PAS		"admin"
 
-#define MQTT_TOPIC_TEST		"$thing/down/property/CN9ON49O9Y/ln_light_01"
+#define MQTT_TOPIC_TEST		"sensor"
 
 #if LWIP_TCP
 
@@ -141,7 +143,27 @@ mqtt_example_init(void)
 {
 #if LWIP_TCP
 	ip4_addr_t cp = {0};
+#ifndef MQTT_SERVER
 	inet_aton(MQTT_SERVER_IP, &cp);
+#else
+	Log_i("MQTT Server: %s", MQTT_SERVER);
+	bool bRes = false;
+    for (size_t i = 0; i < 5; i++)
+    {
+        if (dns_gethostbyname(MQTT_SERVER, &(cp), NULL, NULL) == ERR_OK)
+        {
+            bRes = true;
+            break;
+        }
+        OS_MsDelay(500);
+    }
+	
+	if (!bRes)
+	{
+		Log_e("dns parse fail!!");
+		while(1);
+	}
+#endif
 	Log_i("cp:%d", cp.addr);
 	
   mqtt_client = mqtt_client_new();

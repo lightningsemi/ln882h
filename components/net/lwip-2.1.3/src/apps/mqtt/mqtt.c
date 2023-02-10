@@ -65,7 +65,7 @@
  * MQTT_DEBUG: Default is off.
  */
 #if !defined MQTT_DEBUG || defined __DOXYGEN__
-#define MQTT_DEBUG                  LWIP_DBG_OFF
+#define MQTT_DEBUG                  LWIP_DBG_ON
 #endif
 
 #define MQTT_DEBUG_TRACE        (MQTT_DEBUG | LWIP_DBG_TRACE)
