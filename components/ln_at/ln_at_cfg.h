@@ -16,8 +16,8 @@
 #define LN_AT_USING_SERVER      (1)
 #define LN_AT_ENABLE_ECHO       (1) /* enable */
 
-#define LN_AT_MAX_LINE_SIZE     (512)
-#define LN_AT_PRINTF_BUF_SIZE   (256)
+#define LN_AT_MAX_LINE_SIZE     (2048)
+#define LN_AT_PRINTF_BUF_SIZE   (2048)
 
 #ifndef LN_AT_TRANSFER_TASK_STACK_SIZE
 #define LN_AT_TRANSFER_TASK_STACK_SIZE   (2*1024)

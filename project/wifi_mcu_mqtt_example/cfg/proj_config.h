@@ -60,8 +60,8 @@
  */
 #define CFG_UART0_TX_BUF_SIZE      256
 #define CFG_UART0_RX_BUF_SIZE      256
-#define CFG_UART1_TX_BUF_SIZE      128
-#define CFG_UART1_RX_BUF_SIZE      256
+#define CFG_UART1_TX_BUF_SIZE      2048
+#define CFG_UART1_RX_BUF_SIZE      2048
 #define CFG_UART2_TX_BUF_SIZE      128
 #define CFG_UART2_RX_BUF_SIZE      256
 
