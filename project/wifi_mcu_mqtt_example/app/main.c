@@ -62,6 +62,16 @@ int main (int argc, char* argv[])
 
     //Init lwip stack.
     lwip_tcpip_init();
+		
+    {
+        uint8_t mac[6] ={0};
+        ln_generate_random_mac(mac);
+        mac[5] |= 0xC0; // This address is random generated, so assign 0x11 => Static Random Address
+
+        extern void rw_init(uint8_t mac[6]);
+        rw_init(mac);
+    }
+		
 
     //Creat usr app task.
     creat_usr_app_task();
