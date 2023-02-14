@@ -250,43 +250,18 @@ void usr_app_task_entry(void *params)
     uint32_t buf_len = 0;
     memset(buf,0,sizeof(buf));
     
-    //根据KV的值判断是否需要配网
-    if(ln_kv_get("net_config_flag",buf,50,&buf_len) == KV_ERR_NONE){
-        //需要配网则开启蓝牙，等待小程序发送WIFI名称和密码
-        if(strcmp((const char*)buf,"true") == 0){
-            if(OS_OK != OS_ThreadCreate(&ble_g_usr_app_thread, "BleUsrAPP", ble_app_task_entry, NULL, OS_PRIORITY_BELOW_NORMAL, BLE_USR_APP_TASK_STACK_SIZE)) 
-            {
-                LN_ASSERT(1);
-            }
-            ln_kv_set("net_config_flag","false",sizeof("false"));
+		if(OS_OK != OS_ThreadCreate(&ble_g_usr_app_thread, "BleUsrAPP", ble_app_task_entry, NULL, OS_PRIORITY_BELOW_NORMAL, BLE_USR_APP_TASK_STACK_SIZE)) 
+		{
+				LN_ASSERT(1);
+		}
+
             
-            while(net_config_state != NET_CONFIG_GET_PWD)OS_MsDelay(100);
-            app_mode = NET_CONFIG_MODE;
-        }
-    }else{  
-        app_mode = NORMAL_MODE;
-    }
-   
-    //读取KV是否保存了WIFI名称和密码
-    //lvgl_set_next_state_machine(wifi_sta_init);
-    if(ln_kv_has_key("wifi_ssid") == LN_FALSE){
-        LOG(LOG_LVL_INFO, "There is no ssid in the flash.\r\n");
-        app_mode = ERROR_MODE;
-    }else{
-        uint32_t len = 0;
-        memset(wifi_ssid,0,sizeof(wifi_ssid));
-        ln_kv_get("wifi_ssid",wifi_ssid,sizeof(wifi_ssid),&len);
-        connect.ssid = wifi_ssid;
-        
-        if(ln_kv_has_key("wifi_pwd") == LN_TRUE){
-            memset(wifi_password,0,sizeof(wifi_password));
-            ln_kv_get("wifi_pwd",wifi_password,sizeof(wifi_password),&len);
-            connect.pwd = wifi_password;
-        }
-    }
+		while(net_config_state != NET_CONFIG_GET_PWD)OS_MsDelay(100);
+		app_mode = NET_CONFIG_MODE;
+
 
     OS_MsDelay(10);
-    hal_gpio_pin_pull_set(WEB_DISTRIBUTION_NET_KEY_PORT,WEB_DISTRIBUTION_NET_KEY_PIN,GPIO_PULL_UP);
+    //hal_gpio_pin_pull_set(WEB_DISTRIBUTION_NET_KEY_PORT,WEB_DISTRIBUTION_NET_KEY_PIN,GPIO_PULL_UP);
     
     //根据app_mode判断是否需要打开WIFI
     if(app_mode == NET_CONFIG_MODE || app_mode == NORMAL_MODE){
@@ -299,21 +274,6 @@ void usr_app_task_entry(void *params)
     
     while(1)
     {
-        //判断配网按键是否按下
-        if(hal_gpio_pin_read(WEB_DISTRIBUTION_NET_KEY_PORT,WEB_DISTRIBUTION_NET_KEY_PIN) == HAL_RESET){
-            uint8_t press_cnt = 0;
-            while(hal_gpio_pin_read(WEB_DISTRIBUTION_NET_KEY_PORT,WEB_DISTRIBUTION_NET_KEY_PIN) == HAL_RESET){
-                press_cnt++;
-                OS_MsDelay(10);
-            }
-            if(press_cnt > 5){
-                ln_kv_set("net_config_flag","true",sizeof("true"));
-                OS_MsDelay(10);
-                hal_misc_reset_all();
-            }           
-            
-        }
-
         //判断WIFI连接是否超时
         if(wifi_sta_connect_flag == 0){
             timeout_cnt++;
