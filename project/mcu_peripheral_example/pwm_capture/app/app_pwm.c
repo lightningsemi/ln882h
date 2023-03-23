@@ -21,7 +21,6 @@ void app_pwm(void)
 	//默认频率1000,范围为1~38KHz,
 	//默认占空比20,范围为1~100,
 	pwm_init(1000,20,PWM_CHA_1,GPIO_B,GPIO_PIN_5);
-	
 	pwm_start(PWM_CHA_1);
 	LOG(LOG_LVL_INFO, "pwm start!please connect GPIOB 5 to GPIOA 9!\r\n");
 	while(pulse_cap_get_result() != PULSE_CAP_SUCESS);

@@ -29,7 +29,7 @@ int main (int argc, char* argv[])
     LOG(LOG_LVL_INFO,"ln882H init! \n");
     ln_show_reg_init();
 
-		app_pwm();
+	app_pwm();
 	
     while(1)
     {
