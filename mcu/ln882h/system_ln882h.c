@@ -101,8 +101,8 @@ void SetSysClock(void)
     hal_misc_awo_set_r_xtal40m_cap_bit(0);    // xtal40m Cap (pf)
     hal_misc_awo_set_r_xtal40m_ibsel(0);      //1
     hal_misc_awo_set_ldo18_4_vset(7);
-    hal_misc_awo_set_ldo18_2_vset(6);         // tx_rx_filter LDO18_2 vol set
-    hal_misc_awo_set_ldo15_1_vset(6);         //(6: optimize pll @vtrim=1) Fix OFDM package losses
+    hal_misc_awo_set_ldo18_2_vset(7);         // tx_rx_filter LDO18_2 vol set
+    hal_misc_awo_set_ldo15_1_vset(7);         //(7: optimize pll @vtrim=1) Fix OFDM package losses
 
     hal_misc_awo_set_o_cpu_sleep_counter_bp(0); //32K RCO cal
     hal_misc_awo_set_bod_vth(0x03);             //0x03=2.2V BOD, fix reboot problem

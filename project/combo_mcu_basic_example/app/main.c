@@ -16,6 +16,10 @@
 #include "ln_at.h"
 #include "flash_partition_table.h"
 
+#include "ln_ble_app_kv.h"
+#include "usr_app.h"
+#include "ln_ble_app_default_cfg.h"
+
 
 int main (int argc, char* argv[])
 {
@@ -34,15 +38,18 @@ int main (int argc, char* argv[])
     //2. register os heap mem
     OS_DefineHeapRegions();
 
+    //3.init log&AT
     log_init();
     if (LN_AT_ERR_NONE != ln_at_init()) {
         LOG(LOG_LVL_ERROR, "ln at init fail.\r\n");
         return -1;
     }
 
+    //4.cm backtrace
     cm_backtrace_init("combo_mcu_basic_example", "hw", "sw");
     LOG(LOG_LVL_INFO, "------  combo_mcu_basic_example  ------\r\n");
 
+    //5. init NVDS&KV
     if (NVDS_ERR_OK != ln_nvds_init(NVDS_SPACE_OFFSET)) {
         LOG(LOG_LVL_ERROR, "NVDS init filed!\r\n");
     }
@@ -51,29 +58,20 @@ int main (int argc, char* argv[])
         LOG(LOG_LVL_ERROR, "KV init filed!\r\n");
     }
 
-    //init system parameter
+    //6.init system parameter
     sysparam_integrity_check_all();
 
-    //3.rf preprocess,img cal
+    //7.rf preprocess,img cal
     wifi_rf_calibration();
 
-    //Init wifi stack.
+    //8.Init wifi stack.
     wifi_init();
     wlib_pvtcmd_output_cb_set(ln_at_vprintf);
 
-    //Init lwip stack.
+    //9.Init lwip stack.
     lwip_tcpip_init();
 
-    {
-        uint8_t mac[6] ={0};
-        ln_generate_random_mac(mac);
-        mac[5] |= 0xC0; // This address is random generated, so assign 0x11 => Static Random Address
-
-        extern void rw_init(uint8_t mac[6]);
-        rw_init(mac);
-    }
-
-    //Creat usr app task.
+    //10.Creat usr app task.
     creat_usr_app_task();
 
     OS_ThreadStartScheduler();

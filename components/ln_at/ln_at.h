@@ -227,7 +227,6 @@ void    ln_at_echo_enable(uint8_t en);
 void    ln_at_printf(const char *format, ...);
 size_t  ln_at_vprintf(const char *format, va_list args);
 void    ln_at_hex_print(uint8_t *buf, size_t size, const char *format, ...);
-int     ln_at_cmd_args_get(const char *args_string, const char *expr, ...);
 void    ln_at_preparser(char ch);
 void    ln_at_server_recv_len_get(ln_at_c2s_data_t *data);
 void    ln_at_curr_link_info_update(int link_id, send_notify_cb_t fnp_notify_cb, ln_at_curr_mode_t mode, uint32_t need_data_len);

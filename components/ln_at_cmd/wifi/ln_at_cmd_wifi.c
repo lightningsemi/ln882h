@@ -12,6 +12,7 @@
 #include "utils/ln_psk_calc.h"
 #include "utils/system_parameter.h"
 #include "utils/ln_list.h"
+#include "utils/ln_misc.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -69,6 +70,77 @@ static ln_at_store_mode_e g_at_store_mode = LN_AT_STORE_M_W_F;
 
 //static void ln_at_cache_wifi_mode_set(wifi_mode_t mode);
 static ln_at_err_t ln_at_set_wifi_mode_def(uint8_t para_num, const char *name);
+
+static int str_del_space_check_hex(char *s1)
+{
+    char *s2;
+    s2 = s1;
+    while (*s1) {
+        if (*s1 == ' ') {
+            s1++;
+        } else if(!isxdigit(*s1) && (*s1 != ':')) {
+            return -1;
+        }else {
+            *s2 = *s1;
+            s1++;
+            s2++;
+        }
+    }
+    *s2 = '\0';
+    
+    return 0;
+}
+
+static int strmac2mac(char * str, uint8_t *mac)//"00:50:66:77:88:99"
+{
+    int16_t len = 0;
+    char * pos_start = str;
+    char value_ch[3];
+    uint8_t bt_mac_str[6] = {0,};
+    const char *hex_str = "0123456789abcdefABCDEF";
+    
+    if (pos_start == NULL) {
+        return -1;
+    }
+    
+    if (0 != str_del_space_check_hex(pos_start)) {
+        return -1;
+    }
+    
+    for (uint32_t idx = 0; idx < 6; idx++)
+    {
+        if(pos_start > 0) 
+        {
+            if (*pos_start == ':') {
+                return -1;
+            }
+            pos_start = strpbrk(pos_start, hex_str);
+            len = strspn(pos_start, hex_str);
+
+            memset(value_ch, '\0', sizeof(value_ch));
+            if (len == 1){
+                memcpy(value_ch, pos_start, len);
+                bt_mac_str[idx] = ln_char2hex(value_ch[0]);
+            } else if (len == 2) {
+                memcpy(value_ch, pos_start, len);
+                bt_mac_str[idx] =  ln_char2hex(value_ch[0]) << 4;
+                bt_mac_str[idx] += ln_char2hex(value_ch[1]);
+            } else {
+                return -1;
+            }
+
+            pos_start = strchr(pos_start,':'); //find next
+            pos_start += sizeof(char);
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    
+    memcpy(mac, bt_mac_str, 6);
+    return 0;
+}
 
 // private command
 // char ln_at_set_pvtcmd(char *str)
@@ -846,13 +918,12 @@ static ln_at_err_t ln_at_set_scan_opt(uint8_t para_num, const char *name)
     LOG(LOG_LVL_ERROR, "ssid:%s; bssid:%s; chl:%d; scan type:%d, mini time:%d, max time:%d\r\n",
         ssid_p, bssid_p, channel, scan_type, scan_time_min, scan_time_max);
 
-    ret = ln_at_cmd_args_get(bssid_p, "%x:%x:%x:%x:%x:%x",
-            &bssid_hex[0], &bssid_hex[1], &bssid_hex[2], &bssid_hex[3], &bssid_hex[4], &bssid_hex[5]);
+    ret = strmac2mac(bssid_p, bssid_hex);
 
-    LOG(LOG_LVL_ERROR, "ret:%d; mac addr:%02x:%02x:%02x:%02x:%02x:%02x\r\n", ret,
+    LOG(LOG_LVL_ERROR, "ret:%d; mac addr:%02X:%02X:%02X:%02X:%02X:%02X\r\n", ret,
             bssid_hex[0], bssid_hex[1], bssid_hex[2], bssid_hex[3], bssid_hex[4], bssid_hex[5]);
 
-    if (ret != 6)
+    if (ret != 0)
     {
         goto __exit;
     }
@@ -1458,13 +1529,12 @@ static ln_at_err_t _ln_at_set_mac_parse(wifi_mode_t mode, uint8_t para_num, cons
         goto __exit;
     }
 
-    ret = ln_at_cmd_args_get(bssid_p, "%x:%x:%x:%x:%x:%x",
-            &bssid_hex[0], &bssid_hex[1], &bssid_hex[2], &bssid_hex[3], &bssid_hex[4], &bssid_hex[5]);
+    ret = strmac2mac(bssid_p, bssid_hex);
 
-    LOG(LOG_LVL_ERROR, "ret:%d; mac addr:\"%02x:%02x:%02x:%02x:%02x:%02x\"\r\n", ret,
+    LOG(LOG_LVL_ERROR, "ret:%d; mac addr:\"%02X:%02X:%02X:%02X:%02X:%02X\"\r\n", ret,
             bssid_hex[0], bssid_hex[1], bssid_hex[2], bssid_hex[3], bssid_hex[4], bssid_hex[5]);
 
-    if (ret != 6)
+    if (ret != 0)
     {
         goto __exit;
     }
@@ -1712,7 +1782,12 @@ static ln_at_err_t _ln_at_get_dhcpd_cfg_parse(const char *name)
     char start_ip[16] = {0};
     char end_ip[16] = {0};
 
-    mode = g_ln_at_ctrl_p->mode;
+    if (g_ln_at_ctrl_p->mode == WIFI_MODE_MAX) {
+        mode = g_ln_at_ctrl_p->mode = wifi_current_mode_get();
+    } else {
+        mode = g_ln_at_ctrl_p->mode;
+    }
+
     if (mode != WIFI_MODE_AP)
     {
         goto __exit;
@@ -1785,7 +1860,12 @@ static ln_at_err_t _ln_at_set_dhcpd_cfg_parse(uint8_t para_num, const char *name
         goto __exit;
     }
 
-    mode = g_ln_at_ctrl_p->mode;
+    if (g_ln_at_ctrl_p->mode == WIFI_MODE_MAX) {
+        mode = g_ln_at_ctrl_p->mode = wifi_current_mode_get();
+    } else {
+        mode = g_ln_at_ctrl_p->mode;
+    }
+
     if (mode != WIFI_MODE_AP)
     {
         goto __exit;
@@ -1915,7 +1995,12 @@ static ln_at_err_t ln_at_set_auto_conn(uint8_t para_num, const char *name)
         goto __exit;
     }
 
-    mode = g_ln_at_ctrl_p->mode;
+    if (g_ln_at_ctrl_p->mode == WIFI_MODE_MAX) {
+        mode = g_ln_at_ctrl_p->mode = wifi_current_mode_get();
+    } else {
+        mode = g_ln_at_ctrl_p->mode;
+    }
+
     if (mode != WIFI_MODE_STATION)
     {
         goto __exit;
@@ -1968,7 +2053,12 @@ static ln_at_err_t _ln_at_cipsta_get_parser(ln_at_cmd_type_e cmd_type, wifi_mode
     char netmask[16] = {0};
     char gw[16] = {0};
 
-    cur_mode = g_ln_at_ctrl_p->mode;
+    if (g_ln_at_ctrl_p->mode == WIFI_MODE_MAX) {
+        cur_mode = g_ln_at_ctrl_p->mode = wifi_current_mode_get();
+    } else {
+        cur_mode = g_ln_at_ctrl_p->mode;
+    }
+
     if (mode != cur_mode)
     {
         goto __exit;
@@ -2077,7 +2167,12 @@ static ln_at_err_t _ln_at_cipsta_set_parser(ln_at_cmd_type_e cmd_type, wifi_mode
         goto __exit;
     }
 
-    cur_mode = g_ln_at_ctrl_p->mode;
+    if (g_ln_at_ctrl_p->mode == WIFI_MODE_MAX) {
+        cur_mode = g_ln_at_ctrl_p->mode = wifi_current_mode_get();
+    } else {
+        cur_mode = g_ln_at_ctrl_p->mode;
+    }
+
     if (mode != cur_mode)
     {
         goto __exit;

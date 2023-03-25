@@ -33,10 +33,7 @@
 
 #include "ke_mem.h"
 
-#if (TRACE_ENABLE)
 #include "utils/debug/log.h"
-#endif
-
 
 
 /// State machine used to retrieve Device Information Service characteristics information
@@ -91,9 +88,7 @@ __STATIC int disc_enable_req_handler(ke_msg_id_t const msgid,
     // Device Information Service Client Role Task Environment
     struct disc_env_tag *p_disc_env = PRF_ENV_GET(DISC, disc);
 
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO, "disc_enable_req_handler: con_type=%d\r\n", p_param->con_type);
-#endif   
 
     ASSERT_INFO(p_disc_env != NULL, dest_id, src_id);
     if ((state == DISC_IDLE) && (p_disc_env->p_env[conidx] == NULL))
@@ -150,9 +145,7 @@ __STATIC int gattc_sdp_svc_ind_handler(ke_msg_id_t const msgid,
                                      ke_task_id_t const dest_id,
                                      ke_task_id_t const src_id)
 {
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO, "gattc_sdp_svc_ind_handler\r\n");
-#endif  
 
     if (ke_state_get(dest_id) == DISC_DISCOVERING)
     {
@@ -200,10 +193,8 @@ __STATIC int gattc_cmp_evt_handler(ke_msg_id_t const msgid,
     struct disc_env_tag *p_disc_env = PRF_ENV_GET(DISC, disc);
     uint8_t conidx = KE_IDX_GET(dest_id);
 
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO, "gattc_cmp_evt_handler: state=%d,status=%d,operation=0x%x, seq_num=0x%x\r\n",
                         state, p_param->status,p_param->operation, p_param->seq_num);
-#endif   
 
     if (state == DISC_DISCOVERING)
     {
@@ -268,9 +259,7 @@ __STATIC int disc_rd_char_cmd_handler(ke_msg_id_t const msgid,
     // Device Information Service Client Role Task Environment
     struct disc_env_tag *p_disc_env = PRF_ENV_GET(DISC, disc);
 
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO, "disc_rd_char_cmd_handler code=0x%x\r\n",p_param->char_code);
-#endif      
 
     ASSERT_INFO(p_disc_env != NULL, dest_id, src_id);
     if ((state == DISC_IDLE) && (p_disc_env->p_env[conidx] != NULL))
@@ -331,10 +320,8 @@ __STATIC int gattc_read_ind_handler(ke_msg_id_t const msgid,
                                   ke_task_id_t const dest_id,
                                   ke_task_id_t const src_id)
 {
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO, "disc_task gattc_read_ind_handler handle=0x%x,length=%d, offset=%d\r\n", 
                        p_param->handle, p_param->length, p_param->offset);
-#endif 
 
     if (ke_state_get(dest_id) == DISC_BUSY)
     {

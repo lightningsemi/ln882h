@@ -1,14 +1,13 @@
 include(ProjModuleCollect.cmake)
 
-file(GLOB_RECURSE  BLE_USR_APP_SRC  app/ble_usr_app/*.c)
 
 set(PROJ_ALL_SRC
     app/main.c
     app/usr_app.c
+    app/usr_ble_app.c
     bsp/serial_hw.c
     bsp/drv_adc_measure.c
     startup/startup_${CHIP_SERIAL}_gcc.c
-    ${BLE_USR_APP_SRC}
     ${MODULE_SRC}
 )
 
@@ -41,8 +40,6 @@ target_link_directories(${pro_executable_target}
 target_include_directories(${pro_executable_target}
     PRIVATE
     app
-    app/ble_usr_app
-    app/ble_usr_app/app_callback
     bsp
     cfg
 

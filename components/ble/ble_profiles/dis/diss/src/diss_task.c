@@ -34,9 +34,9 @@
 #include "prf_utils.h"
 
 #include "ke_mem.h"
-#if (TRACE_ENABLE)
+
 #include "utils/debug/log.h"
-#endif
+
 
 /*
  * FUNCTION DEFINITIONS
@@ -62,10 +62,8 @@ __STATIC int diss_set_value_req_handler(ke_msg_id_t const msgid,
     // Request status
     uint8_t status;
     struct diss_set_value_rsp *p_rsp;
-    
-#if (TRACE_ENABLE)
+
     LOG(LOG_LVL_INFO,"diss_set_value_req_handler: value=0x%x\r\n", p_param->value);
-#endif    
 
     // Check Characteristic Code
     if (p_param->value < DIS_CHAR_MAX)
@@ -150,9 +148,7 @@ __STATIC int gattc_read_req_ind_handler(ke_msg_id_t const msgid,
     int msg_status = KE_MSG_CONSUMED;
     ke_state_t state = ke_state_get(dest_id);
 
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO,"gattc_read_req_ind_handler: handle=0x%x,state=%d\r\n", p_param->handle,state);
-#endif    
 
     if (state == DISS_IDLE)
     {
@@ -244,9 +240,7 @@ __STATIC int diss_value_cfm_handler(ke_msg_id_t const msgid,
                                       ke_task_id_t const dest_id,
                                       ke_task_id_t const src_id)
 {
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO,"diss_value_cfm_handler: handle=0x%x,length=%d\r\n", p_param->value,p_param->length);
-#endif 
 
     if (ke_state_get(dest_id) == DISS_BUSY)
     {

@@ -107,14 +107,25 @@ void blib_hexdump(const char *info, void *buf, uint32_t buf_len)
  * @param[in] type    blib_assert_type_t defined in arch.h
 */
 void blib_assert(int param0, int param1, int type, const char *file, int line)
-{
-    __disable_irq();
-    blib_log_printf(0, BLIB_LOG_LVL_E, "[BLIB_ASSERT][%s:%d] type:%d; p0:%08x; p1:%08x\r\n",
-            file, line, (int)type, param0, param1);
-
-    __BKPT(0);
-
-    while(1);
+{    
+    switch (type)
+    {
+        case ASSERT_TYPE_ERROR:
+            __disable_irq();
+            blib_log_printf(0, BLIB_LOG_LVL_E, "[BLIB_ASSERT]:ERROR;[%s:%d]\r\n", file, line);
+            __BKPT(0);
+            while(1);
+        
+        case ASSERT_TYPE_WARNING:
+            blib_log_printf(0, BLIB_LOG_LVL_E, "[BLIB_ASSERT]:WARNING;[%s:%d]\r\n", file, line);
+            break;
+        case ASSERT_TYPE_INFO:        
+            blib_log_printf(0, BLIB_LOG_LVL_E, "[BLIB_ASSERT]:INFO;[%s:%d]\r\n", file, line);
+            break;
+        default:
+            blib_log_printf(0, BLIB_LOG_LVL_E, "[BLIB_ASSERT]type:%d;[%s:%d]\r\n", (int)type, file, line);
+            break;
+    }
 }
 
 /**

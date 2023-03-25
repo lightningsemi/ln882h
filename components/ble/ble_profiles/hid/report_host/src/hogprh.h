@@ -28,10 +28,16 @@
  ****************************************************************************************
  */
 #include "rwprf_config.h"
+#include "rwip_config.h"
+
 #if (BLE_HID_REPORT_HOST)
+#include "hogp_common.h"
+#include "hogprh_task.h"
+
+#include "prf_ble.h"
 #include "prf_types.h"
-#include "prf.h"
-#include "../api/hogprh_task.h"
+
+
 /*
  * DEFINES
  ****************************************************************************************
@@ -75,9 +81,48 @@ struct hogprh_env_tag
     ke_state_t state[HOGPRH_IDX_MAX];
 };
 
+/**
+ ****************************************************************************************
+ * @brief Retrieve HID client profile interface
+ *
+ * @return HID client profile interface
+ ****************************************************************************************
+ */
+const struct prf_task_cbs *hogprh_prf_itf_get(void);
 
+/**
+ ****************************************************************************************
+ * @brief Retrieve Attribute handle from service and attribute index
+ *
+ * @param[in] p_hogprh_env  HID report host environment
+ * @param[in] conidx        Connection index
+ * @param[in] status        Response status code
+ *
+ ****************************************************************************************
+ */
+void hogprh_enable_rsp_send(struct hogprh_env_tag *p_hogprh_env, uint8_t conidx, uint8_t status);
 
+/**
+ ****************************************************************************************
+ * @brief Retrieve Attribute handle from service and attribute index
+ *
+ * @param[in] p_hogprh_env  HID report host environment
+ * @param[in] conidx        Connection index
+ * @param[in] operation     Indicates the operation for which the cmp_evt is being sent
+ * @param[in] status        Response status code
+ *
+ ****************************************************************************************
+ */
+void hogprh_send_cmp_evt(struct hogprh_env_tag *p_hogprh_env, uint8_t conidx, uint8_t operation, uint8_t status);
 
+/**
+ ****************************************************************************************
+ * Initialize task handler
+ *
+ * @param task_desc Task descriptor to fill
+ ****************************************************************************************
+ */
+void hogprh_task_init(struct ke_task_desc *p_task_desc);
 
 #endif//#if (BLE_HID_DEVICE)
 

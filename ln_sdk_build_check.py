@@ -238,8 +238,6 @@ def main():
         "project/ble_mcu_prf_battery/keil_ln882h_rel",
         # ble_mcu_prf_hid_mouse
         "project/ble_mcu_prf_hid_mouse/keil_ln882h_rel",
-        # ble_mcu_scan
-        "project/ble_mcu_scan/keil_ln882h_rel",
 
         # wifi_mcu_basic_example
         "project/wifi_mcu_basic_example/keil_ln882h_rel",
@@ -257,6 +255,7 @@ def main():
         "project/mcu_peripheral_driver_demo/AES/keil_ln882h_dev",
         "project/mcu_peripheral_driver_demo/DMA/keil_ln882h_dev",
         "project/mcu_peripheral_driver_demo/EXT/keil_ln882h_dev",
+        "project/mcu_peripheral_driver_demo/GPIO/keil_ln882h_dev",
         "project/mcu_peripheral_driver_demo/I2C_AT24C04/keil_ln882h_dev",
         "project/mcu_peripheral_driver_demo/I2C_MPU9250/keil_ln882h_dev",
         "project/mcu_peripheral_driver_demo/I2C_OLED/keil_ln882h_dev",
@@ -277,7 +276,6 @@ def main():
         "ble_mcu_data_trans",
         "ble_mcu_prf_battery",
         "ble_mcu_prf_hid_mouse",
-        "ble_mcu_scan",
 
         "wifi_mcu_basic_example",
         "combo_mcu_basic_example",

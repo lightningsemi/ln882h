@@ -1,6 +1,10 @@
 #ifndef __LWIP_CFG_H__
 #define __LWIP_CFG_H__
 
+#include <sys/time.h>
+
+#define LWIP_TIMEVAL_PRIVATE    0
+
 /* ---------- User options ---------- */
 #define LWIP_USE_LN_USER_CHANGE    1
 /* ---------- User options end ------ */
@@ -216,6 +220,8 @@ a lot of data that needs to be copied, this should be set high. */
 #define LWIP_RESOURCE_TRACE             0
 
 /* ---------- Checksum options ----------*/
+#define LWIP_CHKSUM_ALGORITHM           3
+
 //#define CHECKSUM_BY_HARDWARE
 
 #ifdef CHECKSUM_BY_HARDWARE

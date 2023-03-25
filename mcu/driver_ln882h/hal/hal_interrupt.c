@@ -28,7 +28,7 @@ void set_interrupt_priority(void)
 
     NVIC_SetPriority(BLE_WAKE_IRQn,  4);
     NVIC_SetPriority(BLE_ERR_IRQn,   4);
-    NVIC_SetPriority(BLE_MAC_IRQn,   3);
+    NVIC_SetPriority(BLE_MAC_IRQn,   1);
     NVIC_SetPriority(DMA_IRQn,       4);
     NVIC_SetPriority(QSPI_IRQn,      4);
 

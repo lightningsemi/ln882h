@@ -3,10 +3,7 @@ include(ProjModuleCollect.cmake)
 set(PROJ_ALL_SRC
     app/main.c
     app/usr_app.c
-    app/usr_send_data.c
-    app/app_callback/ln_gap_callback.c
-    app/app_callback/ln_gatt_callback.c
-    app/app_callback/usr_ble_app.c
+    app/usr_ble_app.c
     bsp/serial_hw.c
     bsp/serial_h4tl_driver.c
     # bsp/drv_adc_measure.c
@@ -37,7 +34,6 @@ target_link_directories(${pro_executable_target}
 target_include_directories(${pro_executable_target}
     PRIVATE
     app
-    app/app_callback
     bsp
     cfg
 )

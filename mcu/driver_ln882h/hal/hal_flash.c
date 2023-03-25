@@ -23,6 +23,212 @@
 #pragma GCC optimize(2)
 #endif
 
+
+#if FLASH_UPDATE_READ_REG
+#include "hal/hal_misc.h"
+#include "hal/hal_gpio.h"
+static void read_flash_reg(uint8_t *rd_ptr, uint32_t rd_len, uint8_t *wr_ptr, uint8_t wr_len, uint8_t read_r_dummy)
+{
+    hal_misc_cmp_set_spif_io_en(0);
+    
+    gpio_init_t_def gpio_init;
+    memset(&gpio_init,0,sizeof(gpio_init));
+    gpio_init.dir = GPIO_OUTPUT;
+    gpio_init.pin = GPIO_PIN_15;
+    gpio_init.speed = GPIO_HIGH_SPEED;
+    hal_gpio_init(GPIOA_BASE,&gpio_init);
+    hal_gpio_pin_set(GPIOA_BASE,GPIO_PIN_15);
+    
+    gpio_init.pin = GPIO_PIN_0;
+    hal_gpio_init(GPIOB_BASE,&gpio_init);
+    hal_gpio_pin_reset(GPIOB_BASE,GPIO_PIN_0);
+    
+    gpio_init.pin = GPIO_PIN_2;
+    hal_gpio_init(GPIOB_BASE,&gpio_init);
+    hal_gpio_pin_reset(GPIOB_BASE,GPIO_PIN_2);
+    
+    //START
+    hal_gpio_pin_reset(GPIOA_BASE,GPIO_PIN_15);
+    
+    //WRITE DATA
+    for(int i = 0; i < wr_len; i ++){
+        for(int x = 0; x < 8; x++){
+            if(((wr_ptr[i] >> (7 - x)) & 0x1) == 0x1){
+                hal_gpio_pin_set(GPIOB_BASE,GPIO_PIN_2);
+            }else{
+                hal_gpio_pin_reset(GPIOB_BASE,GPIO_PIN_2);
+            }
+            hal_gpio_pin_set(GPIOB_BASE,GPIO_PIN_0);
+            hal_gpio_pin_reset(GPIOB_BASE,GPIO_PIN_0);
+        }
+    }
+
+    //1bit dummy
+    if(read_r_dummy == 1){
+        hal_gpio_pin_set(GPIOB_BASE,GPIO_PIN_0);
+        hal_gpio_pin_reset(GPIOB_BASE,GPIO_PIN_0);
+    }
+    
+    //READ DATA
+    hal_gpio_pin_direction_set(GPIOB_BASE,GPIO_PIN_2,GPIO_INPUT);
+    for(int i = 0; i < rd_len; i ++){
+        volatile uint8_t val = 0;
+        for(int x = 0; x < 8; x++){
+            hal_gpio_pin_set(GPIOB_BASE,GPIO_PIN_0);
+            if(hal_gpio_pin_read(GPIOB_BASE,GPIO_PIN_2) == 1){
+                val |= (1 << (7 - x));
+            }
+            hal_gpio_pin_reset(GPIOB_BASE,GPIO_PIN_0);
+        }
+        rd_ptr[i] = val;
+    }
+    
+    hal_gpio_pin_set(GPIOA_BASE,GPIO_PIN_15);
+    
+    hal_gpio_pin_direction_set(GPIOA_BASE,GPIO_PIN_15,GPIO_INPUT);
+    hal_gpio_pin_direction_set(GPIOB_BASE,GPIO_PIN_0,GPIO_INPUT);
+    hal_gpio_pin_direction_set(GPIOB_BASE,GPIO_PIN_2,GPIO_INPUT);
+    
+    hal_misc_cmp_set_spif_io_en(1);
+}
+#endif
+
+/**
+ * @brief Update the flash.
+ * 
+ *        The TH25Q-16HB flash needs to be upgraded to work properly. 
+ *        And the volatile update should be running every time it's powered on.
+ */
+static uint8_t hal_flash_update_with_volatile(void)
+{
+    uint8_t  cmd;
+    uint8_t  buf[10] = {0,};
+
+    //1. read flash ID
+    cmd = FLASH_READ_ID;
+    buf[0] = 0; // Manufacturer ID
+    buf[1] = 0; // Memory Type (device identification high 8 bit)
+    buf[2] = 0; // Capacity    (device identification low 8 bit)
+    hal_qspi_standard_read_byte(buf, 3, &cmd, sizeof(cmd));
+    if(buf[0] != 0xEB){
+        return 0;
+    }
+
+    //2-4. write cmd.
+    cmd = 0x33;
+    hal_qspi_standard_write(&cmd,1);
+    cmd = 0xCC;
+    hal_qspi_standard_write(&cmd,1);
+    cmd = 0xAA;
+    hal_qspi_standard_write(&cmd,1);
+
+    //If the flash has upgraded,return 1.
+    //write R reg.
+    buf[0] = 0xFA;  //CMD
+    buf[1] = 0x01;  //ADDR
+    buf[2] = 0x20;  //ADDR
+    buf[3] = 0x0D;  //ADDR
+    buf[4] = 0x03;  //ADDR
+    hal_qspi_standard_write(buf,5);
+    
+#if (FLASH_UPDATE_READ_REG)
+    static uint8_t read_r_dummy = 0;
+    //read R reg.
+    buf[0] = 0xFA;
+    buf[1] = 0x02;  //ADDR
+    buf[2] = 0x20;  //ADDR
+    buf[3] = 0x0D;  //ADDR
+    buf[4] = 0x00;  //DATA
+    read_r_dummy = 1;
+    read_flash_reg(buf+4, 1, buf, 4, read_r_dummy);
+    read_r_dummy = 0;
+    //read back 0x03
+#endif
+
+    buf[0] = 0x48;  //CMD
+    buf[1] = 0x00;  //ADDR
+    buf[2] = 0x05;  //ADDR
+    buf[3] = 0x0D;  //ADDR
+    buf[4] = 0x00;  //DUMMY
+    hal_qspi_standard_read_byte(buf+5, 1, buf, 5);
+    
+    if((buf[5] & 0x7F) == 0x7C){
+        cmd = 0x55;
+        hal_qspi_standard_write(&cmd,1);
+        cmd = 0x88;
+        hal_qspi_standard_write(&cmd,1);
+        return 1;
+    }
+
+    //5. write enable
+    hal_flash_write_enable();
+    
+    //6. write data
+    buf[0] = 0x42;  //CMD
+    buf[1] = 0x00;  //ADDR
+    buf[2] = 0x01;  //ADDR
+    buf[3] = 0xFE;  //ADDR
+    buf[4] = 0x00;  //DATA
+    buf[5] = 0x00;  //DATA
+    hal_qspi_standard_write(buf,6);
+    hal_flash_operation_wait();
+
+    //7. write C reg.
+    buf[0] = 0xFA;  //CMD
+    buf[1] = 0x03;  //ADDR
+    buf[2] = 0x04;  //ADDR
+    buf[3] = 0x00;  //ADDR
+    buf[4] = 0xFC;  //DATA
+    buf[5] = 0xFA;  //DATA
+    buf[6] = 0x00;  //DUMMY
+    buf[7] = 0x00;  //DUMMY
+    hal_qspi_standard_write(buf,8);
+
+    //8. read C reg.
+#if FLASH_UPDATE_READ_REG
+    buf[0] = 0xFA;
+    buf[1] = 0x04;  //ADDR
+    buf[2] = 0x04;  //ADDR
+    buf[3] = 0x00;  //ADDR
+    buf[4] = 0x00;  //DATA
+    buf[5] = 0x00;  //DATA
+    read_flash_reg(buf+4, 2, buf, 4, read_r_dummy);
+    //read back 0x0305
+#endif
+
+    //9. write C reg.
+    buf[0] = 0xFA;  //CMD
+    buf[1] = 0x03;  //ADDR
+    buf[2] = 0x02;  //ADDR
+    buf[3] = 0x00;  //ADDR
+    buf[4] = 0x79;  //DATA
+    buf[5] = 0xF3;  //DATA
+    buf[6] = 0x00;  //DUMMY
+    buf[7] = 0x00;  //DUMMY
+    hal_qspi_standard_write(buf,8);
+
+    //10. read C reg.
+#if FLASH_UPDATE_READ_REG
+    buf[0] = 0xFA;
+    buf[1] = 0x04;  //ADDR
+    buf[2] = 0x02;  //ADDR
+    buf[3] = 0x00;  //ADDR
+    buf[4] = 0x00;  //DATA
+    buf[5] = 0x00;  //DATA
+    read_flash_reg(buf+4, 2, buf, 4, read_r_dummy);
+    //read back 0x860C
+#endif
+
+    //11-12. write cmd
+    cmd = 0x55;
+    hal_qspi_standard_write(&cmd,1);
+    cmd = 0x88;
+    hal_qspi_standard_write(&cmd,1);
+
+    return 1;
+}
+
+
 /**
  * @brief Init FLASH.
  * @note Warning!!! If running on flash, do not init flash!
@@ -47,6 +253,8 @@ void hal_flash_init(void)
     /* QSPI_CLK  <= AHB_CLOCK / 2 */ 
     /* The first parameter is the frequency division value, and the second parameter is rx sample delay!*/
     hal_qspi_init(2, 1);
+    
+    hal_flash_update_with_volatile();
 }
 
 /**
@@ -478,7 +686,6 @@ void hal_flash_read_unique_id(uint8_t *unique_id)
 {
     uint8_t cmd_buf[5];
     uint8_t read_back[16]; 
-    uint16_t value = 0;
 
     cmd_buf[0] = FLASH_READ_UNIQUE_ID;
     cmd_buf[1] = 0;//dumy data

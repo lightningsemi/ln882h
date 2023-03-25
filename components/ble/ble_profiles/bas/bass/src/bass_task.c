@@ -247,6 +247,7 @@ __STATIC int gattc_write_req_ind_handler(ke_msg_id_t const msgid, struct gattc_w
                                 bass_batt_level_ntf_cfg_ind);
 
             p_ind->conidx = conidx;
+            p_ind->handle = p_param->handle;
             p_ind->ntf_cfg = p_bass_env->ntf_cfg[conidx];
 
             ke_msg_send(p_ind);

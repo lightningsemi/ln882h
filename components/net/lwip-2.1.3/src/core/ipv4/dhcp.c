@@ -241,6 +241,7 @@ dhcp_inc_pcb_refcount(void)
     }
 
     ip_set_option(dhcp_pcb, SOF_BROADCAST);
+    dhcp_pcb->tos = 0xE0; /* DHCP frame:high priority(IPTOS_PREC_NETCONTROL) */
 
     /* set up local and remote port for the pcb -> listen on all interfaces on all src/dest IPs */
     udp_bind(dhcp_pcb, IP4_ADDR_ANY, LWIP_IANA_PORT_DHCP_CLIENT);
@@ -1038,7 +1039,7 @@ dhcp_discover(struct netif *netif)
   // Wifi environment, the first dhcp interaction process may not complete due to packet loss, and the ip acquisition was slow.
   // This then causes the time to get the IP to become very long.
   // This change circumvents the problem.
-  msecs = (u16_t)((dhcp->tries < 5? 1 << dhcp->tries : 16) * 1000);
+  msecs = (u16_t)((dhcp->tries < 4 ? 1 << dhcp->tries :  8 ) * 1000); //retry=1,2,3 => 2->4->8  8 8 8 8...
 #else
   msecs = (u16_t)((dhcp->tries < 6? 1 << dhcp->tries : 60) * 1000);
 #endif

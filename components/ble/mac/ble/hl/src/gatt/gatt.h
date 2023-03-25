@@ -55,10 +55,10 @@ enum gatt_db_att
 
     GATT_IDX_CHAR_CLI_SUP_FEAT,
     GATT_IDX_CLI_SUP_FEAT,
-
+#if 0
     GATT_IDX_CHAR_DB_HASH,
     GATT_IDX_DB_HASH,
-
+#endif
     GATT_IDX_NUMBER
 };
 #endif /* (BLE_ATTS)*/

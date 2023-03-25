@@ -193,7 +193,7 @@ void usr_app_task_entry(void *params)
     wifi_init_sta();
     // wifi_init_ap();
 
-    while(NETDEV_LINK_UP != netdev_get_link_state(netdev_get_active())){
+    while (!netdev_got_ip()) {
         OS_MsDelay(1000);
     }
     

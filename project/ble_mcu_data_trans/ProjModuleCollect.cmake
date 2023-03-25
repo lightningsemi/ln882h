@@ -40,6 +40,15 @@ file(GLOB_RECURSE  NVDS_SRC  ${COMP_NVDS_DIR}/*.c)
 include_directories(${COMP_NVDS_DIR})
 list(APPEND MODULE_SRC ${NVDS_SRC})
 
+###################################  ln_at  #####################################
+file(GLOB_RECURSE  LNAT_SRC  ${COMP_LNAT_DIR}/*.c)
+include_directories(${COMP_LNAT_DIR})
+include_directories(${COMP_LNAT_DIR}/adapter)
+include_directories(${COMP_LNAT_DIR}/cmd)
+include_directories(${COMP_LNAT_DIR}/parser)
+include_directories(${COMP_LNAT_DIR}/transfer)
+list(APPEND MODULE_SRC ${LNAT_SRC})
+
 ###################################  utils  ####################################
 set(UTILS_SRC
     ${COMP_UTILS_DIR}/debug/CmBacktrace/cm_backtrace.c
@@ -96,14 +105,28 @@ list(APPEND MODULE_SRC ${MCU_SRC})
 ###############################   BLE (export) #################################
 file(GLOB_RECURSE  BLE_LIB_IMPORT_SRC   ${COMP_BLE_DIR}/ble_lib_import/*.c)
 file(GLOB_RECURSE  BLE_ARCH             ${COMP_BLE_DIR}/ble_arch/*.c)
-file(GLOB_RECURSE  BLE_API_GAP_GATT     ${COMP_BLE_DIR}/ble_api/gap_gatt/*.c)
 file(GLOB_RECURSE  BLE_PROFILE_COMMON   ${COMP_BLE_DIR}/ble_profiles/prf_common/*.c)
+file(GLOB_RECURSE  BLE_APP_COMP         ${COMP_BLE_DIR}/ble_app/*.c)
 include_directories(${COMP_BLE_DIR})
 include_directories(${COMP_BLE_DIR}/ble_arch)
-include_directories(${COMP_BLE_DIR}/ble_lib_import)
-include_directories(${COMP_BLE_DIR}/ble_api/gap_gatt/api)
 include_directories(${COMP_BLE_DIR}/ble_profiles/prf_common)
 include_directories(${COMP_BLE_DIR}/ble_lib_import)
+
+include_directories(${COMP_BLE_DIR}/ble_app/ble_common)
+include_directories(${COMP_BLE_DIR}/ble_app/ble_connection_manager)
+include_directories(${COMP_BLE_DIR}/ble_app/ble_device_manager)
+include_directories(${COMP_BLE_DIR}/ble_app/ble_event)
+include_directories(${COMP_BLE_DIR}/ble_app/ble_gap/gap_advertising)
+include_directories(${COMP_BLE_DIR}/ble_app/ble_gap/gap_misc)
+include_directories(${COMP_BLE_DIR}/ble_app/ble_gap/gap_scan)
+include_directories(${COMP_BLE_DIR}/ble_app/ble_gatt/gatt_client)
+include_directories(${COMP_BLE_DIR}/ble_app/ble_gatt/gatt_common)
+include_directories(${COMP_BLE_DIR}/ble_app/ble_gatt/gatt_server)
+include_directories(${COMP_BLE_DIR}/ble_app/ble_import)
+include_directories(${COMP_BLE_DIR}/ble_app/ble_smp)
+include_directories(${COMP_BLE_DIR}/ble_app/ble_store)
+include_directories(${COMP_BLE_DIR}/ble_app/ble_test)
+
 include_directories(${COMP_BLE_DIR}/mac/ble/hl/api)
 include_directories(${COMP_BLE_DIR}/mac/ble/hl/inc)
 include_directories(${COMP_BLE_DIR}/mac/ble/ll/api)
@@ -129,8 +152,8 @@ include_directories(${COMP_BLE_DIR}/modules/rwip/api)
 
 list(APPEND MODULE_SRC ${BLE_LIB_IMPORT_SRC})
 list(APPEND MODULE_SRC ${BLE_ARCH})
-list(APPEND MODULE_SRC ${BLE_API_GAP_GATT})
 list(APPEND MODULE_SRC ${BLE_PROFILE_COMMON})
+list(APPEND MODULE_SRC ${BLE_APP_COMP})
 
 ###################################   MISC  ####################################
 set(MISC_SRC

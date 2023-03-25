@@ -101,7 +101,7 @@ static void iperf_udp_client(void *thread_param)
     }
 
     while(param.mode != IPERF_MODE_STOP) {
-        if(NETDEV_LINK_DOWN == netdev_get_link_state(netdev_get_active())) {
+        if(!netdev_got_ip()) {
             IPERF_PRINTF("%s network link down, skip...\r\n", __func__);
             OS_SemaphoreWait(&param.kill_signal, 1000);
             continue;
@@ -180,7 +180,7 @@ static void iperf_udp_server(void *thread_param)
     }
     memset(buffer, 0, rcv_len);
     while(param.mode != IPERF_MODE_STOP) {
-        if(NETDEV_LINK_DOWN == netdev_get_link_state(netdev_get_active())) {
+        if(!netdev_got_ip()) {
             IPERF_PRINTF("%s network link down, skip...\r\n", __func__);
             OS_SemaphoreWait(&param.kill_signal, 1000);
             continue;
@@ -347,7 +347,7 @@ static void iperf_client(void *thread_param)
 
     iperf_tx_buffer = iperf_get_data(param.pkt_len);
     while (param.mode != IPERF_MODE_STOP) {
-        if(NETDEV_LINK_DOWN == netdev_get_link_state(netdev_get_active())) {
+        if(!netdev_got_ip()) {
             IPERF_PRINTF("%s network link down, skip...\r\n", __func__);
             OS_SemaphoreWait(&param.kill_signal, 1000);
             continue;
@@ -495,7 +495,7 @@ void iperf_server(void *thread_param)
     }
 
     while (param.mode != IPERF_MODE_STOP) {
-        if(NETDEV_LINK_DOWN == netdev_get_link_state(netdev_get_active())) {
+        if(!netdev_got_ip()) {
             IPERF_PRINTF("%s network link down, skip...\r\n", __func__);
             OS_SemaphoreWait(&param.kill_signal, 1000);
             continue;

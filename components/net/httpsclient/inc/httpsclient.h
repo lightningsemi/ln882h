@@ -167,8 +167,10 @@ extern "C" {
 
     int  http_get(HTTP_INFO* hi, char* url_str, char* response, int size);
     int  http_get_with_callback(HTTP_INFO* hi, char* url_str, http_get_cb cbFunc);
+    int  http_get_ext(HTTP_INFO* hi, char* url_str, http_get_cb cbFunc, const char *usr_header);
 
     int  http_post(HTTP_INFO* hi, char* url_str, char* data, char* response, int size);
+    int http_post_ext(HTTP_INFO *hi, char *url, char *data, http_get_cb cbFunc, const char *usr_header);
 
     int  http_parse(HTTP_INFO* hi);
     void http_dump_err_msg(void);
@@ -180,6 +182,7 @@ extern "C" {
     int  http_read(HTTP_INFO* hi);
 
     int parse_url(char *request_url, int *is_https, char *host, char *port, char *filepath);
+    int parse_url_ext(char *request_url, int *is_https, char *host, char *port, int *is_default_port, char *filepath);
 
 #ifdef __cplusplus
 }

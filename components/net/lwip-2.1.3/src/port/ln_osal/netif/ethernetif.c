@@ -94,7 +94,7 @@ __STATIC_INLINE__ void low_level_input(netif_idx_t nif_idx, uint8_t *data, uint1
     struct netif * nif = NULL;
 
     if(NULL == (pkt =pbuf_alloc(PBUF_RAW, len, PBUF_POOL))) {
-        LOG(LOG_LVL_DEBUG, "[%s, %d] Can not malloc pbuff(request len=%d).\r\n", __func__, __LINE__, len);
+        LOG(LOG_LVL_WARN, "[%s, %d] Can not malloc pbuff(request len=%d).\r\n", __func__, __LINE__, len);
         return;
     }
 
@@ -312,6 +312,14 @@ netdev_link_state_t netdev_get_link_state(netif_idx_t nif_idx)
     } else {
         return NETDEV_LINK_DOWN;
     }
+}
+
+int netdev_got_ip(void)
+{
+    struct netif *nif = netdev_get_netif(netdev_get_active());
+    /* (DHCP supplied) or ((Static IP) and (LinkUp)) */
+    return ((0 != dhcp_supplied_address(nif)) || \
+            ((IPADDR_ANY != nif->ip_addr.addr) && (nif->flags & (NETIF_FLAG_LINK_UP | NETIF_FLAG_UP))));       
 }
 
 int netdev_set_mac_addr(netif_idx_t nif_idx, uint8_t *mac_addr)

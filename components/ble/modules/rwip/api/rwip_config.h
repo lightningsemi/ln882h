@@ -449,9 +449,6 @@
     #define TRACER_PRESENT                   0
 #endif // CFG_TRC_EN
 
-#define TRACE_ENABLE  1 // use log.h instead of TRACER_PRESENT 
-
-
 
 /******************************************************************************************/
 /* -------------------------   DEEP SLEEP SETUP      -------------------------------------*/

@@ -14,7 +14,7 @@
 #ifndef _RWPRF_CONFIG_H_
 #define _RWPRF_CONFIG_H_
 
-#include "project_prof_config.h"
+#include "ln_ble_app_default_cfg.h"
 /**
  ****************************************************************************************
  * @addtogroup PRF_CONFIG

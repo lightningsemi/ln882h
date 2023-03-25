@@ -23,7 +23,7 @@
  * INCLUDE FILES
  ****************************************************************************************
  */
-#include "rwprf_config.h"
+#include "rwip_config.h"
 #include "rwprf_config.h"
 
 #if (BLE_HID_REPORT_HOST)
@@ -31,17 +31,18 @@
 #include "gap.h"
 #include "gattc_task.h"
 #include "hogprh.h"
-#include "hid/report_host/api/hogprh_task.h"
+#include "hogprh_task.h"
 #include "prf_utils.h"
+#include "prf_types.h"
 
 #include "ke_mem.h"
-#if (TRACE_ENABLE)
+
 #include "utils/debug/log.h"
-#endif
+
 
 
 const struct prf_char_def hogprh_device_char[HOGPRH_CHAR_MAX] =
-{   
+{
     [HOGPRH_INCLUDE_CHAR]                   = {ATT_DECL_INCLUDE,           ATT_OPTIONAL, ATT_CHAR_PROP_RD},
     [HOGPRH_HID_INFO_CHAR]                  = {ATT_CHAR_HID_INFO,          ATT_OPTIONAL, ATT_CHAR_PROP_RD},
     [HOGPRH_REPORT_MAP_CHAR]                = {ATT_CHAR_REPORT_MAP,        ATT_OPTIONAL, ATT_CHAR_PROP_RD},
@@ -59,14 +60,14 @@ const struct prf_char_def hogprh_device_char[HOGPRH_CHAR_MAX] =
 #define     ATT_CHAR_HID_DFU_AUTH  {0x2D, 0x0A, 0xDE, 0xEC, 0xE3, 0x20, 0x43, 0xA0, 0x12, 0x49, 0x2C, 0x76, 0x03, 0xA0, 0xBF, 0xCF} 
 #define     ATT_CHAR_HID_DFU_DATA  {0x2D, 0x0A, 0xDE, 0xEC, 0xE3, 0x20, 0x43, 0xA0, 0x12, 0x49, 0x2C, 0x76, 0x02, 0xA0, 0xBF, 0xCF} 
 
-
+#if 0
 const struct prf_char_def_128 hogprh_device_dfu_char[HOGPRH_DFU_CHAR_MAX] =
-{   
+{
     [HOGPRH_DFU_ID_CHAR]                   = {ATT_CHAR_HID_DFU_ID,         ATT_OPTIONAL, ATT_CHAR_PROP_RD},
     [HOGPRH_DFU_AUTH_CHAR]                 = {ATT_CHAR_HID_DFU_AUTH,       ATT_OPTIONAL, ATT_CHAR_PROP_RD},
     [HOGPRH_DFU_DATA_CHAR]                 = {ATT_CHAR_HID_DFU_DATA,       ATT_OPTIONAL, ATT_CHAR_PROP_RD},
 };
-
+#endif
 
 /*
  * FUNCTION DEFINITIONS
@@ -98,10 +99,8 @@ __STATIC int hogprh_enable_req_handler(ke_msg_id_t const msgid,
     uint8_t conidx = KE_IDX_GET(dest_id);
     struct hogprh_env_tag *p_hogprh_env = PRF_ENV_GET(HOGPRH, hogprh);
 
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO, "hogprh_enable_req_handler: con_type=%d,state=%d,p_env[conidx]=0x%x\r\n", 
                        p_param->con_type,state,p_hogprh_env->p_env[conidx]);
-#endif   
 
     ASSERT_INFO(p_hogprh_env != NULL, dest_id, src_id);
     
@@ -168,9 +167,7 @@ __STATIC int hogprh_rd_char_req_handler(ke_msg_id_t const msgid,
     // Device Information Service Client Role Task Environment
     struct hogprh_env_tag *p_hogprh_env = PRF_ENV_GET(HOGPRH, hogprh);
 
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO, "hogprh_rd_char_cmd_handler code=0x%x\r\n",p_param->char_code);
-#endif      
 
     ASSERT_INFO(p_hogprh_env != NULL, dest_id, src_id);
     
@@ -230,9 +227,7 @@ __STATIC int hogprh_rd_req_handler(ke_msg_id_t const msgid,
     // Device Information Service Client Role Task Environment
     struct hogprh_env_tag *p_hogprh_env = PRF_ENV_GET(HOGPRH, hogprh);
 
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO, "hogprh_rd_cmd_handler handle=0x%x\r\n",p_param->handle);
-#endif      
 
     ASSERT_INFO(p_hogprh_env != NULL, dest_id, src_id);
     
@@ -290,9 +285,7 @@ __STATIC int hogprh_wr_req_handler(ke_msg_id_t const msgid,
     
     struct hogprh_env_tag *p_hogprh_env = PRF_ENV_GET(HOGPRH, hogprh);
 
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO, "hogprh_wr_req_handler char_idx=%d, value=0x%x\r\n",p_param->char_idx, p_param->value);
-#endif      
 
     ASSERT_INFO(p_hogprh_env != NULL, dest_id, src_id);
 
@@ -328,10 +321,8 @@ __STATIC int gattc_sdp_svc_ind_handler(ke_msg_id_t const msgid,
                                      ke_task_id_t const dest_id,
                                      ke_task_id_t const src_id)
 {
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO, "hogprh_task gattc_sdp_svc_ind_handler start_hdl=%d, end_hdl=%d,uuid_len=%d, uuid=0x%02x%02x\r\n",
                        p_ind->start_hdl, p_ind->end_hdl,p_ind->uuid_len, p_ind->uuid[1],p_ind->uuid[0]);
-#endif  
 
     if (ke_state_get(dest_id) == HOGPRH_DISCOVERING)
     {
@@ -341,10 +332,8 @@ __STATIC int gattc_sdp_svc_ind_handler(ke_msg_id_t const msgid,
 
         ASSERT_INFO(p_hogprh_env != NULL, dest_id, src_id);
         ASSERT_INFO(p_hogprh_env->p_env[conidx] != NULL, dest_id, src_id);
-        
-#if (TRACE_ENABLE)
+
         LOG(LOG_LVL_INFO, "nb_svc=%d\r\n",p_hogprh_env->p_env[conidx]->nb_svc );
-#endif 
 
         if (p_hogprh_env->p_env[conidx]->nb_svc == 0)
         {
@@ -353,16 +342,15 @@ __STATIC int gattc_sdp_svc_ind_handler(ke_msg_id_t const msgid,
                 // Retrieve device characteristics
                 prf_extract_svc_info(p_ind, HOGPRH_CHAR_MAX, &hogprh_device_char[0], 
                                     &(p_hogprh_env->p_env[conidx]->device.chars[0]), 0, NULL, NULL);
-
-
             }
+#if 0
             else //DFU uuid is 128 bit
             {
                 // Retrieve device characteristics
                 prf_extract_svc_info_128(p_ind, HOGPRH_DFU_CHAR_MAX, &hogprh_device_dfu_char[0], 
                                     &(p_hogprh_env->p_env[conidx]->device.chars[0]), 0, NULL, NULL);
             }
-            
+#endif
                             //Even if we get multiple responses we only store 1 range
             p_hogprh_env->p_env[conidx]->device.svc.shdl = p_ind->start_hdl;
             p_hogprh_env->p_env[conidx]->device.svc.ehdl = p_ind->end_hdl;
@@ -395,10 +383,8 @@ __STATIC int gattc_cmp_evt_handler(ke_msg_id_t const msgid,
     struct hogprh_env_tag *p_hogprh_env = PRF_ENV_GET(HOGPRH, hogprh);
     uint8_t conidx = KE_IDX_GET(dest_id);
 
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO, "HOGPRH_task gattc_cmp_evt_handler: state=%d,status=%d,operation=0x%x, seq_num=0x%x,nb_svc=%d\r\n",
                         state, p_param->status,p_param->operation, p_param->seq_num,p_hogprh_env->p_env[conidx]->nb_svc);
-#endif   
 
     if (state == HOGPRH_DISCOVERING)
     {
@@ -454,10 +440,8 @@ __STATIC int gattc_read_ind_handler(ke_msg_id_t const msgid,
                                   ke_task_id_t const dest_id,
                                   ke_task_id_t const src_id)
 {
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO, "hogprh_task gattc_read_ind_handler handle=0x%x,length=%d, offset=%d\r\n", 
                        p_param->handle, p_param->length, p_param->offset);
-#endif 
 
     if (ke_state_get(dest_id) == HOGPRH_BUSY)
     {
@@ -484,10 +468,8 @@ __STATIC int gattc_disc_char_desc_ind_handler(ke_msg_id_t const msgid,
     uint8_t state = ke_state_get(dest_id);
     struct hogprh_env_tag *p_bcsc_env = PRF_ENV_GET(HOGPRH, hogprh);
 
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO, "HOGPRH_task gattc_read_ind_handler attr_hdl=0x%x,uuid_len=%d, uuid=0x%02x%02x,conidx=%d,state=%d\r\n", 
                            p_ind->attr_hdl, p_ind->uuid_len, p_ind->uuid[1],p_ind->uuid[0],conidx, state);
-#endif     
 
     return (KE_MSG_CONSUMED);
 }
@@ -508,10 +490,8 @@ __STATIC int gattc_event_ind_handler(ke_msg_id_t const msgid,
     //indication Build a PLXC_VALUE_IND message
     struct gattc_event_cfm *p_cfm;
 
-#if (TRACE_ENABLE)
     LOG(LOG_LVL_INFO, "hogprh_task gattc_event_ind_handler handle=0x%x,length=%d, type=%d,hogprh_state=%d\r\n", 
                            p_param->handle, p_param->length, p_param->type, ke_state_get(dest_id));
-#endif 
 
     if ((p_param->type != GATTC_INDICATE) && (p_param->type != GATTC_NOTIFY))
     {

@@ -47,7 +47,7 @@ const struct attm_desc bas_att_db[BAS_IDX_NB] =
     // Battery Level Characteristic Declaration
     [BAS_IDX_BATT_LVL_CHAR]        =   {ATT_DECL_CHARACTERISTIC,   PERM(RD, ENABLE), 0, 0},
     // Battery Level Characteristic Value
-    [BAS_IDX_BATT_LVL_VAL]         =   {ATT_CHAR_BATTERY_LEVEL,    PERM(RD, ENABLE), PERM(RI, ENABLE), 0},
+    [BAS_IDX_BATT_LVL_VAL]         =   {ATT_CHAR_BATTERY_LEVEL,    PERM(RD, ENABLE)|PERM(NTF, ENABLE), PERM(RI, ENABLE), 0},
     // Battery Level Characteristic - Client Characteristic Configuration Descriptor
     [BAS_IDX_BATT_LVL_NTF_CFG]     =   {ATT_DESC_CLIENT_CHAR_CFG,  PERM(RD, ENABLE)|PERM(WRITE_REQ, ENABLE), 0, 0},
     // Battery Level Characteristic - Characteristic Presentation Format Descriptor

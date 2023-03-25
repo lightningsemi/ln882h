@@ -136,8 +136,6 @@ int8_t ln_ble_mac_set(const uint8_t *addr);
 */
 int8_t ln_ble_mac_get(uint8_t *addr);
 
-void ke_msg_sync_lock_release(void);
-
 void platform_reset(uint32_t error);
 void rw_init(uint8_t mac[6]);
 void rw_deinit(void);

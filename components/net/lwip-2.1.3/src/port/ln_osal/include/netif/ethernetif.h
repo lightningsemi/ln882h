@@ -44,6 +44,7 @@ int                  netdev_set_ip_info(netif_idx_t nif_idx, tcpip_ip_info_t *ip
 int                  netdev_get_ip_info(netif_idx_t nif_idx, tcpip_ip_info_t *ip_info);
 void                 netdev_get_ip_cb_set(netdev_get_ip_cb_t cb);
 netdev_get_ip_cb_t   netdev_get_ip_cb_get(void);
+int                  netdev_got_ip(void);
 int                  netdev_set_mac_addr(netif_idx_t nif_idx, uint8_t *mac_addr);
 int                  netdev_get_mac_addr(netif_idx_t nif_idx, uint8_t *mac_addr);
 struct netif *       netdev_get_netif(netif_idx_t nif_idx);

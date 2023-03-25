@@ -78,6 +78,7 @@ set(UTILS_SRC
     ${COMP_UTILS_DIR}/crc32.c
     ${COMP_UTILS_DIR}/system_parameter.c
     ${COMP_UTILS_DIR}/wrap_stdio.c
+    ${COMP_UTILS_DIR}/linux_compat/linux_compat_time.c
 )
 
 include_directories(${COMP_UTILS_DIR})
@@ -86,6 +87,7 @@ include_directories(${COMP_UTILS_DIR}/reboot_trace)
 include_directories(${COMP_UTILS_DIR}/fifo)
 include_directories(${COMP_UTILS_DIR}/debug)
 include_directories(${COMP_UTILS_DIR}/debug/CmBacktrace)
+include_directories(${COMP_UTILS_DIR}/linux_compat)
 list(APPEND MODULE_SRC ${UTILS_SRC})
 
 ###################################  serial  ###################################

@@ -135,6 +135,8 @@ struct bass_batt_level_ntf_cfg_ind
 {
     /// connection index
     uint8_t conidx;
+    /// Handle of the attribute written
+    uint16_t handle;
     ///Notification Configuration
     uint8_t ntf_cfg;
 };

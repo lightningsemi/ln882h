@@ -142,14 +142,21 @@ ln_at_parser_err_t ln_at_cmd_parse(char *intact_line, size_t len)
     memset(at_cmd, 0x0, sizeof(ln_at_parser_t));
 
     {
-        #undef SPECIAL_CMD
-        #define SPECIAL_CMD "+PVTCMD"
+        #define SPECIAL_CMD_NUM     5
+        const static char* special_cmd[SPECIAL_CMD_NUM] = {"+PVTCMD", "+LENTF", "+LEIND", "+LEWRREQ", "+LEWRCMD"};
         char *pos = NULL;
-        if ((pos = strstr(intact_line, SPECIAL_CMD)) != NULL)
+        int special_cmd_idx = 0;
+        while(special_cmd_idx < SPECIAL_CMD_NUM)
+        {
+            if((pos = strstr(intact_line, special_cmd[special_cmd_idx])) != NULL)
+                break;
+            special_cmd_idx++;
+        }
+        if (NULL != pos)
         {
             /* find PVTCMD */
             at_cmd->name.start_pos = pos;
-            at_cmd->name.end_pos   = pos + strlen(SPECIAL_CMD);
+            at_cmd->name.end_pos   = pos + strlen(special_cmd[special_cmd_idx]);
             *at_cmd->name.end_pos = '\0';
             at_cmd->total_para_num = 1;
             at_cmd->cmd_type_flag = LN_AT_CMD_MARK_SET;

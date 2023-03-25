@@ -5,6 +5,44 @@
         <td>当前SDK版本</td>
         <td>上游版本</td>
         <td>摘要</td>
+    </tr>   
+    <tr>
+        <td>
+            2023-03-25 22:30:00
+        </td>
+        <td>
+            v1.8
+        </td>
+        <td>
+            97b642f3
+        </td>
+        <td>
+            1. WIFI Lib 版本更新为 v1.1.2 <br />
+            2. BLE Lib 版本更新为 v1.0.5 <br />
+            3. SDK 版本更新为 v1.8 <br />
+             <br /><b>SDK changelog:</b> <br />
+		    1. BLE MAC中断优先级调整为最高 <br />
+		    2. 增加 linux 代码兼容适配 sys/time.h <br />
+		    3. 更新 http 组件，增加扩展接口，保持向前兼容 <br />
+		    4. 添加smartconfig 示例工程 <br />
+		    5. 优化高阶速率(OFDM)接收 <br />
+		    6. 修复AT+CIPSTA?查询IP返回ERROR，修复CIPSTAMAC命令使用vsscanf(gcc@nona_lib)的bug <br />
+		    7. lwip优化ARP，DHCP，CHKSUM算法 <br />
+		    8. 修复bootheader的一些标志位设置不成功的bug(比如CRP_FLAG被配配置为1，但生成image没有置位) <br />
+		    9. 完善got ip接口，方便应用层在wifi连接成功，等待IP有效后执行网络应用 <br />
+		    10. BLE lib log等级更改为INFO <br />
+		    11. rebuild 2ndboot，添加flash补丁 <br />
+		    12. 删除 ble_mcu_scan示例工程，在ble_mcu_data_trans示例工程中增加scan示例 <br />
+		    13. 添加BLE APP封装层，AT命令，简化BLE应用，用新的ble API更新ble，combo相关示例工程，添加BLE API接口文档。(移除老版本ble api) <br />
+            14. 更新<b>wifilib</b> <br />
+				14.1. AP模式优化 <br />
+				14.2. ping测试/高低温优化 <br />
+				14.3  恢复信令测试模式速率集
+            15. 更新<b>blelib</b> <br />
+				15.1. 修复扩展广播相关问题 <br />
+				15.2. 增加BLE协议栈调度机会 <br />
+				15.3. ble assert分类 <br />
+        </td>
     </tr>
     <tr>
         <td>

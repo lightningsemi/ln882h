@@ -22,20 +22,23 @@
  * INCLUDE FILES
  ****************************************************************************************
  */
-#include "rwprf_config.h"
+#include "rwip_config.h"
+#include "rwip.h"
 #include "rwprf_config.h"
 
 #if (BLE_HID_REPORT_HOST)
+
+#include "gap.h"
+#include "gattc_task.h"
 #include "attm.h"
 #include "hogprh.h"
-#include "hid/report_host/api/hogprh_task.h"
+#include "hogprh_task.h"
 #include "prf_utils.h"
-#include "prf.h"
 
 #include "ke_mem.h"
-#if (TRACE_ENABLE)
+
 #include "utils/debug/log.h"
-#endif
+
 
 
 /**
@@ -168,10 +171,9 @@ void hogprh_enable_rsp_send(struct hogprh_env_tag *p_hogprh_env, uint8_t conidx,
                                                 hogprh_enable_rsp);
 
     p_rsp->status = status;
-    
-#if (TRACE_ENABLE)
+
     LOG(LOG_LVL_INFO, "hogprh_enable_rsp_send status=0x%x\r\n",status);
-#endif 
+
 
     if (status == GAP_ERR_NO_ERROR)
     {

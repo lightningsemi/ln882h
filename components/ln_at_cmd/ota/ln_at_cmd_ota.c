@@ -254,7 +254,7 @@ static void http_ota_entry(void *params)
     
     ota_port = ota_get_port_ctx();
 
-    while(NETDEV_LINK_UP != netdev_get_link_state(netdev_get_active())){
+    while(!netdev_got_ip()){
         OS_MsDelay(500);
     }
     

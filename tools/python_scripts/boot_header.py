@@ -57,6 +57,10 @@ class BootHeader:
         self.__boot_header_crc      = items[6]
 
     def toByteArray(self) -> bytearray:
+        struct.pack_into("<I2H4I", self.__buffer, 0,
+                        self.bootram_target_addr,
+                        self.bootram_bin_length, self.bootram_crc_offset,
+                        self.bootram_crc_value, self.bootram_vector_addr, self.crp_flag, self.boot_header_crc)
         self.__boot_header_crc = zlib.crc32(self.__buffer[0:(BootHeader.BOOT_HEADER_SIZE-4)])
         struct.pack_into("<I2H4I", self.__buffer, 0,
                         self.bootram_target_addr,
