@@ -37,7 +37,7 @@ typedef enum
 }gpio_port_t;
 
 void     pwm_init(uint32_t freq, float duty,pwm_channel_t pwm_channel_num,gpio_port_t gpio_port,gpio_pin_t gpio_pin);
-void     pwm_cnt_set(int cnt);
+void     pwm_cnt_set(int cnt, uint32_t freq, float duty);
 void     pwm_start(pwm_channel_t pwm_channel_num);
 void     pwm_set_duty(float duty, pwm_channel_t pwm_channel_num);
 float    pwm_get_duty(pwm_channel_t pwm_channel_num);

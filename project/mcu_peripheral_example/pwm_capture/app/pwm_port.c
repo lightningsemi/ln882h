@@ -10,11 +10,11 @@
  */
 #include "pwm_port.h"
 
-
 void ADV_TIMER_IRQHandle(void);
 void (*timer2_it_handler)(void);
 uint8_t pwm_start_flag = 0;
 int g_pwm_cnt = 0;
+
 
 /**
  * @brief PWM初始化
@@ -29,6 +29,7 @@ void pwm_init(uint32_t freq, float duty,pwm_channel_t pwm_channel_num,gpio_port_
 {
     uint32_t reg_base = 0;
     uint32_t gpio_reg_base = 0;
+    uint16_t cmp_data = 0;
 
     /* PWM引脚初始化 */
     switch(gpio_port)
@@ -36,10 +37,6 @@ void pwm_init(uint32_t freq, float duty,pwm_channel_t pwm_channel_num,gpio_port_
         case GPIO_A: gpio_reg_base = GPIOA_BASE; break;
         case GPIO_B: gpio_reg_base = GPIOB_BASE; break;
     }
-
-    hal_gpio_pin_afio_select(gpio_reg_base,gpio_pin,(afio_function_t)(ADV_TIMER_PWM0 + pwm_channel_num));
-    hal_gpio_pin_afio_en(gpio_reg_base,gpio_pin,HAL_ENABLE);
-
 
     switch(pwm_channel_num)
     {
@@ -75,23 +72,25 @@ void pwm_init(uint32_t freq, float duty,pwm_channel_t pwm_channel_num,gpio_port_
         adv_tim_init.adv_tim_cmp_a_value = (adv_tim_init.adv_tim_load_value + 2) * duty / 100.0f;      //设置通道a比较值
     else
         adv_tim_init.adv_tim_cmp_b_value = (adv_tim_init.adv_tim_load_value + 2) * duty / 100.0f;      //设置通道b比较值
+    
         
     adv_tim_init.adv_tim_dead_gap_value = 0;                                //设置死区时间
     adv_tim_init.adv_tim_dead_en        = ADV_TIMER_DEAD_DIS;               //不开启死区
     adv_tim_init.adv_tim_cnt_mode       = ADV_TIMER_CNT_MODE_INC;           //向上计数模式
     adv_tim_init.adv_tim_cha_inv_en     = ADV_TIMER_CHA_INV_EN;
     adv_tim_init.adv_tim_chb_inv_en     = ADV_TIMER_CHB_INV_EN;
-    adv_tim_init.adv_tim_cha_en = ADV_TIMER_CHA_EN;
-	adv_tim_init.adv_tim_chb_en = ADV_TIMER_CHB_EN;
-    
-		adv_tim_init.adv_tim_cha_it_mode = ADV_TIMER_CHA_IT_MODE_INC;
-		adv_tim_init.adv_tim_chb_it_mode = ADV_TIMER_CHB_IT_MODE_INC;
+
+   
+    adv_tim_init.adv_tim_cha_it_mode = ADV_TIMER_CHA_IT_MODE_INC;
+	adv_tim_init.adv_tim_chb_it_mode = ADV_TIMER_CHB_IT_MODE_INC;
 
     hal_adv_tim_init(reg_base,&adv_tim_init);
     hal_adv_tim_it_cfg(reg_base, ADV_TIMER_IT_FLAG_CMPA, HAL_ENABLE);
     hal_adv_tim_it_cfg(reg_base, ADV_TIMER_IT_FLAG_CMPB, HAL_ENABLE);
     hal_adv_tim_it_cfg(reg_base, ADV_TIMER_IT_FLAG_LOAD, HAL_ENABLE);
     
+    hal_gpio_pin_afio_select(gpio_reg_base,gpio_pin,(afio_function_t)(ADV_TIMER_PWM0 + pwm_channel_num));
+    hal_gpio_pin_afio_en(gpio_reg_base,gpio_pin,HAL_ENABLE);
 }
 
 /**
@@ -99,14 +98,15 @@ void pwm_init(uint32_t freq, float duty,pwm_channel_t pwm_channel_num,gpio_port_
  * 
  * @param cnt pwm次数
  */
-void pwm_cnt_set(int cnt)
+void pwm_cnt_set(int cnt, uint32_t freq, float duty)
 {
     pwm_start_flag = 1;
-    g_pwm_cnt = cnt;
-    pwm_init(1000,20,PWM_CHA_1,GPIO_B,GPIO_PIN_5);
-    pwm_start(PWM_CHA_1);
-    NVIC_SetPriority(ADV_TIMER_IRQn,     2);     
+    g_pwm_cnt = cnt - 1;    
+    pwm_init(freq,duty,PWM_CHA_0,GPIO_B,GPIO_PIN_5);
+    pwm_start(PWM_CHA_0);
+    NVIC_SetPriority(ADV_TIMER_IRQn,     4);     
     NVIC_EnableIRQ(ADV_TIMER_IRQn);      
+    
 }
 
 /**
@@ -432,13 +432,12 @@ void ADV_TIMER_IRQHandler(void)
            hal_adv_tim_clr_it_flag(ADV_TIMER_0_BASE, ADV_TIMER_IT_FLAG_LOAD);
             if(g_pwm_cnt > 0)
             {
-                pwm_cmp_a_setf(ADV_TIMER_0_BASE,200);
                 g_pwm_cnt --;
             }
             else
             {
                 pwm_start_flag = 0;
-                pwm_disable(PWM_CHA_1);
+                pwm_disable(PWM_CHA_0);
                 NVIC_DisableIRQ(ADV_TIMER_IRQn);
             }
         }

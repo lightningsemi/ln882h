@@ -20,6 +20,9 @@
 #include "pwm_port.h"
 #include "pulse_cap.h"
 
+uint32_t freqlist[10]={1000, 900, 800, 700, 600, 500, 400, 300, 200, 100};
+float dutylist[10]={90, 80, 70, 60, 50, 40, 30, 20, 10, 5};
+extern uint8_t pwm_start_flag;
 
 int main (int argc, char* argv[])
 {     
@@ -29,7 +32,14 @@ int main (int argc, char* argv[])
     LOG(LOG_LVL_INFO,"ln882H init! \n");
     ln_show_reg_init();
 
-	app_pwm();
+    //for pwm cnt test
+    for(uint8_t i = 0; i < 10; i++)
+    {
+      pwm_cnt_set(1,freqlist[i],dutylist[i]);
+      while(pwm_start_flag);
+    }
+    //for pwm capture
+    //app_pwm();
 	
     while(1)
     {
