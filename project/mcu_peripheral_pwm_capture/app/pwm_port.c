@@ -12,7 +12,7 @@
 
 void ADV_TIMER_IRQHandle(void);
 void (*timer2_it_handler)(void);
-uint8_t pwm_start_flag = 0;
+volatile uint8_t pwm_start_flag = 0;
 int g_pwm_cnt = 0;
 
 
@@ -421,15 +421,11 @@ void TIMER2_IRQHandler()
 
 
 void ADV_TIMER_IRQHandler(void)
-{
-   uint8_t it_flag = 0;
-    
-   if(pwm_start_flag)
+{ 
+   if(hal_adv_tim_get_it_flag(ADV_TIMER_0_BASE, ADV_TIMER_IT_FLAG_LOAD))
    {
-       it_flag = hal_adv_tim_get_it_flag(ADV_TIMER_0_BASE, ADV_TIMER_IT_FLAG_LOAD);
-       if(it_flag)
+       if(pwm_start_flag)
        {
-           hal_adv_tim_clr_it_flag(ADV_TIMER_0_BASE, ADV_TIMER_IT_FLAG_LOAD);
             if(g_pwm_cnt > 0)
             {
                 g_pwm_cnt --;
@@ -441,9 +437,7 @@ void ADV_TIMER_IRQHandler(void)
                 NVIC_DisableIRQ(ADV_TIMER_IRQn);
             }
         }
-       else
-       {
-           it_flag =0;
-       }
+
+       hal_adv_tim_clr_it_flag(ADV_TIMER_0_BASE, ADV_TIMER_IT_FLAG_LOAD);
     }
 }

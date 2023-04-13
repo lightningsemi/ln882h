@@ -23,6 +23,8 @@ LR_FLASH  CACHE_FLASH_BASE+APP_SPACE_OFFSET+IMAGE_HEADER_SIZE (APP_SPACE_SIZE - 
         hal_flash.o(+RO)
         hal_cache.o(+RO)
         hal_qspi.o(+RO)
+	  hal_adv_timer.o(+RO)
+        pwm_port.o(+RO)
     }
 	ER_STACK +0
     {

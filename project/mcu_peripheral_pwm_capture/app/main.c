@@ -22,7 +22,7 @@
 
 uint32_t freqlist[10]={1000, 900, 800, 700, 600, 500, 400, 300, 200, 100};
 float dutylist[10]={90, 80, 70, 60, 50, 40, 30, 20, 10, 5};
-extern uint8_t pwm_start_flag;
+volatile extern uint8_t pwm_start_flag;
 
 int main (int argc, char* argv[])
 {     
