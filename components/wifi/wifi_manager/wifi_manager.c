@@ -4,6 +4,7 @@
 #include "ln_wifi_err.h"
 #include "utils/debug/log.h"
 #include "utils/ln_list.h"
+#include "colink_wifi_driver_port.h"
 
 
 typedef struct {
@@ -210,7 +211,7 @@ static void sta_connected(void)
 {
     LOG(LOG_LVL_INFO, "STA connected to target AP!\r\n");
     netdev_set_state(NETIF_IDX_STA, NETDEV_UP);
-
+		get_colink_mcu_handle()->ap_indicate_led_on();
     if (event_cb[WIFI_MGR_EVENT_STA_CONNECTED]) {
         event_cb[WIFI_MGR_EVENT_STA_CONNECTED](NULL);
     }
@@ -221,6 +222,7 @@ static void sta_connected(void)
 static void sta_disconnected(void)
 {
     LOG(LOG_LVL_INFO, "STA disconnected to target AP!\r\n");
+		get_colink_mcu_handle()->ap_indicate_led_off();
     netdev_set_state(NETIF_IDX_STA, NETDEV_DOWN);
     wifi_set_allow_cpu_sleep_flag(0);
 

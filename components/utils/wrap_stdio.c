@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdarg.h>
 
-#define WRAP_STDOUT_BUF_SIZE	(256)
+#define WRAP_STDOUT_BUF_SIZE	(2048)
 static char stdout_buf[WRAP_STDOUT_BUF_SIZE];
 
 #ifdef __CONFIG_OS_KERNEL

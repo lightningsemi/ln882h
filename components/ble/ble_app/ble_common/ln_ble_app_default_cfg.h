@@ -67,7 +67,7 @@ typedef enum
 
 
 #if !defined BLE_CONFIG_AUTO_ADV
-#define BLE_CONFIG_AUTO_ADV             (1)
+#define BLE_CONFIG_AUTO_ADV             (0)
 #endif
 
 #if !defined BLE_CONFIG_AUTO_SCAN

@@ -1671,7 +1671,7 @@
  * data in client_data member array of struct netif (max. 256).
  */
 #if !defined LWIP_NUM_NETIF_CLIENT_DATA || defined __DOXYGEN__
-#define LWIP_NUM_NETIF_CLIENT_DATA      0
+#define LWIP_NUM_NETIF_CLIENT_DATA      2
 #endif
 /**
  * @}

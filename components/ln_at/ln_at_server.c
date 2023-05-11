@@ -149,6 +149,21 @@ void ln_at_hex_print(uint8_t *buf, size_t size, const char *format, ...)
     LN_AT_PRINT_UNLOCK();
 }
 
+int ln_at_cmd_args_get(const char *args_string, const char *expr, ...)
+{
+    va_list args;
+    int num = 0;
+
+    if (!args_string || !expr)
+        return -1;
+
+    va_start(args, expr);
+    num = vsscanf(args_string, expr, args);
+    va_end(args);
+
+    return num;
+}
+
 /**
  * @brief hash type:Daniel J. Bernstein hash algorithm.
 */

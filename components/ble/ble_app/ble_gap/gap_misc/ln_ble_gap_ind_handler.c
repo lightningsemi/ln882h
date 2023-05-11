@@ -138,8 +138,8 @@ static int ln_gap_mgr_cmd_evt_handler(ke_msg_id_t const msgid,
                 ln_gap_set_dev_config_t cfg_param;
                 memset(&cfg_param,0,sizeof(ln_gap_set_dev_config_t));
                 // Set Data length parameters
-                cfg_param.sugg_max_tx_octets = BLE_MIN_OCTETS;
-                cfg_param.sugg_max_tx_time   = BLE_MIN_TIME;
+                cfg_param.sugg_max_tx_octets = 251; //BLE_MIN_OCTETS;
+                cfg_param.sugg_max_tx_time   = 2120; //BLE_MIN_TIME;
                 // Host privacy enabled by default
                 cfg_param.privacy_cfg = 0;
                 cfg_param.role    = GAP_ROLE_ALL;

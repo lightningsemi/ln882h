@@ -13,7 +13,7 @@
 #define LOG_LVL_INFO                (LOG_LVL_EMERG + 3)
 #define LOG_LVL_DEBUG               (LOG_LVL_EMERG + 4)
 #define LOG_LVL_TRACE               (LOG_LVL_EMERG + 5)
-#define LOG_LVL_CTRL                LOG_LVL_INFO     //By modifying this value, control the different levels of log printing
+#define LOG_LVL_CTRL                LOG_LVL_TRACE     //By modifying this value, control the different levels of log printing
 
 void log_init(void);
 void log_deinit(void);
@@ -24,10 +24,12 @@ int log_stdio_write(char *buf, size_t size);
 #define log_printf(...)     __wrap_sprintf((stdio_write_fn)log_stdio_write, __VA_ARGS__)
 #define log_raw_data_flush(data, len) __wrap_stdio_raw_data_flush((const char *)data, (stdio_write_fn)log_stdio_write, (size_t)len)
 
+uint8_t get_log_lvl(void);
+
 #if (PRINTF_OMIT == DISABLE)
         #define LOG(level, ...)                  \
                 do{                              \
-                    if(level <= LOG_LVL_CTRL){   \
+                    if(level <= get_log_lvl()){   \
                         log_printf(__VA_ARGS__); \
                     }                            \
                 }while(0)

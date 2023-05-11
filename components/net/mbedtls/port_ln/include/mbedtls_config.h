@@ -3097,7 +3097,7 @@
  * Uncomment to set the maximum plaintext size of both
  * incoming and outgoing I/O buffers.
  */
-#define MBEDTLS_SSL_MAX_CONTENT_LEN                 16384
+#define MBEDTLS_SSL_MAX_CONTENT_LEN                 8192
 
 /** \def MBEDTLS_SSL_IN_CONTENT_LEN
  *

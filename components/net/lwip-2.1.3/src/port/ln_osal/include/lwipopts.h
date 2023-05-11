@@ -21,6 +21,8 @@
 
 #define LWIP_TCPIP_TIMEOUT         1
 
+//#define LWIP_MDNS_RESPONDER		   1
+
 /**
  * NO_SYS==1: Provides VERY minimal functionality. Otherwise,use lwIP facilities.
  */

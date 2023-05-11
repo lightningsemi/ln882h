@@ -51,7 +51,7 @@
  * transport. IGMP is needed for IPv4 multicast.
  */
 #ifndef LWIP_MDNS_RESPONDER
-#define LWIP_MDNS_RESPONDER             0
+#define LWIP_MDNS_RESPONDER             1
 #endif /* LWIP_MDNS_RESPONDER */
 
 /** The maximum number of services per netif */
@@ -70,7 +70,7 @@
  * MDNS_DEBUG: Enable debugging for multicast DNS.
  */
 #ifndef MDNS_DEBUG
-#define MDNS_DEBUG                       LWIP_DBG_OFF
+#define MDNS_DEBUG                       LWIP_DBG_ON
 #endif
 
 /**
