@@ -26,6 +26,8 @@
 #include "usr_app.h"
 #include "usr_ble_app.h"
 
+#include "ln_nvds.h"
+
 
 
 static OS_Thread_t g_usr_app_thread;
@@ -104,10 +106,18 @@ static void wifi_scan_complete_cb(void * arg)
 static void wifi_init_sta(void)
 {
     // ln_generate_random_mac(mac_addr);
+    
     //1. sta mac get
-     if (SYSPARAM_ERR_NONE != sysparam_sta_mac_get(mac_addr)) {
-        LOG(LOG_LVL_ERROR, "[%s]sta mac get filed!!!\r\n", __func__);
-        return;
+    if(ln_get_read_param_from_fotp_flag() == 0x01){
+        ln_fotp_get_mac_val(mac_addr);
+        sysparam_sta_mac_update((const uint8_t *)mac_addr);	
+    }
+    else
+    {
+         if (SYSPARAM_ERR_NONE != sysparam_sta_mac_get(mac_addr)) {
+            LOG(LOG_LVL_ERROR, "[%s]sta mac get filed!!!\r\n", __func__);
+            return;
+        }
     }
 
     if (mac_addr[0] == STA_MAC_ADDR0 &&
@@ -152,6 +162,11 @@ static void wifi_init_ap(void)
 {
     tcpip_ip_info_t  ip_info;
     server_config_t  server_config;
+    
+    if(ln_get_read_param_from_fotp_flag() == 0x01){
+        ln_fotp_get_mac_val(mac_addr);
+        sysparam_sta_mac_update((const uint8_t *)mac_addr);	
+    }
 
     ip_info.ip.addr      = ipaddr_addr((const char *)"192.168.4.1");
     ip_info.gw.addr      = ipaddr_addr((const char *)"192.168.4.1");

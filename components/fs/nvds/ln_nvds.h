@@ -63,6 +63,24 @@
 #define NV11_TX_POWER_COMP_GN_OFFST    (NV10_TX_POWER_COMP_B_OFFST + NV10_TX_POWER_COMP_B_LEN)
 #define NV11_TX_POWER_COMP_GN_LEN      (1)
 
+
+#define FLASH_OTP_VAL_VAILD        0x01
+
+#define FLASH_OTP_FREQ_OFFSET_POS  0
+#define FLASH_OTP_FREQ_OFFSET_LEN  1
+#define FLASH_OTP_TX_POWER_B_POS   1
+#define FLASH_OTP_TX_POWER_B_LEN   1
+#define FLASH_OTP_TX_POWER_GN_POS  2
+#define FLASH_OTP_TX_POWER_GN_LEN  1
+#define FLASH_OTP_TX_POWER_BGN_POS 3
+#define FLASH_OTP_TX_POWER_BGN_LEN 1
+
+#define FLASH_OTP_PARAM_FLAG_POS   4
+#define FLASH_OTP_PARAM_FLAG_LEN   1
+
+#define FLASH_OTP_MAC_POS  0x100
+#define FLASH_OTP_MAC_LEN  6
+
 //If vendor add new macro into the nvds,please update it!
 #if ((NV11_TX_POWER_COMP_GN_OFFST + NV11_TX_POWER_COMP_GN_LEN) > SIZE_4KB)
   #error "NVDS area overflow!!!"
@@ -117,6 +135,16 @@ int    ln_nvds_get_tx_power_b_comp(uint8_t *val);
 int    ln_nvds_set_tx_power_gn_comp(uint8_t  val);
 int    ln_nvds_get_tx_power_gn_comp(uint8_t *val);
 
+int    ln_get_read_param_from_fotp_flag();
+int    ln_fotp_get_param_flag(uint8_t *val);
+
+int    ln_fotp_get_xtal_comp_val(uint8_t *val);
+
+int    ln_fotp_get_tx_power_b_comp_val(uint8_t *val);
+int    ln_fotp_get_tx_power_gn_comp_val(uint8_t *val);
+int    ln_fotp_get_tx_power_bgn_comp_val(uint8_t *val);
+
+int    ln_fotp_get_mac_val(uint8_t *val);
 #ifdef __cplusplus
 }
 #endif

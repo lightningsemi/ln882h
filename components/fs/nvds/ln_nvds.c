@@ -4,6 +4,7 @@
 
 static uint32_t ln_nvds_base = 0;
 static char     ln_nvds_ver[NV0_NVDS_VERSION_LEN] = {0,};
+static uint8_t  read_from_fotp_flag = 0;
 
 #define USR_NVDS_SECT1_OFFSET    (ln_nvds_base)
 #define USR_NVDS_SECT2_OFFSET    (USR_NVDS_SECT1_OFFSET + SIZE_4KB)
@@ -183,7 +184,54 @@ int ln_nvds_init(uint32_t base) {
         str_len = (NV0_NVDS_VERSION_LEN > str_len) ? str_len : NV0_NVDS_VERSION_LEN;
         return ln_nvds_write(NV0_NVDS_VERSION_OFFST, (uint8_t *)NV0_NVDS_VERSION_STR, str_len);
     }
+    
+    uint8_t flag = 0;
+    if (ln_fotp_get_param_flag(&flag) == NVDS_ERR_OK){
+        if(flag == FLASH_OTP_VAL_VAILD){
+            read_from_fotp_flag = 1;
+        }
+    }
+    return NVDS_ERR_OK;
+}
 
+int ln_get_read_param_from_fotp_flag()
+{
+    return read_from_fotp_flag;
+}
+
+int ln_fotp_get_param_flag(uint8_t *val)
+{
+    hal_flash_security_area_read(FLASH_OTP_PARAM_FLAG_POS,FLASH_OTP_PARAM_FLAG_LEN,val);
+    return NVDS_ERR_OK;
+}
+
+int ln_fotp_get_xtal_comp_val(uint8_t *val)
+{
+    hal_flash_security_area_read(FLASH_OTP_FREQ_OFFSET_POS,FLASH_OTP_FREQ_OFFSET_LEN,val);
+    return NVDS_ERR_OK;
+}
+
+int ln_fotp_get_tx_power_b_comp_val(uint8_t *val)
+{
+    hal_flash_security_area_read(FLASH_OTP_TX_POWER_B_POS,FLASH_OTP_TX_POWER_B_LEN,val);
+    return NVDS_ERR_OK;
+}
+
+int ln_fotp_get_tx_power_gn_comp_val(uint8_t *val)
+{
+    hal_flash_security_area_read(FLASH_OTP_TX_POWER_GN_POS,FLASH_OTP_TX_POWER_GN_LEN,val);
+    return NVDS_ERR_OK;
+}
+
+int ln_fotp_get_tx_power_bgn_comp_val(uint8_t *val)
+{
+    hal_flash_security_area_read(FLASH_OTP_TX_POWER_BGN_POS,FLASH_OTP_TX_POWER_BGN_LEN,val);
+    return NVDS_ERR_OK;
+}
+
+int ln_fotp_get_mac_val(uint8_t *val)
+{
+    hal_flash_security_area_read(FLASH_OTP_MAC_POS,FLASH_OTP_MAC_LEN,val);
     return NVDS_ERR_OK;
 }
 
@@ -220,7 +268,10 @@ int ln_nvds_set_xtal_comp_val(uint8_t  val) {
 }
 
 int ln_nvds_get_xtal_comp_val(uint8_t *val) {
-    return ln_nvds_read(NV2_XTAL_COMP_VAL_OFFST, val, NV2_XTAL_COMP_VAL_LEN);
+    if(read_from_fotp_flag == 1)
+        return ln_fotp_get_xtal_comp_val(val);
+    else
+        return ln_nvds_read(NV2_XTAL_COMP_VAL_OFFST, val, NV2_XTAL_COMP_VAL_LEN);
 }
 
 /* NV3_TX_POWER_COMP_OFFST, NV3_TX_POWER_COMP_LEN */
@@ -236,7 +287,13 @@ int ln_nvds_set_tx_power_comp(uint8_t  val) {
 }
 
 int ln_nvds_get_tx_power_comp(uint8_t *val) {
-    return ln_nvds_read(NV3_TX_POWER_COMP_OFFST, val, NV3_TX_POWER_COMP_LEN);
+    //FLASH OTP has no BGN parameter.
+    if(read_from_fotp_flag == 1){
+        *val = 0;
+        return NVDS_ERR_OK;
+    }
+    else
+        return ln_nvds_read(NV3_TX_POWER_COMP_OFFST, val, NV3_TX_POWER_COMP_LEN);
 }
 
 /* NV4_CHIP_SN_OFFSET, NV4_CHIP_SN_LEN */
@@ -350,7 +407,10 @@ int ln_nvds_set_tx_power_b_comp(uint8_t  val) {
 }
 
 int ln_nvds_get_tx_power_b_comp(uint8_t *val) {
-    return ln_nvds_read(NV10_TX_POWER_COMP_B_OFFST, val, NV10_TX_POWER_COMP_B_LEN);
+    if(read_from_fotp_flag == 1)
+        return ln_fotp_get_tx_power_b_comp_val(val);
+    else
+        return ln_nvds_read(NV10_TX_POWER_COMP_B_OFFST, val, NV10_TX_POWER_COMP_B_LEN);
 }
 
 /* NV11_TX_POWER_COMP_GN_OFFST, NV11_TX_POWER_COMP_GN_LEN */
@@ -366,5 +426,8 @@ int ln_nvds_set_tx_power_gn_comp(uint8_t  val) {
 }
 
 int ln_nvds_get_tx_power_gn_comp(uint8_t *val) {
-    return ln_nvds_read(NV11_TX_POWER_COMP_GN_OFFST, val, NV11_TX_POWER_COMP_GN_LEN);
+    if(read_from_fotp_flag == 1)
+        return ln_fotp_get_tx_power_gn_comp_val(val);
+    else
+        return ln_nvds_read(NV11_TX_POWER_COMP_GN_OFFST, val, NV11_TX_POWER_COMP_GN_LEN);
 }
