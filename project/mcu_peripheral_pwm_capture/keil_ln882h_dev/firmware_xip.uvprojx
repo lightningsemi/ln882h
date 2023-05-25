@@ -72,8 +72,8 @@
           <BeforeMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>1</RunUserProg2>
-            <UserProg1Name>python    ..\..\..\..\tools\python_scripts\sdk_env_check.py</UserProg1Name>
-            <UserProg2Name>python3 ..\..\..\..\tools\python_scripts\before_build_keil.py  -p  ..\cfg\flash_partition_cfg.json -o  ..\cfg\flash_partition_table.h</UserProg2Name>
+            <UserProg1Name>python    ..\..\..\tools\python_scripts\sdk_env_check.py</UserProg1Name>
+            <UserProg2Name>python3 ..\..\..\tools\python_scripts\before_build_keil.py  -p  ..\cfg\flash_partition_cfg.json -o  ..\cfg\flash_partition_table.h</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopB1X>0</nStopB1X>
@@ -82,7 +82,7 @@
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>python3  ..\..\..\..\tools\python_scripts\after_build_keil.py  -k   #P   -o flashimage.bin  --sdkroot  ../../../../</UserProg1Name>
+            <UserProg1Name>python3  ..\..\..\tools\python_scripts\after_build_keil.py  -k   #P   -o flashimage.bin</UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
@@ -138,7 +138,7 @@
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3>"..\..\..\..\tools\JFlash\JFlash.exe" (-openprj..\..\..\..\tools\JFlash\ln882h.jflash -open.\flashimage.bin,0x0  -programverify)</Flash3>
+          <Flash3>"..\..\..\tools\JFlash\JFlash.exe" (-openprj..\..\..\tools\JFlash\ln882h.jflash -open.\flashimage.bin,0x0  -programverify)</Flash3>
           <Flash4>.\JLinkSettings.ini</Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>HAL_ASSERT_EN,LN882H</Define>
               <Undefine></Undefine>
-              <IncludePath>..\app;..\bsp;..\cfg;..\startup;..\..\..\..\mcu\CMSIS_5.3.0;..\..\..\..\mcu\driver_ln882h\hal;..\..\..\..\mcu\driver_ln882h\reg;..\..\..\..\mcu\ln882h;..\..\..\..\mcu\driver_ln882h;..\..\..\..\components\utils;..\..\..\..\components;..\..\..\..\components\serial;..\..\..\..\components\utils\debug;..\..\..\..\components\kernel</IncludePath>
+              <IncludePath>..\app;..\bsp;..\cfg;..\startup;..\..\..\mcu\CMSIS_5.3.0;..\..\..\mcu\driver_ln882h\hal;..\..\..\mcu\driver_ln882h\reg;..\..\..\mcu\ln882h;..\..\..\mcu\driver_ln882h;..\..\..\components\utils;..\..\..\components;..\..\..\components\serial;..\..\..\components\utils\debug;..\..\..\components\kernel</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -391,7 +391,7 @@
             <File>
               <FileName>system_ln882h.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\ln882h\system_ln882h.c</FilePath>
+              <FilePath>..\..\..\mcu\ln882h\system_ln882h.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -424,11 +424,6 @@
           <GroupName>bsp</GroupName>
           <Files>
             <File>
-              <FileName>serial_hw.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\bsp\serial_hw.c</FilePath>
-            </File>
-            <File>
               <FileName>ln_show_reg.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp\ln_show_reg.c</FilePath>
@@ -438,6 +433,11 @@
               <FileType>1</FileType>
               <FilePath>..\bsp\ln_test_common.c</FilePath>
             </File>
+            <File>
+              <FileName>serial_hw.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\bsp\serial_hw.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -446,122 +446,122 @@
             <File>
               <FileName>hal_adc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_adc.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_adc.c</FilePath>
             </File>
             <File>
               <FileName>hal_aes.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_aes.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_aes.c</FilePath>
             </File>
             <File>
               <FileName>hal_cache.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_cache.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_cache.c</FilePath>
             </File>
             <File>
               <FileName>hal_common.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_common.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_common.c</FilePath>
             </File>
             <File>
               <FileName>hal_dma.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_dma.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_dma.c</FilePath>
             </File>
             <File>
               <FileName>hal_ext.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_ext.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_ext.c</FilePath>
             </File>
             <File>
               <FileName>hal_flash.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_flash.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_flash.c</FilePath>
             </File>
             <File>
               <FileName>hal_gpio.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_gpio.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_gpio.c</FilePath>
             </File>
             <File>
               <FileName>hal_i2s.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_i2s.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_i2s.c</FilePath>
             </File>
             <File>
               <FileName>hal_it.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_it.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_it.c</FilePath>
             </File>
             <File>
               <FileName>hal_i2c.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_i2c.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_i2c.c</FilePath>
             </File>
             <File>
               <FileName>hal_qspi.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_qspi.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_qspi.c</FilePath>
             </File>
             <File>
               <FileName>hal_rtc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_rtc.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_rtc.c</FilePath>
             </File>
             <File>
               <FileName>hal_spi.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_spi.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_spi.c</FilePath>
             </File>
             <File>
               <FileName>hal_timer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_timer.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_timer.c</FilePath>
             </File>
             <File>
               <FileName>hal_trng.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_trng.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_trng.c</FilePath>
             </File>
             <File>
               <FileName>hal_uart.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_uart.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_uart.c</FilePath>
             </File>
             <File>
               <FileName>hal_wdt.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_wdt.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_wdt.c</FilePath>
             </File>
             <File>
               <FileName>hal_ws2811.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_ws2811.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_ws2811.c</FilePath>
             </File>
             <File>
               <FileName>hal_misc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_misc.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_misc.c</FilePath>
             </File>
             <File>
               <FileName>hal_clock.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_clock.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_clock.c</FilePath>
             </File>
             <File>
               <FileName>hal_adv_timer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_adv_timer.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_adv_timer.c</FilePath>
             </File>
             <File>
               <FileName>hal_sdio_device.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_sdio_device.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_sdio_device.c</FilePath>
             </File>
             <File>
               <FileName>hal_efuse.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\mcu\driver_ln882h\hal\hal_efuse.c</FilePath>
+              <FilePath>..\..\..\mcu\driver_ln882h\hal\hal_efuse.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -571,7 +571,7 @@
             <File>
               <FileName>fifobuf.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\utils\fifo\fifobuf.c</FilePath>
+              <FilePath>..\..\..\components\utils\fifo\fifobuf.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -581,17 +581,17 @@
             <File>
               <FileName>ln_assert.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\utils\debug\ln_assert.c</FilePath>
+              <FilePath>..\..\..\components\utils\debug\ln_assert.c</FilePath>
             </File>
             <File>
               <FileName>log.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\utils\debug\log.c</FilePath>
+              <FilePath>..\..\..\components\utils\debug\log.c</FilePath>
             </File>
             <File>
               <FileName>wrap_stdio.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\utils\wrap_stdio.c</FilePath>
+              <FilePath>..\..\..\components\utils\wrap_stdio.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -601,7 +601,7 @@
             <File>
               <FileName>serial.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\serial\serial.c</FilePath>
+              <FilePath>..\..\..\components\serial\serial.c</FilePath>
             </File>
           </Files>
         </Group>

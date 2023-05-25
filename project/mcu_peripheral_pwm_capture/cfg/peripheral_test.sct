@@ -1,10 +1,10 @@
 #! armcc -E
 
 #include "../cfg/flash_partition_table.h"
-#include "../../../../mcu/ln882h/mem_map_ln882h.h"
+#include "../../../mcu/ln882h/mem_map_ln882h.h"
 	
 
-LR_FLASH  CACHE_FLASH_BASE+APP_SPACE_OFFSET+IMAGE_HEADER_SIZE (APP_SPACE_SIZE - IMAGE_HEADER_SIZE)
+LR_FLASH  CACHE_FLASH_BASE+APP_SPACE_OFFSET+IMAGE_HEADER_SIZE  (APP_SPACE_SIZE - IMAGE_HEADER_SIZE)
 {
     ISR_VECTOR RAM_BASE ALIGN 0x100
     {
@@ -12,7 +12,7 @@ LR_FLASH  CACHE_FLASH_BASE+APP_SPACE_OFFSET+IMAGE_HEADER_SIZE (APP_SPACE_SIZE - 
     }
 
 
-    ER_FLASH CACHE_FLASH_BASE+APP_SPACE_OFFSET+IMAGE_HEADER_SIZE + ImageLength(ISR_VECTOR) (APP_SPACE_SIZE - IMAGE_HEADER_SIZE)
+    ER_FLASH CACHE_FLASH_BASE+APP_SPACE_OFFSET+IMAGE_HEADER_SIZE+ImageLength(ISR_VECTOR)  (APP_SPACE_SIZE - IMAGE_HEADER_SIZE)
     {
         *(InRoot$$Sections)
         .ANY (+RO)
@@ -23,8 +23,6 @@ LR_FLASH  CACHE_FLASH_BASE+APP_SPACE_OFFSET+IMAGE_HEADER_SIZE (APP_SPACE_SIZE - 
         hal_flash.o(+RO)
         hal_cache.o(+RO)
         hal_qspi.o(+RO)
-	  hal_adv_timer.o(+RO)
-        pwm_port.o(+RO)
     }
 	ER_STACK +0
     {

@@ -119,13 +119,8 @@
       <TargetDriverDllRegistry>
         <SetRegEntry>
           <Number>0</Number>
-          <Key>DLGUARM</Key>
-          <Name>d</Name>
-        </SetRegEntry>
-        <SetRegEntry>
-          <Number>0</Number>
           <Key>JL2CM3</Key>
-          <Name>-U69400394 -O78 -S8 -ZTIFSpeedSel50000 -A0 -C0 -JU1 -JI127.0.0.1 -JP0 -RST0 -N00("ARM CoreSight SW-DP") -D00(2BA01477) -L00(0) -TO282 -TC20000000 -TP21 -TDS8008 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -TB1 -TFE1 -FO15 -FD20000000 -FC1000 -FN0</Name>
+          <Name>-U174402503 -O78 -S8 -ZTIFSpeedSel50000 -A0 -C0 -JU1 -JI127.0.0.1 -JP0 -RST0 -N00("ARM CoreSight SW-DP") -D00(2BA01477) -L00(0) -TO283 -TC40000000 -TP21 -TDS8008 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -TB2 -TFE1 -FO15 -FD20000000 -FC1000 -FN0</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -148,7 +143,72 @@
           <Name></Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint/>
+      <Breakpoint>
+        <Bp>
+          <Number>0</Number>
+          <Type>0</Type>
+          <LineNumber>44</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>268503038</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\app\main.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\firmware_xip\../app/main.c\44</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>53</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>268503050</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\app\main.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\firmware_xip\../app/main.c\53</Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>654</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>268501308</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>D:\work\ln8620\mcu\driver_ln882h\reg\reg_i2c.h</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\firmware_xip\../../../mcu/driver_ln882h/reg/reg_i2c.h\654</Expression>
+        </Bp>
+        <Bp>
+          <Number>3</Number>
+          <Type>0</Type>
+          <LineNumber>656</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>268501316</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>D:\work\ln8620\mcu\driver_ln882h\reg\reg_i2c.h</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\firmware_xip\../../../mcu/driver_ln882h/reg/reg_i2c.h\656</Expression>
+        </Bp>
+      </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
@@ -178,7 +238,7 @@
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>ADV_TIMER_0,0x0A</ItemText>
+          <ItemText>ADV_TIMER_0</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
@@ -320,49 +380,289 @@
         <Ww>
           <count>0</count>
           <WinNumber>2</WinNumber>
-          <ItemText>id</ItemText>
+          <ItemText>adc_data</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>2</WinNumber>
-          <ItemText>address</ItemText>
+          <ItemText>random_num</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>2</WinNumber>
-          <ItemText>dev_addr</ItemText>
+          <ItemText>cnt</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>2</WinNumber>
-          <ItemText>address_num</ItemText>
+          <ItemText>adc_data</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>2</WinNumber>
-          <ItemText>buf_len</ItemText>
+          <ItemText>uart0_rxbuf</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>2</WinNumber>
-          <ItemText>UART0</ItemText>
+          <ItemText>data,0x10</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>2</WinNumber>
-          <ItemText>\\firmware_xip\../bsp/ln_show_reg.c\UART0-&gt;uart_cr3.val</ItemText>
+          <ItemText>uart0_txbuf</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>2</WinNumber>
-          <ItemText>hal_clock_apb0_clk,0x0A</ItemText>
+          <ItemText>tx_buffer</ItemText>
+        </Ww>
+        <Ww>
+          <count>8</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>rx_data</ItemText>
+        </Ww>
+        <Ww>
+          <count>9</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>tx_data</ItemText>
+        </Ww>
+        <Ww>
+          <count>10</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>send_cnt,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>11</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>collect_cnt,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>12</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>adc_data</ItemText>
+        </Ww>
+        <Ww>
+          <count>13</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>ws2811_data_arr</ItemText>
+        </Ww>
+        <Ww>
+          <count>14</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>ws2811_data_arr</ItemText>
+        </Ww>
+        <Ww>
+          <count>15</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>rx_data_1,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>16</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>rx_data_2,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>17</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>uart0_txbuf</ItemText>
+        </Ww>
+        <Ww>
+          <count>18</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>stdout_buf</ItemText>
+        </Ww>
+        <Ww>
+          <count>19</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>wrap_stdio</ItemText>
+        </Ww>
+        <Ww>
+          <count>20</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>int_cnt_1</ItemText>
+        </Ww>
+        <Ww>
+          <count>21</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>int_cnt_2</ItemText>
+        </Ww>
+        <Ww>
+          <count>22</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>err_cnt_1</ItemText>
+        </Ww>
+        <Ww>
+          <count>23</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>low_level_time</ItemText>
+        </Ww>
+        <Ww>
+          <count>24</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>high_level_time</ItemText>
+        </Ww>
+        <Ww>
+          <count>25</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>edge_sel</ItemText>
+        </Ww>
+        <Ww>
+          <count>26</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>rx_data_right</ItemText>
+        </Ww>
+        <Ww>
+          <count>27</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>rx_data_left</ItemText>
+        </Ww>
+        <Ww>
+          <count>28</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>rx_data_index,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>29</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>data_index,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>30</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>tx_data_index</ItemText>
+        </Ww>
+        <Ww>
+          <count>31</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>tx_data_left</ItemText>
+        </Ww>
+        <Ww>
+          <count>32</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>tx_data_right</ItemText>
+        </Ww>
+        <Ww>
+          <count>33</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>dst_data</ItemText>
+        </Ww>
+        <Ww>
+          <count>34</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>read_data</ItemText>
+        </Ww>
+        <Ww>
+          <count>35</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>test_data</ItemText>
+        </Ww>
+        <Ww>
+          <count>36</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>err_cnt</ItemText>
+        </Ww>
+        <Ww>
+          <count>37</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>rx_data</ItemText>
+        </Ww>
+        <Ww>
+          <count>38</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>tx_data</ItemText>
+        </Ww>
+        <Ww>
+          <count>39</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>src_clk,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>40</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>output</ItemText>
+        </Ww>
+        <Ww>
+          <count>41</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>ds18b20_data</ItemText>
+        </Ww>
+        <Ww>
+          <count>42</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>ln_ds18b20_id</ItemText>
+        </Ww>
+        <Ww>
+          <count>43</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>ln_ds18b20_id_num</ItemText>
+        </Ww>
+        <Ww>
+          <count>44</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>cnt</ItemText>
+        </Ww>
+        <Ww>
+          <count>45</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>temp_data</ItemText>
+        </Ww>
+        <Ww>
+          <count>46</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>NVIC</ItemText>
+        </Ww>
+        <Ww>
+          <count>47</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>address</ItemText>
+        </Ww>
+        <Ww>
+          <count>48</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>data</ItemText>
+        </Ww>
+        <Ww>
+          <count>49</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>timeout</ItemText>
+        </Ww>
+        <Ww>
+          <count>50</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>BMP280,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>51</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>pressure_data,0x10</ItemText>
+        </Ww>
+        <Ww>
+          <count>52</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>pressure_tem_data</ItemText>
+        </Ww>
+        <Ww>
+          <count>53</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>pressure_tem_adc,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>54</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>pressure_adc,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>55</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>gImage_pic</ItemText>
         </Ww>
       </WatchWindow2>
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
-          <SubType>0</SubType>
-          <ItemText>hal_clock_apb0_clk</ItemText>
+          <SubType>1</SubType>
+          <ItemText>MSP</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>
@@ -370,7 +670,7 @@
         <Mm>
           <WinNumber>2</WinNumber>
           <SubType>1</SubType>
-          <ItemText>rx_data_2</ItemText>
+          <ItemText>T</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow2>
@@ -452,7 +752,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\ln882h\system_ln882h.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\ln882h\system_ln882h.c</PathWithFileName>
       <FilenameWithoutPath>system_ln882h.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -528,8 +828,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\bsp\serial_hw.c</PathWithFileName>
-      <FilenameWithoutPath>serial_hw.c</FilenameWithoutPath>
+      <PathWithFileName>..\bsp\ln_show_reg.c</PathWithFileName>
+      <FilenameWithoutPath>ln_show_reg.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -540,8 +840,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\bsp\ln_show_reg.c</PathWithFileName>
-      <FilenameWithoutPath>ln_show_reg.c</FilenameWithoutPath>
+      <PathWithFileName>..\bsp\ln_test_common.c</PathWithFileName>
+      <FilenameWithoutPath>ln_test_common.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -552,8 +852,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\bsp\ln_test_common.c</PathWithFileName>
-      <FilenameWithoutPath>ln_test_common.c</FilenameWithoutPath>
+      <PathWithFileName>..\bsp\serial_hw.c</PathWithFileName>
+      <FilenameWithoutPath>serial_hw.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -561,7 +861,7 @@
 
   <Group>
     <GroupName>drv_hal</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -572,7 +872,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_adc.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_adc.c</PathWithFileName>
       <FilenameWithoutPath>hal_adc.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -584,7 +884,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_aes.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_aes.c</PathWithFileName>
       <FilenameWithoutPath>hal_aes.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -596,7 +896,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_cache.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_cache.c</PathWithFileName>
       <FilenameWithoutPath>hal_cache.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -608,7 +908,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_common.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_common.c</PathWithFileName>
       <FilenameWithoutPath>hal_common.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -620,7 +920,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_dma.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_dma.c</PathWithFileName>
       <FilenameWithoutPath>hal_dma.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -632,7 +932,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_ext.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_ext.c</PathWithFileName>
       <FilenameWithoutPath>hal_ext.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -644,7 +944,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_flash.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_flash.c</PathWithFileName>
       <FilenameWithoutPath>hal_flash.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -656,7 +956,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_gpio.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_gpio.c</PathWithFileName>
       <FilenameWithoutPath>hal_gpio.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -668,7 +968,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_i2s.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_i2s.c</PathWithFileName>
       <FilenameWithoutPath>hal_i2s.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -680,7 +980,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_it.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_it.c</PathWithFileName>
       <FilenameWithoutPath>hal_it.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -692,7 +992,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_i2c.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_i2c.c</PathWithFileName>
       <FilenameWithoutPath>hal_i2c.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -704,7 +1004,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_qspi.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_qspi.c</PathWithFileName>
       <FilenameWithoutPath>hal_qspi.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -716,7 +1016,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_rtc.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_rtc.c</PathWithFileName>
       <FilenameWithoutPath>hal_rtc.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -728,7 +1028,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_spi.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_spi.c</PathWithFileName>
       <FilenameWithoutPath>hal_spi.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -740,7 +1040,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_timer.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_timer.c</PathWithFileName>
       <FilenameWithoutPath>hal_timer.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -752,7 +1052,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_trng.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_trng.c</PathWithFileName>
       <FilenameWithoutPath>hal_trng.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -764,7 +1064,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_uart.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_uart.c</PathWithFileName>
       <FilenameWithoutPath>hal_uart.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -776,7 +1076,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_wdt.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_wdt.c</PathWithFileName>
       <FilenameWithoutPath>hal_wdt.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -788,7 +1088,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_ws2811.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_ws2811.c</PathWithFileName>
       <FilenameWithoutPath>hal_ws2811.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -800,7 +1100,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_misc.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_misc.c</PathWithFileName>
       <FilenameWithoutPath>hal_misc.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -812,7 +1112,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_clock.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_clock.c</PathWithFileName>
       <FilenameWithoutPath>hal_clock.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -824,7 +1124,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_adv_timer.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_adv_timer.c</PathWithFileName>
       <FilenameWithoutPath>hal_adv_timer.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -836,7 +1136,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_sdio_device.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_sdio_device.c</PathWithFileName>
       <FilenameWithoutPath>hal_sdio_device.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -848,7 +1148,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\mcu\driver_ln882h\hal\hal_efuse.c</PathWithFileName>
+      <PathWithFileName>..\..\..\mcu\driver_ln882h\hal\hal_efuse.c</PathWithFileName>
       <FilenameWithoutPath>hal_efuse.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -857,7 +1157,7 @@
 
   <Group>
     <GroupName>util</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -868,7 +1168,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\components\utils\fifo\fifobuf.c</PathWithFileName>
+      <PathWithFileName>..\..\..\components\utils\fifo\fifobuf.c</PathWithFileName>
       <FilenameWithoutPath>fifobuf.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -877,7 +1177,7 @@
 
   <Group>
     <GroupName>debug</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -888,7 +1188,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\components\utils\debug\ln_assert.c</PathWithFileName>
+      <PathWithFileName>..\..\..\components\utils\debug\ln_assert.c</PathWithFileName>
       <FilenameWithoutPath>ln_assert.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -900,7 +1200,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\components\utils\debug\log.c</PathWithFileName>
+      <PathWithFileName>..\..\..\components\utils\debug\log.c</PathWithFileName>
       <FilenameWithoutPath>log.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -912,7 +1212,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\components\utils\wrap_stdio.c</PathWithFileName>
+      <PathWithFileName>..\..\..\components\utils\wrap_stdio.c</PathWithFileName>
       <FilenameWithoutPath>wrap_stdio.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -921,7 +1221,7 @@
 
   <Group>
     <GroupName>serial</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -932,7 +1232,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\components\serial\serial.c</PathWithFileName>
+      <PathWithFileName>..\..\..\components\serial\serial.c</PathWithFileName>
       <FilenameWithoutPath>serial.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
