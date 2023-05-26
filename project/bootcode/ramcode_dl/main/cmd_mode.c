@@ -83,6 +83,13 @@ static bootram_cmd_tbl_t bootram_cmd_list[] = {
         "flash_test.\r\n"
     },
     
+    {
+        "flash_uid",
+        1,
+        cmd_flash_uid,
+        "get flash uid.\r\n"
+    },
+    
 
 #if (defined(DEBUG_FLASH_ROBUST) && (DEBUG_FLASH_ROBUST == 1))
     {
@@ -271,6 +278,28 @@ int cmd_flash_info(bootram_cmd_tbl_t* cmdtbl, int argc, char* argv[])
     }
     
     sprintf(buf, "\r\nid:0x%X,flash size:%dM Byte\r\n", ret,flash_size);
+
+    for (int i = 0; i < strlen(buf); i++) {
+        uint8_t ch = buf[i];
+        bootram_serial_write(&ch, 1);
+    }
+    
+    return 0;
+}
+
+int cmd_flash_uid(bootram_cmd_tbl_t* cmdtbl, int argc, char* argv[])
+{
+    char     buf[50]    = {0};
+    char     uid[16]    = {0};
+    char     str_uid[32]= {0};
+    
+    bootram_flash_uid((uint8_t*)uid);
+    
+    for(int i = 0; i < 16; i++){
+        sprintf(str_uid+i*2, "%02X", uid[i]);
+    }
+    
+    sprintf(buf, "\r\nflash uid:0x%s\r\n", str_uid);
 
     for (int i = 0; i < strlen(buf); i++) {
         uint8_t ch = buf[i];

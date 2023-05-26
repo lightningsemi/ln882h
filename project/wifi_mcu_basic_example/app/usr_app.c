@@ -22,6 +22,8 @@
 #define PM_WIFI_DEFAULT_PS_MODE           (WIFI_NO_POWERSAVE)
 #define WIFI_TEMP_CALIBRATE               (1)
 
+#define WIFI_USER_USE_WPA3                (1) /* 0: Not use; 1: Use */
+
 #define USR_APP_TASK_STACK_SIZE           (6*256) //Byte
 
 #if WIFI_TEMP_CALIBRATE
@@ -94,6 +96,12 @@ static void wifi_scan_complete_cb(void * arg)
     wifi_manager_ap_list_update_enable(LN_TRUE);
 }
 
+static void wifi_connect_failed_cb(void * arg)
+{
+    wifi_sta_connect_failed_reason_t reason = *(wifi_sta_connect_failed_reason_t*)arg;
+    LOG(LOG_LVL_INFO, "############ wifi_connect_failed!, reason = %d, please retry. ############\r\n", reason);
+}
+
 void wifi_init_sta(void)
 {
     sta_ps_mode_t ps_mode = PM_WIFI_DEFAULT_PS_MODE;
@@ -119,7 +127,11 @@ void wifi_init_sta(void)
 
     //3. wifi start
     wifi_manager_reg_event_callback(WIFI_MGR_EVENT_STA_SCAN_COMPLETE, &wifi_scan_complete_cb);
-
+    wifi_manager_reg_event_callback(WIFI_MGR_EVENT_STA_CONNECT_FAILED, &wifi_connect_failed_cb);
+#if (WIFI_USER_USE_WPA3 == 1)
+    extern void ln_wpa_sae_enable(void);
+    ln_wpa_sae_enable();
+#endif
     if(WIFI_ERR_NONE != wifi_sta_start(mac_addr, ps_mode)){
         LOG(LOG_LVL_ERROR, "[%s]wifi sta start filed!!!\r\n", __func__);
     }
@@ -132,7 +144,8 @@ void wifi_init_sta(void)
         }
     }
 
-    wifi_sta_connect(&connect, &scan_cfg);
+    //wifi_sta_connect(&connect, &scan_cfg);
+    wifi_sta_connect_v2(&connect, &scan_cfg, 30);
 }
 
 static void ap_startup_cb(void * arg)
@@ -183,6 +196,20 @@ void wifi_init_ap(void)
     }
 }
 
+static void wifi_connect_status_dump(void)
+{
+    wifi_sta_connect_failed_reason_t reason = WIFI_STA_CONN_SUCCESSFUL;
+    wifi_sta_conn_fail_detail_t detail = {0};
+    wifi_get_sta_conn_fail_reason(&reason);
+    wifi_get_sta_conn_fail_detail(&detail);
+
+    LOG(LOG_LVL_INFO, "[user] reason: %d \r\n", reason);
+    LOG(LOG_LVL_INFO, "[802.11] reason: %d; status: %d; private: 0x%02x%02x\r\n",
+        detail.reason_code,
+        detail.status_code,
+        detail.private_err_code[1],
+        detail.private_err_code[0]);
+}
 
 void usr_app_task_entry(void *params)
 {
@@ -195,11 +222,20 @@ void usr_app_task_entry(void *params)
 
     while (!netdev_got_ip()) {
         OS_MsDelay(1000);
+
+        if (wifi_current_mode_get() == WIFI_MODE_STATION) {
+            wifi_connect_status_dump();
+        }
     }
-    
+
+    LOG(LOG_LVL_INFO, "[user] Got the IP address.\r\n");
+
     while(1)
     {
         OS_MsDelay(1000);
+        if (wifi_current_mode_get() == WIFI_MODE_STATION) {
+            wifi_connect_status_dump();
+        }
     }
 }
 

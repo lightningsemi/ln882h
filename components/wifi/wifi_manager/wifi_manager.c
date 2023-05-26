@@ -236,6 +236,13 @@ static void sta_scan_complete(void)
     }
 }
 
+static void sta_connect_failed(wifi_sta_connect_failed_reason_t *reason)
+{
+    if (event_cb[WIFI_MGR_EVENT_STA_CONNECT_FAILED]) {
+        event_cb[WIFI_MGR_EVENT_STA_CONNECT_FAILED]((void *)reason);
+    }
+}
+
 static void sta_scan_report(const ap_info_t *ap_info)
 {
     ap_info_list_update(ap_info);
@@ -281,6 +288,7 @@ static void wifi_callback_init(void)
         .disconnected  = &sta_disconnected,
         .scan_complete = &sta_scan_complete,
         .scan_report   = &sta_scan_report,
+        .connect_failed   = &sta_connect_failed,
     };
 
     ap_cb_t  softap_cb = {

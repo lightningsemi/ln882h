@@ -10,6 +10,7 @@
 #include "utils/debug/log.h"
 #include "ln_compiler.h"
 #include "ln_utils.h"
+#include "utils/system_parameter.h"
 
 #define TCPIP_PKT_SIZE_MAX              (NETIF_MTU + PBUF_LINK_HLEN)//max in/output pocket size = MTU + LINK_HEAD_LEN
 
@@ -121,16 +122,27 @@ static void netif_low_level_input_callback(uint8_t *data, uint16_t len) {
 
 static err_t ethernetif_init(struct netif *netif, netif_idx_t nif_idx)
 {
+    static char *sta_hostname    = NULL;
+    static char *softap_hostname = NULL;
+
     LWIP_ASSERT("netif != NULL", (netif != NULL));
 
     if (nif_idx == NETIF_IDX_STA) {
 #if LWIP_NETIF_HOSTNAME
-        netif->hostname = "sta";
+        if (0 == sysparam_sta_hostname_get(sta_hostname)) {
+            netif->hostname = sta_hostname;
+        } else {
+            netif->hostname = "ln_sta";
+        }
 #endif
         memcpy(netif->name, IF_NAME_STA, sizeof(netif->name));
     } else if (nif_idx == NETIF_IDX_AP) {
 #if LWIP_NETIF_HOSTNAME
-        netif->hostname = "ap";
+        if (0 == sysparam_softap_hostname_get(softap_hostname)) {
+            netif->hostname = softap_hostname;
+        } else {
+            netif->hostname = "ln_softap";
+        }
 #endif
         memcpy(netif->name, IF_NAME_AP, sizeof(netif->name));
     } else {

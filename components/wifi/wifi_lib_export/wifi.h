@@ -60,6 +60,7 @@ typedef enum {
     WIFI_AUTH_WPA2_PSK            = 3,   /**<  authenticate mode : WPA2_PSK */
     WIFI_AUTH_WPA_WPA2_PSK        = 4,   /**<  authenticate mode : WPA_WPA2_PSK */
     WIFI_AUTH_WPA2_ENTERPRISE     = 5,   /**<  authenticate mode : WPA2_ENTERPRISE */
+    WIFI_AUTH_WPA3_SAE            = 6,   /**<  authenticate mode : WPA3 SAE ECC */
     WIFI_AUTH_MAX
 } wifi_auth_mode_t;
 
@@ -79,10 +80,12 @@ typedef enum
 } sta_ps_mode_t;
 
 typedef enum {
-    WIFI_CONN_WRONG_PWD           = 1,
-    WIFI_CONN_TARGET_AP_NOT_FOUND = 2,
-    WIFI_CONN_TIMEOUT             = 3,
-} sta_connect_failed_reason_t;
+    WIFI_STA_CONN_SUCCESSFUL              = 0,
+    WIFI_STA_CONN_WRONG_PWD               = 1, //include 80211 reason/status code, private err code  
+    WIFI_STA_CONN_TARGET_AP_NOT_FOUND     = 2,
+    WIFI_STA_CONN_TIMEOUT                 = 3,
+    WIFI_STA_CONN_REFUSED                 = 4, //include 80211 reason/status code
+} wifi_sta_connect_failed_reason_t;
 
 
 
@@ -123,8 +126,11 @@ typedef struct {
     int8_t                       rssi;
     int16_t                      freq_offset;
     uint8_t                      bgn;
-    uint8_t                      wps_en;
-    uint8_t                      is_hidden;
+    uint8_t                      wps_en:1;
+    uint8_t                      is_hidden:1;
+    uint8_t                      rsn_mfpr:1;
+    uint8_t                      rsn_mfpc:1;
+    uint8_t                      set_wpa_sae_support:1;
 } ap_info_t;
 
 typedef struct {
@@ -137,7 +143,7 @@ typedef void (*sta_connected_cb_t)(void);
 typedef void (*sta_disconnected_cb_t)(void);
 typedef void (*sta_scan_complete_cb_t)(void);
 typedef void (*sta_scan_report_cb_t)(const ap_info_t *ap_info);
-//TODO: typedef void (*sta_connect_failed_cb_t)(sta_connect_failed_reason_t reason);
+typedef void (*sta_connect_failed_cb_t)(wifi_sta_connect_failed_reason_t *reason);
 
 typedef void (*ap_startup_cb_t)(void);
 typedef void (*ap_associated_cb_t)(const uint8_t *mac_addr);
@@ -156,6 +162,7 @@ typedef struct {
     sta_disconnected_cb_t      disconnected;
     sta_scan_complete_cb_t     scan_complete;
     sta_scan_report_cb_t       scan_report;
+    sta_connect_failed_cb_t    connect_failed;
 } sta_cb_t;
 
 typedef struct {
@@ -170,6 +177,11 @@ typedef struct {
     uint32_t                   filter_mask;
 } sniffer_cfg_t;
 
+typedef struct {
+    uint8_t                    reason_code;
+    uint8_t                    status_code;        
+    uint8_t                    private_err_code[2];
+} wifi_sta_conn_fail_detail_t;
 
 //wifi general-purpose API
 int     wifi_init(void);
@@ -183,12 +195,14 @@ wifi_mode_t wifi_current_mode_get(void);
 
 int     wifi_sta_scan(wifi_scan_cfg_t * scan_cfg);
 int     wifi_sta_connect(wifi_sta_connect_t * connect, wifi_scan_cfg_t * scan_cfg);//if scan_cfg = NULL, uase default scan param.
+int     wifi_sta_connect_v2(wifi_sta_connect_t * connect, wifi_scan_cfg_t * scan_cfg, uint16_t timeout_s);
 int     wifi_sta_disconnect(void);
 
 int     wifi_get_sta_scan_cfg(wifi_scan_cfg_t *scan_cfg);
 int     wifi_get_sta_status(wifi_sta_status_t *status);
 int     wifi_get_sta_conn_info(const char **ssid, const uint8_t **bssid);
-
+int     wifi_get_sta_conn_fail_reason(wifi_sta_connect_failed_reason_t *reason);
+int     wifi_get_sta_conn_fail_detail(wifi_sta_conn_fail_detail_t *detail);
 /**
  * @brief wifi_get_psk_info: get psk info for fast connect.
  * 

@@ -203,6 +203,11 @@ void *wlib_aes_init(const uint8_t *key, uint8_t keysize)
     return ctx;
 }
 
+void wlib_aes_setup(void *ctx, uint8_t keysize, const uint8_t *key)
+{
+    ln_aes_setup(ctx, keysize, key);
+}
+
 void wlib_aes_deinit(void *ctx)
 {
     if (ctx)
@@ -277,6 +282,38 @@ void *wlib_malloc(uint32_t size)
 void wlib_free(void *ptr)
 {
     OS_Free(ptr);
+}
+
+
+void *wlib_realloc(void *old, int newlen)
+{
+    void *res = NULL;
+    if (newlen == 0) {
+        wlib_free(old);
+        return NULL;
+    }
+
+    res = (void *)wlib_malloc(newlen);
+
+    if (old == NULL) {
+        return res;
+    }
+
+    if (res != NULL) {
+        memcpy(res, old, newlen);
+        wlib_free(old);
+    }
+    return res;
+}
+
+void *wlib_calloc(int nmemb, int size)
+{
+    void *res = NULL;
+    res = (void *)wlib_malloc(size *nmemb);
+    if (res != NULL) {
+        memset(res, 0x0, size * nmemb);
+    }
+    return res;
 }
 
 /* log print, hexdump */
@@ -641,6 +678,17 @@ void wlib_os_timer_stop(wlib_timer_t timer)
 void wlib_os_delay_ms(uint32_t ms)
 {
     OS_MsDelay(ms);
+}
+
+uint32_t wlib_current_tick(void)
+{
+    return OS_GetTicks();
+}
+
+int wlib_random_data_gen(void)
+{
+    srand(wlib_current_tick());
+    return rand();
 }
 
 static const wlib_wifi_data_rate_t g_wlib_wifi_dr = {

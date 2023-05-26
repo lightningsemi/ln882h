@@ -10,6 +10,11 @@
 #include "hal/hal_cache.h"
 #include "hal/hal_qspi.h"
 
+
+/****************************  Manufacturer ID Define  ************************/
+#define TH25Q16HB    0xEB
+#define GD25WQ16E    0xC8
+
 /****************************  Data types and Macros  ************************/
 #define FLASH_QUAD_READ_DUMMY_CLOCKS    8
 
@@ -26,12 +31,12 @@
 typedef enum
 {
     FLASH_WRITE_NON_VOLATILE_SR = 0x01,
-    FLASH_WRITE_VOLATILE_SR     = 0x50,
     FLASH_READ_STATUS_REG_1   = 0x05,
     FLASH_READ_STATUS_REG_2   = 0x35,
                               
     FLASH_WRITE_DISABLE       = 0x04,
     FLASH_WRITE_ENABLE        = 0x06,
+    FLASH_WRITE_ENALBE_FOR_VOLATILE_SR = 0x50,
                               
     FLASH_STANDARD_READ       = 0x03,
     FLASH_DUAL_FAST_READ      = 0x3B,
@@ -111,6 +116,8 @@ uint8_t  hal_flash_program(uint32_t offset, uint32_t length, uint8_t *buffer);
 void     hal_flash_erase(uint32_t offset, uint32_t length);//@param: offset,length(Note:4K Aligned)
 void     hal_flash_chip_erase(void);
 uint32_t hal_flash_read_id(void);
+void     hal_flash_read_unique_id(uint8_t *unique_id);
+uint8_t  hal_flash_read_mid(void);
 uint16_t hal_flash_read_device_id(void);
 uint8_t  hal_flash_read_sr1(void);
 uint8_t  hal_flash_read_sr2(void);
@@ -118,7 +125,9 @@ uint16_t hal_flash_read_status(void);
 void     hal_flash_program_erase_suspend(void);
 void     hal_flash_program_erase_resume(void);
 void     hal_flash_write_enable(void);
+void     hal_flash_write_enable_for_volatile_sr(void);
 void     hal_flash_write_disable(void);
+
 void     hal_flash_lock_otp(void);
 uint8_t  hal_flash_get_otp_state(void);
 void     hal_flash_quad_mode_enable(uint8_t enable);

@@ -105,12 +105,7 @@ static uint8_t hal_flash_update_with_volatile(void)
     uint8_t  buf[10] = {0,};
 
     //1. read flash ID
-    cmd = FLASH_READ_ID;
-    buf[0] = 0; // Manufacturer ID
-    buf[1] = 0; // Memory Type (device identification high 8 bit)
-    buf[2] = 0; // Capacity    (device identification low 8 bit)
-    hal_qspi_standard_read_byte(buf, 3, &cmd, sizeof(cmd));
-    if(buf[0] != 0xEB){
+    if(hal_flash_read_mid() != TH25Q16HB){
         return 0;
     }
 
@@ -576,6 +571,23 @@ uint32_t hal_flash_read_id(void)
 }
 
 /**
+ * @brief Read flash Manufacturer ID
+ * @return uint8_t Manufacturer ID.
+ */
+uint8_t hal_flash_read_mid(void)
+{
+    uint8_t  cmd;
+    uint8_t  buf[10] = {0,};
+    
+    cmd = FLASH_READ_ID;
+    buf[0] = 0; // Manufacturer ID
+    buf[1] = 0; // Memory Type (device identification high 8 bit)
+    buf[2] = 0; // Capacity    (device identification low 8 bit)
+    hal_qspi_standard_read_byte(buf, 3, &cmd, sizeof(cmd));
+    return buf[0];
+}
+
+/**
  * @brief The READ_ID command identifies the Device Manufacturer ID and the
  * Device ID. The command is also referred to as Read Electronic Manufacturer
  * and device Signature (REMS).
@@ -759,6 +771,17 @@ void hal_flash_write_enable(void)
 }
 
 /**
+ * @brief Flash Write Enable(Volatile for SR)
+ */
+void hal_flash_write_enable_for_volatile_sr(void)
+{
+    uint8_t cmd = 0;
+    cmd = FLASH_WRITE_ENALBE_FOR_VOLATILE_SR;
+
+    hal_qspi_standard_write(&cmd, sizeof(cmd));
+}
+
+/**
  * @brief Flash Write Disable
  */
 void hal_flash_write_disable(void)
@@ -933,19 +956,19 @@ void hal_flash_quad_mode_enable(uint8_t enable)
     hal_qspi_standard_read_byte(&status2.reg2_data, sizeof(uint8_t), &read_sr2_cmd, sizeof(read_sr2_cmd));
     
     enable = (enable ? 1 : 0);
-    if(((status2.bits.CMP != 0)||(status1.bits.BP0_4 != 0)||(status1.bits.SRP != 0)||(status2.bits.QE != enable)))
-    {
-        status2.bits.CMP = 0;
-        status1.bits.BP0_4 = 0;
-        status1.bits.SRP = 0;
-        status2.bits.QE = enable;
-    }
     
+    //BP,CMP and SRP, force write 0
+    status2.bits.CMP   = 0;
+    status1.bits.BP0_4 = 0;
+    status1.bits.SRP   = 0;
+    status2.bits.QE    = enable;
+   
     write_sr_cmd[0] = FLASH_WRITE_NON_VOLATILE_SR;
     write_sr_cmd[1] = status1.reg1_data;
     write_sr_cmd[2] = status2.reg2_data;
 
-    hal_flash_write_enable();
+    hal_flash_write_enable_for_volatile_sr();
+    
     hal_qspi_standard_write(write_sr_cmd, sizeof(write_sr_cmd));
     hal_flash_operation_wait();
 }

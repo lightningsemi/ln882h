@@ -33,7 +33,7 @@ int           bootram_serial_flush(void);
 unsigned char bootram_serial_setbaudrate(uint32_t baudrate);
 void          bootram_user_reboot(void);
 int           bootram_flash_info(void);
-
+int           bootram_flash_uid(uint8_t *uid);
 #ifdef __cplusplus
 }
 #endif  // __cplusplus

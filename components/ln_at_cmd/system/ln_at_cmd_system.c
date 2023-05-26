@@ -59,6 +59,6 @@ ln_at_err_t ln_at_exec_ble_fw_start(const char *name)
     hal_misc_awo_set_r_idle_reg(0xaeaebebe);
     __NVIC_SystemReset();
     while(1);
-    return LN_AT_ERR_NONE;
+//    return LN_AT_ERR_NONE;
 }
 LN_AT_CMD_REG(BLE_START, NULL, NULL, NULL, ln_at_exec_ble_fw_start);

@@ -562,6 +562,13 @@ static ln_at_err_t ln_at_get_wifi_join_ap_def(const char *name)
     return _ln_at_sta_get_link_ap_info(name);
 }
 
+static void wifi_connect_failed_cb(void * arg)
+{
+    wifi_sta_connect_failed_reason_t reason = *(wifi_sta_connect_failed_reason_t*)arg;
+    LOG(LOG_LVL_INFO, "############ wifi_connect_failed!, reason = %d, please retry. ############\r\n", reason);
+}
+
+
 /**
  * AT+CWJAP=<ssid>,<pwd>[,<bssid>]
  * AT+CWJAP=[<ssid>],[<pwd>][,<bssid>][,<pci_en>][,<reconn_interval>][,<listen_interval>][,<scan_mode>][,<jap_timeout>][,<pmf>]
@@ -694,8 +701,9 @@ static ln_at_err_t _ln_at_parse_cwjap(uint8_t para_num, const char *name)
     netdev_set_mac_addr(NETIF_IDX_STA, mac_addr);
     netdev_set_active(NETIF_IDX_STA);
     wifi_sta_start(mac_addr, ps_mode);
+    wifi_manager_reg_event_callback(WIFI_MGR_EVENT_STA_CONNECT_FAILED, &wifi_connect_failed_cb);
 
-    if (wifi_sta_connect(&conn, &scan_cfg) != 0)
+    if (wifi_sta_connect_v2(&conn, &scan_cfg, 30) != 0)
     {
         LOG(LOG_LVL_ERROR, "Join failed! ssid:%s, pwd:%s\r\n",
                 conn.ssid, conn.pwd);

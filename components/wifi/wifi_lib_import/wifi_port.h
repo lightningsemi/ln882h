@@ -90,6 +90,14 @@ void *wlib_aes_init(const uint8_t *key, uint8_t keysize);
 void  wlib_aes_deinit(void *ctx);
 
 /**
+ * @brief wlib_aes_setup
+ * 
+ * @param ctx in param, from wlib_aes_context_t, defined by lib
+ * @param keysize in param. Optional 16/24/32, uint byte.
+ * @param key in param
+ */
+void wlib_aes_setup(void *ctx, uint8_t keysize, const uint8_t *key);
+/**
  * @brief wlib_aes_encrypt
  * 
  * @param ctx in param, from wlib_aes_init()
@@ -113,6 +121,8 @@ void   wlib_get_tx_power_ext_comp_val(int8_t *bgn_pwr, int8_t *b_pwr, int8_t *gn
 /* heap memory manager */
 void  *wlib_malloc(uint32_t size);
 void   wlib_free(void *ptr);
+void  *wlib_realloc(void *old, int newlen);
+void  *wlib_calloc(int nmemb, int size);
 
 /* host mem map, reg base, nop */
 #include "ln882h.h"
@@ -191,6 +201,8 @@ void          wlib_os_timer_delete(wlib_timer_t *ptimer);
 void          wlib_os_timer_start(wlib_timer_t timer, uint32_t ms);
 void          wlib_os_timer_stop(wlib_timer_t timer);
 void          wlib_os_delay_ms(uint32_t ms);
+uint32_t      wlib_current_tick(void);
+int           wlib_random_data_gen(void);
 
 #endif /* __MACLIB_PORT_H__ */
 

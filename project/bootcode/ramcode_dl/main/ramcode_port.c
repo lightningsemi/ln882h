@@ -23,6 +23,11 @@ static Serial_t bootram_fd;
 static uint8_t temp_4k_buffer[SIZE_4KB] = {0};
 
 /*****************************************  functions *********************************************/
+int bootram_flash_uid(uint8_t *uid)
+{
+    hal_flash_read_unique_id(uid);
+    return 0;
+}
 
 int bootram_flash_info(void)
 {

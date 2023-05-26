@@ -39,6 +39,7 @@ target_include_directories(${pro_executable_target}
     app
     bsp
     cfg
+    ${LN_SDK_ROOT}/components/wifi/wpa_sae
 )
 
 include(gcc/gcc-custom-build-stage.cmake)

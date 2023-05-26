@@ -657,4 +657,5 @@ ln_at_parser_err_t ln_at_param_dump(void)
             value);
     }
     LN_AT_LOG_I("======================================\r\n");
+    return LN_AT_PSR_ERR_NONE;
 }
