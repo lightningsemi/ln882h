@@ -115,6 +115,7 @@ set(COMP_SERIAL_DIR             ${LN_SDK_ROOT}/components/serial)
 set(COMP_UTILS_DIR              ${LN_SDK_ROOT}/components/utils)
 set(COMP_LIBC_STUB_DIR          ${LN_SDK_ROOT}/components/libc)
 set(COMP_WIFI_DIR               ${LN_SDK_ROOT}/components/wifi)
+set(COMP_SMARTLINK_DIR          ${LN_SDK_ROOT}/components/smartlink)
 
 if(DEFINED THIRD_PARTY_LWIP AND (THIRD_PARTY_LWIP))
     message(STATUS "LwIP: third-party provided.")

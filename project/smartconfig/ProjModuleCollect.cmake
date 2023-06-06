@@ -36,6 +36,8 @@ list(APPEND MODULE_SRC ${LNAT_SRC})
 file(GLOB_RECURSE  LNAT_CMD_SRC  ${COMP_LNAT_CMD_DIR}/*.c)
 file(GLOB_RECURSE  _NO_NEED_SRCS  ${COMP_LNAT_CMD_DIR}/ota/*.c)
 list(REMOVE_ITEM LNAT_CMD_SRC ${_NO_NEED_SRCS})
+file(GLOB_RECURSE  _NO_NEED_SRCS  ${COMP_LNAT_CMD_DIR}/bluetooth/*.c)
+list(REMOVE_ITEM LNAT_CMD_SRC ${_NO_NEED_SRCS})
 include_directories(${COMP_LNAT_CMD_DIR})
 list(APPEND MODULE_SRC ${LNAT_CMD_SRC})
 
@@ -131,3 +133,8 @@ include_directories(${COMP_WIFI_DIR}/wifi_manager)
 include_directories(${COMP_WIFI_DIR}/wifi_lib_import)
 include_directories(${COMP_WIFI_DIR}/wifi_lib_export)
 list(APPEND MODULE_SRC ${MISC_SRC})
+
+###################################   smartconfig  #############################
+file(GLOB_RECURSE  SMART_CONFIG_SRC  ${COMP_SMARTLINK_DIR}/smartcfg/*.c)
+include_directories(${COMP_SMARTLINK_DIR}/smartcfg)
+list(APPEND MODULE_SRC ${SMART_CONFIG_SRC})

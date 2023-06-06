@@ -55,6 +55,10 @@
 
 ## GCC 编译
 
+0. 在 SDK 根目录下的 CMakeLists.txt 文件内配置 project 为 `aws_iot_core`
+
+    `set(USER_PROJECT  aws_iot_core)`
+
 1. 选择具体的 demo（demo_http_mutual_auth 或者 demo_mqtt_mutual_auth）
 
     默认配置选择了 demo_mqtt_mutual_auth 。  

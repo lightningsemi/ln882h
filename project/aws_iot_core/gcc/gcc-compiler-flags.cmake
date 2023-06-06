@@ -10,11 +10,11 @@ set(MCU         "-mthumb  -mabi=aapcs  ${CPU}  ${FPU}  ${FLOAT_ABI}")
 
 set(C_WARNFLAGS   "-Wall  -Wextra  -Wundef  -Wshadow  -Wredundant-decls        \
     -Wstrict-prototypes  -Wimplicit-function-declaration  -Wmissing-prototypes \
-    -Wdouble-promotion  -Wfloat-conversion  -pedantic -Wformat=2 "
+    -Wdouble-promotion  -Wfloat-conversion  -pedantic"
 )
 
 set(CXX_WARNFLAGS   "-Wall  -Wextra  -Wundef  -Wshadow  -Wredundant-decls      \
-    -Wmissing-declarations -Wdouble-promotion  -Wfloat-conversion  -pedantic"
+    -Wdouble-promotion  -Wfloat-conversion  -pedantic"
 )
 
 set(PREPFLAGS   "-MD -MP")
