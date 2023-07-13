@@ -34,3 +34,4 @@ out
 .lib
 build/
 buildout*.txt
+/.vs

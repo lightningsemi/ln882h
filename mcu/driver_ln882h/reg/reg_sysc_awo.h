@@ -3,6 +3,10 @@
 
 #include "ln882h.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef union
 {
     uint32_t val;
@@ -1871,7 +1875,7 @@ __STATIC_INLINE void sysc_awo_vset_pack(uint8_t vlimit_vset_awo, uint8_t ldo18_p
 
 
 //--------------------------------------------------------------------------------
-
+#ifndef __cplusplus
 __STATIC_INLINE void sysc_awo_div_para_unpack(uint8_t * pclk1_div_para_m1, uint8_t * hclk_div_para_m1)
 {
     t_sysc_awo_div_para local_val = hwp_sysc_awo->div_para;
@@ -2066,4 +2070,7 @@ __STATIC_INLINE void sysc_awo_vset_unpack(uint8_t * vlimit_vset_awo, uint8_t * l
 }
 
 #endif
-
+#ifdef __cplusplus
+}
+#endif
+#endif
