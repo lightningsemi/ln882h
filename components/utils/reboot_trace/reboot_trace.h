@@ -3,6 +3,10 @@
 
 #include "ln_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SOFTWARE_BOOT_MAGIC    (0x5AA5DCBA1234A55AULL)
 #define WATCHDOG_BOOT_MAGIC    (0xA55A5678ABCD5AA5ULL)
 
@@ -52,5 +56,8 @@ chip_reboot_cause_t  ln_chip_get_reboot_cause(void);
  */
 void  ln_chip_reboot(void);
 
-#endif /* __LN_CHIP_REBOOT_TRACE_H__ */
+#ifdef __cplusplus
+}
+#endif
 
+#endif /* __LN_CHIP_REBOOT_TRACE_H__ */

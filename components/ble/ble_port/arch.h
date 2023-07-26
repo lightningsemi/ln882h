@@ -8,6 +8,9 @@
 #include <stdint.h>            // standard integer definition
 #include "ln_compiler.h"       // standard integer definition
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define CPU_WORD_SIZE   4      // ARM is a 32-bit CPU
 #define CPU_LE          1      // ARM is little endian
@@ -142,4 +145,7 @@ void platform_reset(uint32_t error);
 void ble_init(uint8_t mac[6]);
 void ble_deinit(void);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // __BLE_STACK_ARCH_H__

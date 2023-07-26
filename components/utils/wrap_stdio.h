@@ -2,7 +2,7 @@
 #define _WRAP_STDIO_H_
 
 #include <stdarg.h>
-
+#include <stddef.h>
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -10,6 +10,11 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /* hardware for MAC Interrupt */
 void   blib_ble_mac_isr_enable(void);
 void   blib_ble_mac_isr_disable(void);
@@ -61,6 +66,8 @@ void   blib_modem_init(void);
 void   blib_rf_reg_prepare_init(void);
 void   blib_rf_cal(void);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __BLE_LIB_PORT_H__ */
-
